@@ -1,0 +1,464 @@
+{
+  "files": {
+    "train_csv": "E:\\swiss_citation_extraction\\data\\train.csv",
+    "val_csv": "E:\\swiss_citation_extraction\\data\\val.csv",
+    "laws_de_csv": "E:\\swiss_citation_extraction\\data\\laws_de.csv",
+    "law_enrichment_file": "E:\\swiss_citation_extraction\\artifacts\\law_authority_cards_v2_unified.jsonl",
+    "law_enrichment_summary": "E:\\swiss_citation_extraction\\artifacts\\law_authority_cards_v2_unified.summary.json",
+    "laws_knowledge_base": "E:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_other_artifacts\\laws_knowledge_base.jsonl",
+    "bm25_corpus": "E:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_other_artifacts\\corpus_v2.parquet",
+    "bm25_index": "E:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_other_artifacts\\bm25_v2_index.pkl",
+    "bm25_ids": "E:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_other_artifacts\\bm25_v2_ids.pkl"
+  },
+  "laws_de": {
+    "rows": 175933,
+    "unique_citations": 175933
+  },
+  "law_enrichment_summary": {
+    "inputs": {
+      "cards": "E:\\swiss_citation_extraction\\artifacts\\law_authority_cards_v1_static.jsonl",
+      "llm": "law_json_llm_output\\law_llm_descriptors_0000000_all.jsonl"
+    },
+    "output": "E:\\swiss_citation_extraction\\artifacts\\law_authority_cards_v2_unified.jsonl",
+    "elapsed_seconds": 22.0,
+    "stats": {
+      "scanned": 175933,
+      "written": 175933
+    },
+    "enrichment_source_counts": {
+      "llm+static": 173033,
+      "static": 2900
+    },
+    "provision_role_distribution": [
+      [
+        "other",
+        68056
+      ],
+      [
+        "procedure",
+        24739
+      ],
+      [
+        "definition",
+        24432
+      ],
+      [
+        "duty",
+        22260
+      ],
+      [
+        "right_or_entitlement",
+        9330
+      ],
+      [
+        "scope",
+        8128
+      ],
+      [
+        "competence",
+        4611
+      ],
+      [
+        "data_reporting",
+        3517
+      ],
+      [
+        "purpose",
+        3229
+      ],
+      [
+        "transitional_or_commencement",
+        3088
+      ],
+      [
+        "prohibition",
+        2490
+      ],
+      [
+        "principle",
+        1349
+      ],
+      [
+        "sanction_or_penalty",
+        689
+      ],
+      [
+        "fees_or_costs",
+        15
+      ]
+    ],
+    "suppression": {
+      "rule_fields_suppressed": 7925
+    },
+    "rag_field_fill_total": [
+      [
+        "legal_area",
+        175933
+      ],
+      [
+        "legal_domain_path",
+        175933
+      ],
+      [
+        "primary_domain",
+        175933
+      ],
+      [
+        "concepts_en",
+        175210
+      ],
+      [
+        "english_summary",
+        173033
+      ],
+      [
+        "provision_role_llm",
+        173033
+      ],
+      [
+        "terms_de_to_en",
+        172659
+      ],
+      [
+        "specificity_score",
+        171324
+      ],
+      [
+        "addressees",
+        169085
+      ],
+      [
+        "applicability_conditions",
+        164399
+      ],
+      [
+        "secondary_domain",
+        140605
+      ],
+      [
+        "terms_original",
+        138720
+      ],
+      [
+        "legal_question",
+        88923
+      ],
+      [
+        "legal_rule",
+        86218
+      ],
+      [
+        "sanctions_or_consequences",
+        33678
+      ],
+      [
+        "defined_terms",
+        26678
+      ],
+      [
+        "exceptions_or_limitations",
+        21142
+      ]
+    ],
+    "rag_field_fill_pct_by_source": {
+      "static": {
+        "legal_area": 100.0,
+        "legal_domain_path": 100.0,
+        "primary_domain": 100.0,
+        "secondary_domain": 76.31,
+        "concepts_en": 75.52,
+        "terms_original": 74.0
+      },
+      "llm+static": {
+        "concepts_en": 99.99,
+        "english_summary": 100.0,
+        "legal_area": 100.0,
+        "legal_domain_path": 100.0,
+        "legal_question": 51.39,
+        "primary_domain": 100.0,
+        "secondary_domain": 79.98,
+        "specificity_score": 99.01,
+        "applicability_conditions": 95.01,
+        "exceptions_or_limitations": 12.22,
+        "terms_de_to_en": 99.78,
+        "defined_terms": 15.42,
+        "addressees": 97.72,
+        "sanctions_or_consequences": 19.46,
+        "provision_role_llm": 100.0,
+        "legal_rule": 49.83,
+        "terms_original": 78.93
+      }
+    }
+  },
+  "splits": {
+    "train": {
+      "n_queries": 1139,
+      "total_gold_citations": 4659,
+      "law_gold_citations": 4602,
+      "laws_de_source_gold_citations": 3262,
+      "non_law_gold_citations": 57,
+      "laws_de_source_coverage_of_law_gold": 0.7088222511951325,
+      "law_gold_per_query_min": 0,
+      "law_gold_per_query_median": 2.0,
+      "law_gold_per_query_max": 43,
+      "queries_with_all_law_gold_in_laws_de": 483,
+      "missing_law_gold_from_laws_de_source": 1340,
+      "explicit_query_law_gold_hits": 405,
+      "explicit_query_law_gold_coverage": 0.0880052151238592,
+      "mean_explicit_query_law_gold_coverage_per_query": 0.09465069892037221,
+      "top_law_codes": [
+        [
+          "ZGB",
+          699
+        ],
+        [
+          "OR",
+          282
+        ],
+        [
+          "ZPO",
+          170
+        ],
+        [
+          "BV",
+          163
+        ],
+        [
+          "StGB",
+          158
+        ],
+        [
+          "GBV",
+          154
+        ],
+        [
+          "IPRG",
+          140
+        ],
+        [
+          "DBG",
+          127
+        ],
+        [
+          "StPO",
+          84
+        ],
+        [
+          "URG",
+          67
+        ],
+        [
+          "JStPO",
+          66
+        ],
+        [
+          "BGG",
+          64
+        ],
+        [
+          "JStG",
+          57
+        ],
+        [
+          "SchKG",
+          51
+        ],
+        [
+          "RPG",
+          48
+        ]
+      ],
+      "top_missing_law_codes": [
+        [
+          "ZGB",
+          218
+        ],
+        [
+          "OR",
+          184
+        ],
+        [
+          "StGB",
+          129
+        ],
+        [
+          "BV",
+          75
+        ],
+        [
+          "DSG",
+          54
+        ],
+        [
+          "LugÜ",
+          43
+        ],
+        [
+          "URG",
+          41
+        ],
+        [
+          "ZPO",
+          40
+        ],
+        [
+          "IPRG",
+          39
+        ],
+        [
+          "JStG",
+          36
+        ],
+        [
+          "GBV",
+          35
+        ],
+        [
+          "StPO",
+          33
+        ],
+        [
+          "DBG",
+          24
+        ],
+        [
+          "AIG",
+          23
+        ],
+        [
+          "SchKG",
+          22
+        ]
+      ],
+      "oracle_f1_mean": 0.5443470027128342,
+      "f1_at_exact_law_gold_count_mean": 0.4290285621370692,
+      "f1_at_predicted_k_law_mean": 0.3272500056638748,
+      "oracle_k_median": 3.0,
+      "k_law_pred_mae_vs_laws_de_count": 2.270412642669008,
+      "k_law_pred_corr_vs_laws_de_count": 0.09120105676793763,
+      "cascade_corr_vs_laws_de_count": 0.09706201990323363
+    },
+    "val": {
+      "n_queries": 10,
+      "total_gold_citations": 251,
+      "law_gold_citations": 149,
+      "laws_de_source_gold_citations": 149,
+      "non_law_gold_citations": 102,
+      "laws_de_source_coverage_of_law_gold": 1.0,
+      "law_gold_per_query_min": 6,
+      "law_gold_per_query_median": 14.5,
+      "law_gold_per_query_max": 24,
+      "queries_with_all_law_gold_in_laws_de": 10,
+      "missing_law_gold_from_laws_de_source": 0,
+      "explicit_query_law_gold_hits": 9,
+      "explicit_query_law_gold_coverage": 0.06040268456375839,
+      "mean_explicit_query_law_gold_coverage_per_query": 0.06170255183413078,
+      "top_law_codes": [
+        [
+          "ZGB",
+          39
+        ],
+        [
+          "StPO",
+          36
+        ],
+        [
+          "OR",
+          18
+        ],
+        [
+          "BGG",
+          13
+        ],
+        [
+          "StGB",
+          12
+        ],
+        [
+          "IVG",
+          10
+        ],
+        [
+          "ATSG",
+          7
+        ],
+        [
+          "StBOG",
+          4
+        ],
+        [
+          "ZPO",
+          4
+        ],
+        [
+          "BV",
+          3
+        ],
+        [
+          "IPRG",
+          2
+        ],
+        [
+          "SchKG",
+          1
+        ]
+      ],
+      "top_missing_law_codes": [],
+      "oracle_f1_mean": 0.8639444076720292,
+      "f1_at_exact_law_gold_count_mean": 0.7809395267970586,
+      "f1_at_predicted_k_law_mean": 0.7392911499181011,
+      "oracle_k_median": 11.0,
+      "k_law_pred_mae_vs_laws_de_count": 5.7,
+      "k_law_pred_corr_vs_laws_de_count": 0.53618745184569,
+      "cascade_corr_vs_laws_de_count": 0.517855523660461
+    }
+  },
+  "current_bm25_tlf": {
+    "summary": {
+      "val": {
+        "split": "val",
+        "n": 10,
+        "median_gold": 14.0,
+        "f1@K5": 0.5504169121864222,
+        "f1@K8": 0.686551569059309,
+        "f1@K10": 0.7049625839446485,
+        "f1@K12": 0.7141196461322689,
+        "f1@K15": 0.7051777262629189,
+        "f1@K20": 0.653971602129032,
+        "f1@K25": 0.5819796101010521,
+        "f1@K30": 0.5345528769849327,
+        "oracle_f1": 0.8639444076720292,
+        "median_oracle_k": 11.0,
+        "pearson_K*_gold": 0.9048921725672915,
+        "pearson_K*_querylen": 0.1084446473828557,
+        "f1_at_K=gold_count": 0.7847993088782562
+      },
+      "train": {
+        "split": "train",
+        "n": 1120,
+        "median_gold": 4.0,
+        "f1@K5": 0.3155652933760343,
+        "f1@K8": 0.28816840467438637,
+        "f1@K10": 0.2659258828285395,
+        "f1@K12": 0.24743742566541005,
+        "f1@K15": 0.2228519355815966,
+        "f1@K20": 0.18946049604760173,
+        "f1@K25": 0.16678891233310056,
+        "f1@K30": 0.14834634793226337,
+        "oracle_f1": 0.5443470027128342,
+        "median_oracle_k": 3.0,
+        "pearson_K*_gold": 0.3146664895972995,
+        "pearson_K*_querylen": 0.11159631026842165,
+        "f1_at_K=gold_count": 0.429815362143056
+      }
+    },
+    "combined": {
+      "honest_avg_oracle_f1": 0.7041457051924317
+    },
+    "config": {
+      "sample_train": 0,
+      "max_k": 60,
+      "bm25_index": "E:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_other_artifacts\\bm25_v2_index.pkl"
+    }
+  }
+}

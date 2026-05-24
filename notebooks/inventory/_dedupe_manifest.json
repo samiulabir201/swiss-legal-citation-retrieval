@@ -1,0 +1,850 @@
+{
+  "kept": [
+    {
+      "family": "0.7716_scored_notebook",
+      "src": "C:\\Users\\samiul\\Downloads\\0.7716_scored_notebook.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\0.7716_scored_notebook.ipynb",
+      "mtime": "2026-04-29 20:38"
+    },
+    {
+      "family": "colab_dense_embedding_test",
+      "src": "C:\\Users\\samiul\\Downloads\\colab_dense_embedding_test (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\colab_dense_embedding_test.ipynb",
+      "mtime": "2026-04-26 18:16"
+    },
+    {
+      "family": "colab_recall_preserving_candidate_funnel",
+      "src": "C:\\Users\\samiul\\Downloads\\colab_recall_preserving_candidate_funnel_(2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\colab_recall_preserving_candidate_funnel.ipynb",
+      "mtime": "2026-04-27 02:56"
+    },
+    {
+      "family": "colab_segment_lattice_funnel_v3",
+      "src": "C:\\Users\\samiul\\Downloads\\colab_segment_lattice_funnel_v3 (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\colab_segment_lattice_funnel_v3.ipynb",
+      "mtime": "2026-04-30 15:10"
+    },
+    {
+      "family": "court_citation_concept_enrichment",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment.ipynb",
+      "mtime": "2026-05-03 12:38"
+    },
+    {
+      "family": "court_citation_concept_enrichment_minimal_llm",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_minimal_llm.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment_minimal_llm.ipynb",
+      "mtime": "2026-05-03 13:00"
+    },
+    {
+      "family": "court_citation_concept_enrichment_robust_v5_t4_fixed",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+      "mtime": "2026-05-02 21:26"
+    },
+    {
+      "family": "court_citation_concept_enrichment_smoke_test_10_v3_local_model",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+      "mtime": "2026-05-02 20:57"
+    },
+    {
+      "family": "court_citation_enrichment_smoke_test_10",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_enrichment_smoke_test_10.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_enrichment_smoke_test_10.ipynb",
+      "mtime": "2026-05-02 20:28"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized_(4).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_blackwell_optimized.ipynb",
+      "mtime": "2026-05-04 13:42"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized_3",
+      "src": "E:\\swiss_citation_extraction\\outputs_from_363k_run\\court_llm_descriptor_extractor_blackwell_optimized__3__(1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_blackwell_optimized_3.ipynb",
+      "mtime": "2026-05-05 01:39"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_colab_10k_optimized",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_10k_optimized (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_colab_10k_optimized.ipynb",
+      "mtime": "2026-05-03 14:58"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_colab_qwen3_8b_awq",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+      "mtime": "2026-05-03 14:09"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_kaggle",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_kaggle.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_kaggle.ipynb",
+      "mtime": "2026-05-03 13:17"
+    },
+    {
+      "family": "embed_unified_corpus_qwen3_8b_blackwell_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\embed_unified_corpus_qwen3_8b_blackwell_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\embed_unified_corpus_qwen3_8b_blackwell_colab.ipynb",
+      "mtime": "2026-05-06 23:48"
+    },
+    {
+      "family": "encode_queries_qwen3_8b_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\encode_queries_qwen3_8b_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\encode_queries_qwen3_8b_colab.ipynb",
+      "mtime": "2026-05-08 09:52"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_colab.ipynb",
+      "mtime": "2026-04-30 23:45"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture.ipynb",
+      "mtime": "2026-05-02 00:46"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab_fast_quality_json_v2",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_v2_(2) (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_colab_fast_quality_json_v2.ipynb",
+      "mtime": "2026-05-01 19:27"
+    },
+    {
+      "family": "enrich_cards_qwen35_vllm_fast_stable_failure_capture",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_vllm_fast_stable_failure_capture (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_vllm_fast_stable_failure_capture.ipynb",
+      "mtime": "2026-05-02 01:23"
+    },
+    {
+      "family": "enrich_cards_qwen3_8b_colab_fast_stable",
+      "src": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+      "mtime": "2026-05-02 04:31"
+    },
+    {
+      "family": "enrich_cards_qwen3_8b_kaggle",
+      "src": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_kaggle.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen3_8b_kaggle.ipynb",
+      "mtime": "2026-05-02 05:02"
+    },
+    {
+      "family": "enrich_laws_de_qwen3_8b_kaggle",
+      "src": "E:\\swiss_citation_extraction\\law_json_llm_output\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "mtime": "2026-05-06 20:59"
+    },
+    {
+      "family": "exp_a1_bgem3_statutes",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A1_bgem3_statutes.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A1_bgem3_statutes.ipynb",
+      "mtime": "2026-04-21 18:55"
+    },
+    {
+      "family": "exp_a2_hyde_and_enumeration",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A2_hyde_and_enumeration.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A2_hyde_and_enumeration.ipynb",
+      "mtime": "2026-04-21 19:42"
+    },
+    {
+      "family": "exp_a3_qwen32b_enumeration",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A3_qwen32b_enumeration.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A3_qwen32b_enumeration.ipynb",
+      "mtime": "2026-04-21 21:13"
+    },
+    {
+      "family": "exp_a4_rerank",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A4_rerank.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A4_rerank.ipynb",
+      "mtime": "2026-04-21 21:36"
+    },
+    {
+      "family": "exp_a4b_rerank_hyde",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A4b_rerank_hyde.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A4b_rerank_hyde.ipynb",
+      "mtime": "2026-04-21 21:53"
+    },
+    {
+      "family": "exp_a5_court_retrieval",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A5_court_retrieval.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A5_court_retrieval.ipynb",
+      "mtime": "2026-04-22 01:11"
+    },
+    {
+      "family": "exp_a6_legal_roberta_finetune",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A6_legal_roberta_finetune.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A6_legal_roberta_finetune.ipynb",
+      "mtime": "2026-04-22 13:11"
+    },
+    {
+      "family": "fresh_safe_qwen35_card_enrichment_no_vllm",
+      "src": "C:\\Users\\samiul\\Downloads\\fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+      "mtime": "2026-05-02 01:01"
+    },
+    {
+      "family": "investigate-notebook",
+      "src": "C:\\Users\\samiul\\Downloads\\investigate-notebook (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\investigate-notebook.ipynb",
+      "mtime": "2026-04-29 13:11"
+    },
+    {
+      "family": "investigate_laws_de_token_optimization",
+      "src": "E:\\swiss_citation_extraction\\research\\investigate_laws_de_token_optimization.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\investigate_laws_de_token_optimization.ipynb",
+      "mtime": "2026-05-06 14:07"
+    },
+    {
+      "family": "kaggle-10-test-for-swiss-law",
+      "src": "C:\\Users\\samiul\\Downloads\\kaggle-10-test-for-swiss-law (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\kaggle-10-test-for-swiss-law.ipynb",
+      "mtime": "2026-05-02 21:44"
+    },
+    {
+      "family": "latest_notebook_fixed_v3",
+      "src": "C:\\Users\\samiul\\Downloads\\latest__notebook_fixed_v3 (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\latest_notebook_fixed_v3.ipynb",
+      "mtime": "2026-04-20 21:20"
+    },
+    {
+      "family": "notebook3500ee7363_corrected_kaggle_safe",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook3500ee7363_corrected_kaggle_safe.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook3500ee7363_corrected_kaggle_safe.ipynb",
+      "mtime": "2026-05-02 21:07"
+    },
+    {
+      "family": "notebook4ae3b3ffc3_stage0_gated",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook4ae3b3ffc3_stage0_gated.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook4ae3b3ffc3_stage0_gated.ipynb",
+      "mtime": "2026-04-12 16:10"
+    },
+    {
+      "family": "notebook_no_debug_prints",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook_no_debug_prints.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook_no_debug_prints.ipynb",
+      "mtime": "2026-04-10 21:03"
+    },
+    {
+      "family": "notebook_qwen3_8b_awq_kaggle_local_batchfix",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+      "mtime": "2026-05-02 05:20"
+    },
+    {
+      "family": "notebookd37248e1eb",
+      "src": "C:\\Users\\samiul\\Downloads\\notebookd37248e1eb (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebookd37248e1eb.ipynb",
+      "mtime": "2026-05-02 19:55"
+    },
+    {
+      "family": "qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable",
+      "src": "C:\\Users\\samiul\\Downloads\\qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+      "mtime": "2026-05-02 05:48"
+    },
+    {
+      "family": "retrieve_unified_corpus_qwen3_8b_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_qwen3_8b_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_qwen3_8b_colab.ipynb",
+      "mtime": "2026-05-08 00:45"
+    },
+    {
+      "family": "retrieve_unified_corpus_v3",
+      "src": "E:\\swiss_citation_extraction\\research\\retrieve_unified_corpus_v3.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_v3.ipynb",
+      "mtime": "2026-05-08 21:11"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_v7_5_multiquery",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery (11).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_v7_5_multiquery.ipynb",
+      "mtime": "2026-05-12 23:41"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+      "mtime": "2026-05-13 18:55"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001.ipynb",
+      "mtime": "2026-05-09 22:02"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v4",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v4.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v4.ipynb",
+      "mtime": "2026-05-09 22:48"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v5",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v5.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v5.ipynb",
+      "mtime": "2026-05-09 23:42"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v6",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v6.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v6.ipynb",
+      "mtime": "2026-05-10 12:26"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7 (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v7.ipynb",
+      "mtime": "2026-05-10 21:48"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7_4",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7_4 (4).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v7_4.ipynb",
+      "mtime": "2026-05-11 12:37"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7_part4_output",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7__part4_output.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v7_part4_output.ipynb",
+      "mtime": "2026-05-11 13:30"
+    },
+    {
+      "family": "swiss_citation_endgame_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_endgame_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_endgame_colab.ipynb",
+      "mtime": "2026-05-09 16:26"
+    },
+    {
+      "family": "swiss_citation_final_2026",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_final_2026.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_final_2026.ipynb",
+      "mtime": "2026-05-13 15:48"
+    },
+    {
+      "family": "swiss_citation_hybrid_rerank_final",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final.ipynb",
+      "mtime": "2026-05-15 11:21"
+    },
+    {
+      "family": "swiss_citation_hybrid_rerank_final_output",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final_output.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final_output.ipynb",
+      "mtime": "2026-05-15 11:46"
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1.ipynb",
+      "mtime": "2026-05-13 19:25"
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1_optimized",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_optimized (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1_optimized.ipynb",
+      "mtime": "2026-05-14 15:05"
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1_poc",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+      "mtime": "2026-05-14 15:27"
+    },
+    {
+      "family": "swiss_citation_precision_v1",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_precision_v1_(3).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1.ipynb",
+      "mtime": "2026-05-13 08:25"
+    },
+    {
+      "family": "swiss_citation_precision_v1_top_gold_from_50k_candidates",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+      "mtime": "2026-05-13 07:51"
+    },
+    {
+      "family": "swiss_citation_rerank_only_diagnostic",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "mtime": "2026-05-13 18:11"
+    },
+    {
+      "family": "swiss_law_pipeline_end_to_end_notebook_no_function_imports",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+      "mtime": "2026-04-12 16:31"
+    },
+    {
+      "family": "untitled75",
+      "src": "E:\\swiss_citation_extraction\\research\\Untitled75.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\Untitled75.ipynb",
+      "mtime": "2026-05-08 12:15"
+    }
+  ],
+  "dropped": [
+    {
+      "family": "colab_dense_embedding_test",
+      "dropped": "E:\\swiss_citation_extraction\\research\\colab_dense_embedding_test.ipynb",
+      "kept_instead": "C:\\Users\\samiul\\Downloads\\colab_dense_embedding_test (2).ipynb",
+      "drop_mtime": "2026-04-26 18:08"
+    },
+    {
+      "family": "colab_recall_preserving_candidate_funnel",
+      "dropped": "E:\\swiss_citation_extraction\\research\\colab_recall_preserving_candidate_funnel.ipynb",
+      "kept_instead": "C:\\Users\\samiul\\Downloads\\colab_recall_preserving_candidate_funnel_(2).ipynb",
+      "drop_mtime": "2026-04-27 01:22"
+    },
+    {
+      "family": "colab_segment_lattice_funnel_v3",
+      "dropped": "E:\\swiss_citation_extraction\\research\\colab_segment_lattice_funnel_v3.ipynb",
+      "kept_instead": "C:\\Users\\samiul\\Downloads\\colab_segment_lattice_funnel_v3 (2).ipynb",
+      "drop_mtime": "2026-04-30 15:10"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized_3",
+      "dropped": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized__3_ (1).ipynb",
+      "kept_instead": "E:\\swiss_citation_extraction\\outputs_from_363k_run\\court_llm_descriptor_extractor_blackwell_optimized__3__(1).ipynb",
+      "drop_mtime": "2026-05-04 21:00"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab",
+      "dropped": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen35_colab.ipynb",
+      "kept_instead": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab (1).ipynb",
+      "drop_mtime": "2026-04-30 19:22"
+    },
+    {
+      "family": "enrich_laws_de_qwen3_8b_kaggle",
+      "dropped": "C:\\Users\\samiul\\Downloads\\enrich_laws_de_qwen3_8b_kaggle (3).ipynb",
+      "kept_instead": "E:\\swiss_citation_extraction\\law_json_llm_output\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "drop_mtime": "2026-05-06 17:35"
+    },
+    {
+      "family": "enrich_laws_de_qwen3_8b_kaggle",
+      "dropped": "E:\\swiss_citation_extraction\\research\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "kept_instead": "E:\\swiss_citation_extraction\\law_json_llm_output\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "drop_mtime": "2026-05-06 01:00"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001",
+      "dropped": "E:\\swiss_citation_extraction\\swiss_citation_anchor_funnel_val001.ipynb",
+      "kept_instead": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001.ipynb",
+      "drop_mtime": "2026-05-09 20:28"
+    },
+    {
+      "family": "swiss_citation_hybrid_rerank_final",
+      "dropped": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final.ipynb",
+      "kept_instead": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final.ipynb",
+      "drop_mtime": "2026-05-15 08:34"
+    },
+    {
+      "family": "swiss_citation_precision_v1",
+      "dropped": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1.ipynb",
+      "kept_instead": "C:\\Users\\samiul\\Downloads\\swiss_citation_precision_v1_(3).ipynb",
+      "drop_mtime": "2026-05-13 08:25"
+    },
+    {
+      "family": "swiss_citation_rerank_only_diagnostic",
+      "dropped": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "kept_instead": "C:\\Users\\samiul\\Downloads\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "drop_mtime": "2026-05-13 18:11"
+    }
+  ],
+  "copy_log": [
+    {
+      "family": "swiss_citation_hybrid_rerank_final_output",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final_output.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final_output.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_hybrid_rerank_final",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1_poc",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1_optimized",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_optimized (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1_optimized.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_rerank_only_diagnostic",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_precision_v1",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_precision_v1_(3).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_v7_5_multiquery",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery (11).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_v7_5_multiquery.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7_part4_output",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7__part4_output.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v7_part4_output.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7_4",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7_4 (4).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v7_4.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7 (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v7.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "0.7716_scored_notebook",
+      "src": "C:\\Users\\samiul\\Downloads\\0.7716_scored_notebook.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\0.7716_scored_notebook.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_laws_de_qwen3_8b_kaggle",
+      "src": "E:\\swiss_citation_extraction\\law_json_llm_output\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized_(4).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_blackwell_optimized.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized_3",
+      "src": "E:\\swiss_citation_extraction\\outputs_from_363k_run\\court_llm_descriptor_extractor_blackwell_optimized__3__(1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_blackwell_optimized_3.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_colab_10k_optimized",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_10k_optimized (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_colab_10k_optimized.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_colab_qwen3_8b_awq",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_llm_descriptor_extractor_kaggle",
+      "src": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_kaggle.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_llm_descriptor_extractor_kaggle.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_citation_concept_enrichment_minimal_llm",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_minimal_llm.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment_minimal_llm.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_citation_concept_enrichment_robust_v5_t4_fixed",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_citation_concept_enrichment_smoke_test_10_v3_local_model",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "court_citation_enrichment_smoke_test_10",
+      "src": "C:\\Users\\samiul\\Downloads\\court_citation_enrichment_smoke_test_10.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_enrichment_smoke_test_10.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "kaggle-10-test-for-swiss-law",
+      "src": "C:\\Users\\samiul\\Downloads\\kaggle-10-test-for-swiss-law (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\kaggle-10-test-for-swiss-law.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_cards_qwen35_vllm_fast_stable_failure_capture",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_vllm_fast_stable_failure_capture (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_vllm_fast_stable_failure_capture.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab_fast_quality_json_v2",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_v2_(2) (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_colab_fast_quality_json_v2.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "fresh_safe_qwen35_card_enrichment_no_vllm",
+      "src": "C:\\Users\\samiul\\Downloads\\fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_cards_qwen35_colab",
+      "src": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen35_colab.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a1_bgem3_statutes",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A1_bgem3_statutes.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A1_bgem3_statutes.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a2_hyde_and_enumeration",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A2_hyde_and_enumeration.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A2_hyde_and_enumeration.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a3_qwen32b_enumeration",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A3_qwen32b_enumeration.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A3_qwen32b_enumeration.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a4_rerank",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A4_rerank.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A4_rerank.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a4b_rerank_hyde",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A4b_rerank_hyde.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A4b_rerank_hyde.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a5_court_retrieval",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A5_court_retrieval.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A5_court_retrieval.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "exp_a6_legal_roberta_finetune",
+      "src": "C:\\Users\\samiul\\Downloads\\exp_A6_legal_roberta_finetune.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\exp_A6_legal_roberta_finetune.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "colab_segment_lattice_funnel_v3",
+      "src": "C:\\Users\\samiul\\Downloads\\colab_segment_lattice_funnel_v3 (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\colab_segment_lattice_funnel_v3.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "colab_recall_preserving_candidate_funnel",
+      "src": "C:\\Users\\samiul\\Downloads\\colab_recall_preserving_candidate_funnel_(2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\colab_recall_preserving_candidate_funnel.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "colab_dense_embedding_test",
+      "src": "C:\\Users\\samiul\\Downloads\\colab_dense_embedding_test (2).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\colab_dense_embedding_test.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "latest_notebook_fixed_v3",
+      "src": "C:\\Users\\samiul\\Downloads\\latest__notebook_fixed_v3 (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\latest_notebook_fixed_v3.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_law_pipeline_end_to_end_notebook_no_function_imports",
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "notebook4ae3b3ffc3_stage0_gated",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook4ae3b3ffc3_stage0_gated.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook4ae3b3ffc3_stage0_gated.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "notebook_no_debug_prints",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook_no_debug_prints.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook_no_debug_prints.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "notebook_qwen3_8b_awq_kaggle_local_batchfix",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable",
+      "src": "C:\\Users\\samiul\\Downloads\\qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "notebookd37248e1eb",
+      "src": "C:\\Users\\samiul\\Downloads\\notebookd37248e1eb (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebookd37248e1eb.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "notebook3500ee7363_corrected_kaggle_safe",
+      "src": "C:\\Users\\samiul\\Downloads\\notebook3500ee7363_corrected_kaggle_safe.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\notebook3500ee7363_corrected_kaggle_safe.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "investigate-notebook",
+      "src": "C:\\Users\\samiul\\Downloads\\investigate-notebook (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\investigate-notebook.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_final_2026",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_final_2026.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_final_2026.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_precision_v1_top_gold_from_50k_candidates",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v6",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v6.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v6.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v5",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v5.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v5.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v4",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v4.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v4.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "swiss_citation_endgame_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_endgame_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\swiss_citation_endgame_colab.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "encode_queries_qwen3_8b_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\encode_queries_qwen3_8b_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\encode_queries_qwen3_8b_colab.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "retrieve_unified_corpus_qwen3_8b_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_qwen3_8b_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_qwen3_8b_colab.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "embed_unified_corpus_qwen3_8b_blackwell_colab",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\embed_unified_corpus_qwen3_8b_blackwell_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\embed_unified_corpus_qwen3_8b_blackwell_colab.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "court_citation_concept_enrichment",
+      "src": "E:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment.ipynb",
+      "action": "in_place"
+    },
+    {
+      "family": "retrieve_unified_corpus_v3",
+      "src": "E:\\swiss_citation_extraction\\research\\retrieve_unified_corpus_v3.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_v3.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "untitled75",
+      "src": "E:\\swiss_citation_extraction\\research\\Untitled75.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\Untitled75.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "investigate_laws_de_token_optimization",
+      "src": "E:\\swiss_citation_extraction\\research\\investigate_laws_de_token_optimization.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\investigate_laws_de_token_optimization.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_cards_qwen3_8b_kaggle",
+      "src": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_kaggle.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen3_8b_kaggle.ipynb",
+      "action": "copied"
+    },
+    {
+      "family": "enrich_cards_qwen3_8b_colab_fast_stable",
+      "src": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+      "action": "copied"
+    }
+  ],
+  "inv_md_deleted": [
+    "swiss_citation_precision_v1.md",
+    "enrich_laws_de_qwen3_8b_kaggle_3.md",
+    "enrich_cards_qwen35_colab.md",
+    "colab_segment_lattice_funnel_v3.md",
+    "colab_recall_preserving_candidate_funnel.md",
+    "colab_dense_embedding_test.md"
+  ]
+}

@@ -1,0 +1,2077 @@
+{
+  "law": {
+    "Art. 100 Abs. 1 BGG": {
+      "_source_row": 55084,
+      "citation": "Art. 100 Abs. 1 BGG",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "This article sets the time limit for filing an appeal against a decision with the Federal Court.",
+        "legal_rule": "Appeal must be filed within 30 days after full copy availability at the Federal Court",
+        "applicability_conditions": [
+          "Appeal against a decision",
+          "Full copy of the decision available",
+          "Filing with the Federal Court"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "When must an appeal be filed with the Federal Court?",
+        "concepts_en": [
+          "Appeal",
+          "Time limit",
+          "Federal Court",
+          "Decision",
+          "Full copy availability",
+          "Administrative procedure"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Beschwerde",
+            "en": "appeal"
+          },
+          {
+            "de": "Entscheid",
+            "en": "decision"
+          },
+          {
+            "de": "vollständige Ausfertigung",
+            "en": "full copy"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "natural person",
+          "legal entity / undertaking"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "other",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 0.667,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 37 Abs. 1 StBOG": {
+      "_source_row": 128886,
+      "citation": "Art. 37 Abs. 1 StBOG",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "The federal criminal courts' appellate chambers decide appeals referred to them by the StPO as competent.",
+        "legal_rule": "Federal criminal courts' appellate chambers decide appeals referred to them by the StPO.",
+        "applicability_conditions": [
+          "Appeals must be referred to the chambers by the StPO",
+          "Decisions must be within the scope of the StPO's referral"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "Which appeals are decided by the federal criminal courts' appellate chambers?",
+        "concepts_en": [
+          "Administrative law",
+          "Judicial review",
+          "Competence",
+          "Appeal",
+          "Federal criminal courts",
+          "StPO referrals"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Beschwerdekammern",
+            "en": "appellate chambers"
+          },
+          {
+            "de": "Bundestrafgericht",
+            "en": "federal criminal court"
+          },
+          {
+            "de": "StPO",
+            "en": "Swiss Code of Criminal Procedure"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "federal criminal courts",
+          "StPO"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "competence",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 0.667,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 39 Abs. 1 StBOG": {
+      "_source_row": 128890,
+      "citation": "Art. 39 Abs. 1 StBOG",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "The proceedings before the chambers of the Federal Criminal Court are governed by the StPO and this law.",
+        "legal_rule": "Proceedings before federal criminal court chambers follow StPO and this law",
+        "applicability_conditions": [
+          "Federal criminal court chambers involved",
+          "Cases under this law"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "",
+        "concepts_en": [
+          "criminal procedure",
+          "judicial proceedings",
+          "federal court",
+          "statutory law",
+          "court chambers"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Kammern des Bundesstrafgerichts",
+            "en": "chambers of the Federal Criminal Court"
+          },
+          {
+            "de": "StPO",
+            "en": "Federal Criminal Procedure Code"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "federal court",
+          "court chambers"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "scope",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 140 Abs. 1 StGB": {
+      "_source_row": 129816,
+      "citation": "Art. 140 Abs. 1 StGB",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "An act of theft committed by force or threat against a person is punishable by imprisonment from six months to ten years.",
+        "legal_rule": "Theft by force or threat punishable by imprisonment",
+        "applicability_conditions": [
+          "Use of force against a person",
+          "Threat of immediate danger to body or life",
+          "Making the victim unable to resist",
+          "Commission of theft"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "What penalty applies for theft involving force or threat?",
+        "concepts_en": [
+          "criminal liability",
+          "force",
+          "threat",
+          "theft",
+          "imprisonment",
+          "penal sanction",
+          "criminal act",
+          "victim"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Gewalt",
+            "en": "force"
+          },
+          {
+            "de": "Gefahr",
+            "en": "danger"
+          },
+          {
+            "de": "Leib",
+            "en": "body"
+          },
+          {
+            "de": "Leben",
+            "en": "life"
+          },
+          {
+            "de": "Widerstand",
+            "en": "resistance"
+          },
+          {
+            "de": "Diebstahl",
+            "en": "theft"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "court",
+          "public prosecutor"
+        ],
+        "sanctions_or_consequences": [
+          "imprisonment from six months to ten years"
+        ],
+        "provision_role_llm": "other",
+        "specificity_score": 0.9
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 135 Abs. 3 StPO": {
+      "_source_row": 131328,
+      "citation": "Art. 135 Abs. 3 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "The official defense may appeal against a compensation decision using the legal remedy permissible against a final decision.",
+        "legal_rule": "Official defense may appeal compensation decisions using final decision remedies",
+        "applicability_conditions": [
+          "Compensation decision exists",
+          "Official defense is entitled to appeal",
+          "Appeal must follow final decision remedies"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "May official defense appeal compensation decisions?",
+        "concepts_en": [
+          "compensation decision",
+          "legal remedy",
+          "final decision",
+          "appeal",
+          "official defense",
+          "criminal procedure"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Entschädigungsentscheid",
+            "en": "compensation decision"
+          },
+          {
+            "de": "amtliche Verteidigung",
+            "en": "official defense"
+          },
+          {
+            "de": "Rechtsmittel",
+            "en": "legal remedy"
+          },
+          {
+            "de": "Endentscheid",
+            "en": "final decision"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "official defense"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "right_or_entitlement",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 135 Abs. 4 StPO": {
+      "_source_row": 131329,
+      "citation": "Art. 135 Abs. 4 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "If convicted of procedural costs, the accused must repay compensation to the Confederation or canton once their financial situation allows.",
+        "legal_rule": "Accused must repay compensation to state upon financial ability",
+        "applicability_conditions": [
+          "Conviction for procedural costs",
+          "Accused's financial situation permits repayment"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "When must the accused repay compensation?",
+        "concepts_en": [
+          "criminal procedure",
+          "compensation",
+          "financial ability",
+          "state liability",
+          "conviction",
+          "reparation"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Verfahrenskosten",
+            "en": "procedural costs"
+          },
+          {
+            "de": "Entschädigung",
+            "en": "compensation"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "natural person",
+          "Confederation",
+          "cantonal authority"
+        ],
+        "sanctions_or_consequences": [
+          "Repayment obligation",
+          "Financial liability"
+        ],
+        "provision_role_llm": "duty",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 212 Abs. 3 StPO": {
+      "_source_row": 131533,
+      "citation": "Art. 212 Abs. 3 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "Detention for investigation and security purposes cannot exceed the expected prison sentence.",
+        "legal_rule": "Investigation and security detention duration limited to expected prison sentence",
+        "applicability_conditions": [
+          "Detention for investigation",
+          "Detention for security reasons",
+          "Expected prison sentence duration"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "May investigation or security detention exceed the expected prison sentence?",
+        "concepts_en": [
+          "criminal procedure",
+          "detention",
+          "investigation",
+          "security measures",
+          "prison sentence",
+          "duration limitation"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Untersuchungs- und Sicherheitshaft",
+            "en": "Investigation and security detention"
+          },
+          {
+            "de": "Freiheitsstrafe",
+            "en": "Prison sentence"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "court",
+          "competent cantonal authority"
+        ],
+        "sanctions_or_consequences": [
+          "Excess duration may be unlawful"
+        ],
+        "provision_role_llm": "other",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 221 Abs. 1 StPO": {
+      "_source_row": 131559,
+      "citation": "Art. 221 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "Investigative and security detention is allowed only if the accused is strongly suspected of a crime or offense and there is a serious risk that they will evade prosecution or sanctions.",
+        "legal_rule": "Investigative and security detention permitted under specific suspicion and risk conditions",
+        "applicability_conditions": [
+          "Accused is strongly suspected of crime or offense",
+          "Serious risk of evading prosecution or sanctions",
+          "Risk of influencing persons or evidence",
+          "Risk of endangering others through prior offenses"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "When is investigative detention lawful under criminal procedure?",
+        "concepts_en": [
+          "Investigative detention",
+          "Security detention",
+          "Criminal suspicion",
+          "Risk assessment",
+          "Evidence tampering",
+          "Public safety",
+          "Prior offenses",
+          "Legal proceedings"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Untersuchungs- und Sicherheitshaft",
+            "en": "Investigative and security detention"
+          },
+          {
+            "de": "dringend verdächtig",
+            "en": "strongly suspected"
+          },
+          {
+            "de": "Sanktion",
+            "en": "sanction"
+          },
+          {
+            "de": "Beweismittel",
+            "en": "evidence"
+          },
+          {
+            "de": "Sicherheit anderer",
+            "en": "public safety"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "court",
+          "competent cantonal authority",
+          "public prosecutor"
+        ],
+        "sanctions_or_consequences": [
+          "Detention ordered by court",
+          "Must be proportionate to risk",
+          "Reviewable by judicial authority"
+        ],
+        "provision_role_llm": "scope",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 221 Abs. 2 StPO": {
+      "_source_row": 131561,
+      "citation": "Art. 221 Abs. 2 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "Detention is permissible if there is a serious and immediate danger that a person will carry out a serious crime.",
+        "legal_rule": "Detention allowed when serious and immediate danger of committing a serious crime exists",
+        "applicability_conditions": [
+          "Serious threat",
+          "Immediate danger",
+          "Person to commit serious crime"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "When is detention permissible under Article 221(2) StPO?",
+        "concepts_en": [
+          "Detention",
+          "Serious crime",
+          "Threat",
+          "Immediacy",
+          "Danger",
+          "Legal justification"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Drohung",
+            "en": "threat"
+          },
+          {
+            "de": "schweres Verbrechen",
+            "en": "serious crime"
+          },
+          {
+            "de": "ernsthafte und unmittelbare Gefahr",
+            "en": "serious and immediate danger"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "court",
+          "law enforcement"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "other",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 222 StPO": {
+      "_source_row": 131562,
+      "citation": "Art. 222 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "Only the detained person can challenge decisions on investigation or security detention at the appellate instance. Article 233 remains excluded.",
+        "legal_rule": "",
+        "applicability_conditions": [
+          "Decisions on investigation or security detention",
+          "Challenged at the appellate instance",
+          "Only applicable to detained persons"
+        ],
+        "exceptions_or_limitations": [
+          "Exclusion of Article 233"
+        ],
+        "legal_question": "",
+        "concepts_en": [
+          "Detained person",
+          "Appellate instance",
+          "Investigation detention",
+          "Security detention",
+          "Administrative decision",
+          "Legal challenge"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Beschwerdeinstanz",
+            "en": "appellate instance"
+          },
+          {
+            "de": "Anordnung",
+            "en": "order"
+          },
+          {
+            "de": "Verlängerung",
+            "en": "extension"
+          },
+          {
+            "de": "Aufhebung",
+            "en": "revocation"
+          },
+          {
+            "de": "Untersuchungs- oder Sicherheitshaft",
+            "en": "investigation or security detention"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "detained person"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "other",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 227 Abs. 1 StPO": {
+      "_source_row": 131578,
+      "citation": "Art. 227 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "If the duration of pre-trial detention set by the compulsory measures court expires, the prosecutor may apply for extension. If the court did not limit the detention period, the application must be filed within three months.",
+        "legal_rule": "Prosecutor may apply for extension of pre-trial detention if court did not set duration",
+        "applicability_conditions": [
+          "Detention duration set by compulsory measures court has expired",
+          "Prosecutor seeks extension",
+          "Court did not limit detention period",
+          "Application must be filed within three months"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "When can prosecutor apply for extension of pre-trial detention?",
+        "concepts_en": [
+          "pre-trial detention",
+          "compulsory measures court",
+          "prosecutor",
+          "detention extension",
+          "duration limitation",
+          "application filing",
+          "criminal procedure"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Zwangsmassnahmengericht",
+            "en": "compulsory measures court"
+          },
+          {
+            "de": "Staatsanwaltschaft",
+            "en": "prosecutor"
+          },
+          {
+            "de": "Haftverlängerungsgesuch",
+            "en": "detention extension application"
+          },
+          {
+            "de": "Untersuchungshaft",
+            "en": "pre-trial detention"
+          },
+          {
+            "de": "Dauer",
+            "en": "duration"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "prosecutor",
+          "compulsory measures court"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "procedure",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 382 Abs. 1 StPO": {
+      "_source_row": 132082,
+      "citation": "Art. 382 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "Any party with a legally protected interest in revoking or changing a decision may file a legal remedy.",
+        "legal_rule": "Parties with protected interests may seek legal remedies against decisions.",
+        "applicability_conditions": [
+          "Party has legally protected interest",
+          "Decision is subject to revocation or amendment",
+          "Legal remedy is available"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "Who may seek legal remedies against decisions?",
+        "concepts_en": [
+          "legal remedy",
+          "protected interest",
+          "decision revocation",
+          "party",
+          "criminal procedure",
+          "legal protection",
+          "administrative action"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Entscheide",
+            "en": "decisions"
+          },
+          {
+            "de": "Rechtsmittel",
+            "en": "legal remedy"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "natural person",
+          "legal entity"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "right_or_entitlement",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 385 Abs. 1 StPO": {
+      "_source_row": 132088,
+      "citation": "Art. 385 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "This article requires that if a legal remedy is claimed, the person or authority initiating it must specify the points they challenge, the grounds suggesting another decision, and the evidence they invoke.",
+        "legal_rule": "",
+        "applicability_conditions": [
+          "Legal remedy is claimed",
+          "Person or authority initiates remedy"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "",
+        "concepts_en": [
+          "legal remedy",
+          "challenge",
+          "grounds",
+          "evidence",
+          "decision",
+          "authority",
+          "person"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Rechtsmittel",
+            "en": "legal remedy"
+          },
+          {
+            "de": "Entscheide",
+            "en": "decisions"
+          },
+          {
+            "de": "Beweismittel",
+            "en": "evidence"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "person",
+          "authority"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "procedure",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 390 Abs. 2 StPO": {
+      "_source_row": 132101,
+      "citation": "Art. 390 Abs. 2 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "If the legal remedy is not obviously invalid or unfounded, the proceedings officer must provide the opposing parties and the prior instance with the legal remedy document for comment. If the document cannot be delivered or no response is received, the proceedings continue.",
+        "legal_rule": "Proceedings officer must provide legal remedy document for comment unless invalid/unfounded or delivery/response fails",
+        "applicability_conditions": [
+          "Legal remedy not obviously invalid",
+          "Legal remedy not obviously unfounded",
+          "Proceedings officer required to act",
+          "Opposing parties and prior instance involved"
+        ],
+        "exceptions_or_limitations": [
+          "Delivery failure",
+          "No response received"
+        ],
+        "legal_question": "When must proceedings officer provide legal remedy document for comment?",
+        "concepts_en": [
+          "Legal remedy",
+          "Proceedings officer",
+          "Comment provision",
+          "Delivery failure",
+          "Prior instance",
+          "Opposing parties",
+          "Proceedings continuation"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Rechtsmittel",
+            "en": "legal remedy"
+          },
+          {
+            "de": "Verfahrensleitung",
+            "en": "proceedings officer"
+          },
+          {
+            "de": "Stellungnahme",
+            "en": "comment"
+          },
+          {
+            "de": "Vorinstanz",
+            "en": "prior instance"
+          },
+          {
+            "de": "Zugestellung",
+            "en": "delivery"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "proceedings officer",
+          "opposing parties",
+          "prior instance"
+        ],
+        "sanctions_or_consequences": [
+          "Proceedings continue despite lack of comment"
+        ],
+        "provision_role_llm": "procedure",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 0.8,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 393 Abs. 1 StPO": {
+      "_source_row": 132110,
+      "citation": "Art. 393 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "This article allows appeals against certain decisions and procedural acts by police, prosecutors, petty offense authorities, first instance courts, and the compulsory measures court.",
+        "legal_rule": "Appeals are allowed against specified decisions and procedural acts",
+        "applicability_conditions": [
+          "Against decisions of police",
+          "Against procedural acts of prosecutors",
+          "Against decisions of petty offense authorities",
+          "Against decisions of first instance courts",
+          "Against compulsory measures court decisions"
+        ],
+        "exceptions_or_limitations": [
+          "Excludes procedural decisions",
+          "Excludes decisions not designated as final under this law"
+        ],
+        "legal_question": "What decisions and acts are appealable under this article?",
+        "concepts_en": [
+          "Appeal",
+          "Procedural act",
+          "Decision",
+          "Competent authority",
+          "Final decision",
+          "Administrative body",
+          "Judicial authority"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Verfügungen",
+            "en": "formal administrative order"
+          },
+          {
+            "de": "Verfahrenshandlungen",
+            "en": "procedural acts"
+          },
+          {
+            "de": "erstinstanzliche Gerichte",
+            "en": "first instance courts"
+          },
+          {
+            "de": "Zwangsmassnahmengericht",
+            "en": "compulsory measures court"
+          },
+          {
+            "de": "verfahrensleitende Entscheide",
+            "en": "procedural decisions"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "natural person",
+          "legal entity / undertaking",
+          "court",
+          "public prosecutor",
+          "supervisory authority"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "scope",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 0.8,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 396 Abs. 1 StPO": {
+      "_source_row": 132114,
+      "citation": "Art. 396 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "An appeal against written or oral decisions must be submitted in writing and with reasons within 10 days to the appellate authority.",
+        "legal_rule": "Appeals against decisions must be submitted in writing with reasons within 10 days.",
+        "applicability_conditions": [
+          "Appeal against written decisions",
+          "Appeal against oral decisions",
+          "Submission must be in writing",
+          "Reasons required",
+          "Time limit of 10 days"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "What is the procedural requirement for filing an appeal?",
+        "concepts_en": [
+          "Appeal",
+          "Decision",
+          "Appellate authority",
+          "Time limit",
+          "Written submission",
+          "Reasons"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Beschwerde",
+            "en": "appeal"
+          },
+          {
+            "de": "Entscheid",
+            "en": "decision"
+          },
+          {
+            "de": "Beschwerdeinstanz",
+            "en": "appellate authority"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "natural person",
+          "legal entity / undertaking"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "procedure",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 422 Abs. 1 StPO": {
+      "_source_row": 132187,
+      "citation": "Art. 422 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "This article defines procedural costs as consisting of fees covering expenses and specific costs in a criminal case.",
+        "legal_rule": "Procedural costs include fees for expenses and specific costs in a criminal case",
+        "applicability_conditions": [
+          "In criminal proceedings",
+          "Regarding costs incurred",
+          "For specific cases"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "What constitutes procedural costs in criminal proceedings?",
+        "concepts_en": [
+          "criminal proceedings",
+          "procedural costs",
+          "fees",
+          "expenses",
+          "costs",
+          "legal expenses"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Verfahrenskosten",
+            "en": "procedural costs"
+          },
+          {
+            "de": "Gebühren",
+            "en": "fees"
+          },
+          {
+            "de": "Aufwand",
+            "en": "expenses"
+          },
+          {
+            "de": "Auslagen",
+            "en": "costs"
+          },
+          {
+            "de": "Straffall",
+            "en": "criminal case"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "court",
+          "public prosecutor"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "definition",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 422 Abs. 2 StPO": {
+      "_source_row": 132188,
+      "citation": "Art. 422 Abs. 2 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "This article lists specific costs that are considered official expenses in criminal proceedings.",
+        "legal_rule": "",
+        "applicability_conditions": [
+          "Costs related to official defense",
+          "Translation costs",
+          "Expert opinion costs",
+          "Collaboration with other authorities",
+          "Postal, telephone, and similar expenses"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "",
+        "concepts_en": [
+          "criminal proceedings",
+          "official expenses",
+          "costs",
+          "defense",
+          "translation",
+          "expert opinion",
+          "authority collaboration",
+          "postal expenses"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Auslagen",
+            "en": "official expenses"
+          },
+          {
+            "de": "amtliche Verteidigung",
+            "en": "official defense"
+          },
+          {
+            "de": "Verbeiständung",
+            "en": "attendance"
+          },
+          {
+            "de": "Übersetzungen",
+            "en": "translations"
+          },
+          {
+            "de": "Gutachten",
+            "en": "expert opinions"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "court",
+          "public prosecutor",
+          "competent cantonal authority"
+        ],
+        "sanctions_or_consequences": [],
+        "provision_role_llm": "definition",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "Art. 428 Abs. 1 StPO": {
+      "_source_row": 132203,
+      "citation": "Art. 428 Abs. 1 StPO",
+      "language": "de",
+      "llm_priority": "medium",
+      "llm_enrichment": {
+        "english_summary": "Parties bear costs of legal proceedings proportionally to their success or failure. A party that withdraws its claim or fails to have its remedy granted is deemed to have lost.",
+        "legal_rule": "Costs of legal proceedings borne by parties according to their success or failure",
+        "applicability_conditions": [
+          "Legal proceedings under criminal procedure",
+          "Parties involved in legal remedies",
+          "Claim withdrawal or non-fulfillment of remedy"
+        ],
+        "exceptions_or_limitations": [],
+        "legal_question": "Who bears the costs of legal proceedings and under what conditions?",
+        "concepts_en": [
+          "cost allocation",
+          "legal proceedings",
+          "parties",
+          "success",
+          "failure",
+          "claim withdrawal",
+          "remedy fulfillment"
+        ],
+        "terms_de_to_en": [
+          {
+            "de": "Rechtsmittelverfahren",
+            "en": "legal remedy proceedings"
+          },
+          {
+            "de": "Obsiegens oder Unterliegens",
+            "en": "success or failure"
+          }
+        ],
+        "defined_terms": [],
+        "addressees": [
+          "natural person",
+          "legal entity",
+          "court"
+        ],
+        "sanctions_or_consequences": [
+          "Costs allocated based on success/failure",
+          "Withdrawn claims deemed as losing"
+        ],
+        "provision_role_llm": "other",
+        "specificity_score": 0.8
+      },
+      "llm_quality": {
+        "json_valid": true,
+        "terms_grounded_pct": 1.0,
+        "boilerplate_role": false
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "law_descriptor_v1",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    }
+  },
+  "court": {
+    "BGE 137 IV 122 E. 4.2": {
+      "_source_row": 8177,
+      "citation": "BGE 137 IV 122 E. 4.2",
+      "text": "Gemäss Art. 221 Abs. 1 lit. b i.V.m. Art. 237 Abs. 1 StPO ist Untersuchungshaft respektive die Anordnung von Ersatzmassnahmen zulässig, wenn ernsthaft zu befürchten ist, die beschuldigte Person könnte Personen beeinflussen oder auf Beweismittel einwirken, um so die Wahrheitsfindung zu beeinträchtigen. Die strafprozessuale Haft wegen Kollusionsgefahr soll verhindern, dass die beschuldigte Person die Freiheit dazu missbrauchen würde, die wahrheitsgetreue Abklärung des Sachverhalts zu vereiteln oder zu gefährden. Konkrete Anhaltspunkte für Kollusionsgefahr können sich nach der Rechtsprechung des Bundesgerichts namentlich ergeben aus dem bisherigen Verhalten des Beschuldigten im Strafprozess, aus seinen persönlichen Merkmalen, aus seiner BGE 137 IV 122 S. 128 Stellung und seinen Tatbeiträgen im Rahmen des untersuchten Sachverhaltes sowie aus den persönlichen Beziehungen zwischen ihm und den ihn belastenden Personen. Bei der Frage, ob im konkreten Fall eine massgebliche Beeinträchtigung des Strafverfahrens wegen Verdunkelung droht, ist auch der Art und Bedeutung der von Beeinflussung bedrohten Aussagen bzw. Beweismittel, der Schwere der untersuchten Straftaten sowie dem Stand des Verfah...",
+      "language": "de",
+      "legal_area_static": "criminal law and criminal procedure",
+      "llm_enrichment": {
+        "legal_area": "Criminal procedure",
+        "primary_domain": "Detention",
+        "secondary_domain": "Preventive detention",
+        "legal_domain_path": [
+          "Criminal law",
+          "Procedure",
+          "Detention"
+        ],
+        "topic": "Preventive detention",
+        "subtopic": "Grounds for detention",
+        "micro_topic": "Collusion risk as basis for preventive detention",
+        "concepts_en": [
+          "Preventive detention",
+          "Collusion risk",
+          "Interference with evidence",
+          "Criminal procedure",
+          "Detention order"
+        ],
+        "terms_original": [
+          "Untersuchungshaft",
+          "Ersatzmassnahmen",
+          "Kollusionsgefahr",
+          "Beweismittel",
+          "Strafverfahren"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Detention",
+          "Collusion",
+          "Evidence",
+          "Criminal procedure"
+        ],
+        "procedural_context": "Criminal procedure",
+        "paragraph_role": "legal_standard",
+        "authority_role": [
+          "Swiss Federal Court"
+        ],
+        "specificity_score": 0.9
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "1B_28/2022 E. 4.1": {
+      "_source_row": 13866,
+      "citation": "1B_28/2022 E. 4.1",
+      "text": "4.1. Der Haftgrund der Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass die oder der Beschuldigte Personen beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Verdunkelung kann nach der bundesgerichtlichen Praxis zu Art. 221 Abs. 1 lit. b StPO insbesondere in der Weise erfolgen, dass sich die beschuldigte Person mit Zeuginnen oder Zeugen, Auskunftspersonen, Sachverständigen oder Mitbeschuldigten ins Einvernehmen setzt oder sie zu wahrheitswidrigen Aussagen veranlasst oder dass sie Spuren und Beweismittel beseitigt. Strafprozessuale Haft wegen Kollusionsgefahr soll verhindern, dass die beschuldigte Person die wahrheitsgetreue Abklärung des Sachverhalts vereitelt oder gefährdet. Die theoretische Möglichkeit, dass die beschuldigte Person kolludieren könnte, genügt indessen nicht, um Haft unter diesem Titel zu rechtfertigen. Es müssen vielmehr konkrete Indizien für die Annahme von Verdunkelungsgefahr sprechen. Das Vorliegen des Haftgrunds ist nach Massgabe der Umstände des jeweiligen Einzelfalls zu prüfen (BGE 137 IV 122 E. 4.2; Urteil 1B_575/2021 vom 8. November 2021 E. 3.1; je mit Hinweisen). Konkr...",
+      "language": "de",
+      "legal_area_static": "criminal procedure and coercive measures",
+      "llm_enrichment": {
+        "legal_area": "Criminal law",
+        "primary_domain": "Detention law",
+        "secondary_domain": "Collusion risk",
+        "legal_domain_path": [
+          "Criminal procedure",
+          "Detention",
+          "Collusion risk"
+        ],
+        "topic": "Detention grounds",
+        "subtopic": "Collusion risk justification",
+        "micro_topic": "Conditions for detention due to collusion risk",
+        "concepts_en": [
+          "Detention",
+          "Collusion",
+          "Evidence suppression",
+          "Criminal procedure",
+          "Legal standard"
+        ],
+        "terms_original": [
+          "Kollusionsgefahr",
+          "Verdunkelung",
+          "StPO",
+          "BGE",
+          "1B_575/2021"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Detention",
+          "Collusion",
+          "Evidence",
+          "Legal standard"
+        ],
+        "procedural_context": "Detention justification",
+        "paragraph_role": "legal_standard",
+        "authority_role": [
+          "Swiss law",
+          "Case law"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 133 I 270 E. 3.4.2": {
+      "_source_row": 748156,
+      "citation": "BGE 133 I 270 E. 3.4.2",
+      "text": "Gemäss Art. 31 Abs. 3 BV und Art. 5 Ziff. 3 EMRK hat eine in strafprozessualer Haft gehaltene Person Anspruch darauf, innerhalb einer angemessenen Frist richterlich beurteilt oder während des Strafverfahrens aus der Haft entlassen zu werden. Eine übermässige Haftdauer stellt eine unverhältnismässige Beschränkung dieses Grundrechts dar. Sie liegt dann vor, wenn die Haftfrist die mutmassliche Dauer der zu erwartenden freiheitsentziehenden Sanktion übersteigt. Bei der Prüfung der Verhältnismässigkeit der Haftdauer ist namentlich der Schwere der untersuchten Straftaten Rechnung zu tragen. Der Richter darf die Haft nur so lange erstrecken, als sie nicht in grosse zeitliche Nähe der (im Falle einer rechtskräftigen Verurteilung) konkret zu erwartenden Dauer der freiheitsentziehenden Sanktion rückt. Im Weiteren kann eine Haft die zulässige Dauer auch dann überschreiten, wenn das Strafverfahren nicht genügend vorangetrieben wird, wobei sowohl das Verhalten der Justizbehörden als auch dasjenige des Inhaftierten in Betracht gezogen werden müssen. Nach der übereinstimmenden Rechtsprechung des Bundesgerichtes und des Europäischen Gerichtshofs für Menschenrechte ist die Frage, ob eine Haftdauer ...",
+      "language": "de",
+      "legal_area_static": "constitutional and public law",
+      "llm_enrichment": {
+        "legal_area": "Human rights",
+        "primary_domain": "Detention",
+        "secondary_domain": "Proportionality of detention",
+        "legal_domain_path": [
+          "Constitutional law",
+          "Human rights",
+          "Detention"
+        ],
+        "topic": "Detention duration",
+        "subtopic": "Proportionality of detention period",
+        "micro_topic": "When detention exceeds expected sanction duration",
+        "concepts_en": [
+          "Detention",
+          "Proportionality",
+          "Fundamental rights",
+          "Criminal procedure",
+          "Judicial review"
+        ],
+        "terms_original": [
+          "Art. 31 Abs. 3 BV",
+          "Art. 5 Ziff. 3 EMRK",
+          "Haftdauer",
+          "unverhältnismässige Beschränkung",
+          "freiheitsentziehende Sanktion"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Detention",
+          "Proportionality",
+          "Fundamental rights",
+          "Criminal procedure"
+        ],
+        "procedural_context": "Judicial review of detention",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Bundesgericht",
+          "European Court of Human Rights"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 132 I 21 E. 3.2": {
+      "_source_row": 992397,
+      "citation": "BGE 132 I 21 E. 3.2",
+      "text": "Kollusion bedeutet nach der bundesgerichtlichen Praxis insbesondere, dass sich der Angeschuldigte mit Zeugen, Auskunftspersonen, Sachverständigen oder Mitangeschuldigten ins Einvernehmen setzt oder sie zu wahrheitswidrigen Aussagen veranlasst, oder dass er Spuren und Beweismittel beseitigt. Die strafprozessuale Haft wegen Kollusionsgefahr soll verhindern, dass der Angeschuldigte die Freiheit oder einen Urlaub dazu missbrauchen würde, die wahrheitsgetreue Abklärung des Sachverhaltes zu vereiteln oder zu gefährden. Die theoretische Möglichkeit, dass der Angeschuldigte in Freiheit kolludieren könnte, genügt indessen nicht, um die Fortsetzung der Haft oder die Nichtgewährung von Urlauben unter diesem Titel zu rechtfertigen. Es müssen vielmehr konkrete Indizien für die Annahme von Verdunkelungsgefahr sprechen. Das Vorliegen des Haftgrundes ist nach Massgabe der Umstände des jeweiligen Einzelfalles zu prüfen (BGE 123 I 31 E. 3c S. 35; BGE 117 Ia 257 E. 4b S. 261, je mit Hinweisen).",
+      "language": "de",
+      "legal_area_static": "constitutional and public law",
+      "llm_enrichment": {
+        "legal_area": "Criminal procedure",
+        "primary_domain": "Detention",
+        "secondary_domain": "Collusion and evidence",
+        "legal_domain_path": [
+          "Criminal law",
+          "Detention",
+          "Collusion"
+        ],
+        "topic": "Collusion in criminal proceedings",
+        "subtopic": "Conditions for detention due to collusion risk",
+        "micro_topic": "When is detention justified to prevent collusion",
+        "concepts_en": [
+          "Collusion",
+          "Detention",
+          "Evidence",
+          "Due process",
+          "Suspicion"
+        ],
+        "terms_original": [
+          "Kollusion",
+          "Haft",
+          "Beweismittel",
+          "Verdunkelungsgefahr",
+          "Urlaub"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Collusion",
+          "Detention",
+          "Evidence",
+          "Risk"
+        ],
+        "procedural_context": "Detention justification",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Swiss Federal Court"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 132 I 21 E. 3.2.1": {
+      "_source_row": 1240029,
+      "citation": "BGE 132 I 21 E. 3.2.1",
+      "text": "Konkrete Anhaltspunkte für Kollusionsgefahr können sich nach der Rechtsprechung des Bundesgerichtes namentlich ergeben aus dem bisherigen Verhalten des Angeschuldigten im Strafprozess, aus seinen persönlichen Merkmalen, aus seiner Stellung und seinen Tatbeiträgen im Rahmen des untersuchten Sachverhaltes sowie aus den persönlichen Beziehungen zwischen ihm und den ihn belastenden Personen. Bei der Frage, ob im konkreten Fall eine massgebliche Beeinträchtigung des Strafverfahrens wegen Verdunkelung droht, ist auch der Art und Bedeutung der von Beeinflussung bedrohten Aussagen bzw. Beweismittel, der Schwere der untersuchten Straftaten sowie dem Stand des Verfahrens Rechnung zu BGE 132 I 21 S. 24 tragen (vgl. BGE 123 I 31 E. 3c S. 35; BGE 117 Ia 257 E. 4b S. 261, je mit Hinweisen; PETER ALBRECHT, Die Kollusionsgefahr als Haftgrund, BJM 1999 S. 1 ff., 3-14; ANDREAS DONATSCH, in: Donatsch/Schmid, Kommentar zur Strafprozessordnung des Kantons Zürich, Zürich 1996 ff., § 58 N. 40 f.; CHRISTOPH MEIER/GEORG RÜEGG, Der Haftrichter im Kanton Basel-Stadt, BJM 1994 S. 310 f.; NIKLAUS OBERHOLZER, Grundzüge des Strafprozessrechts, Bern 1994, S. 309).",
+      "language": "de",
+      "legal_area_static": "constitutional and public law",
+      "llm_enrichment": {
+        "legal_area": "criminal procedure",
+        "primary_domain": "preliminary detention",
+        "secondary_domain": "collusion danger",
+        "legal_domain_path": [
+          "criminal law",
+          "procedure",
+          "detention"
+        ],
+        "topic": "collusion danger",
+        "subtopic": "evidence of collusion risk",
+        "micro_topic": "factors indicating collusion risk in criminal proceedings",
+        "concepts_en": [
+          "collusion",
+          "preliminary detention",
+          "evidence",
+          "risk assessment",
+          "criminal procedure"
+        ],
+        "terms_original": [
+          "Kollusionsgefahr",
+          "Strafverfahren",
+          "Beweismittel",
+          "Verdunkelung",
+          "Haftrichter"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "collusion risk",
+          "preliminary detention",
+          "evidence",
+          "criminal procedure"
+        ],
+        "procedural_context": "criminal proceedings",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "BGE",
+          "BJM"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 133 I 168 E. 4.1": {
+      "_source_row": 1243356,
+      "citation": "BGE 133 I 168 E. 4.1",
+      "text": "En vertu des art. 31 al. 3 Cst. et 5 par. 3 CEDH, toute personne qui est mise en détention préventive a le droit d'être jugée dans un délai raisonnable ou d'être libérée pendant la procédure pénale. Une durée excessive de la détention constitue une limitation disproportionnée de ce droit fondamental, qui est notamment violé lorsque la durée de la détention préventive dépasse la durée probable de la peine privative de liberté à laquelle il faut s'attendre. Dans l'examen de la proportionnalité de la durée de détention, il y a lieu de prendre en compte la gravité des infractions faisant l'objet de l'instruction. Le juge peut maintenir la détention préventive aussi longtemps qu'elle n'est pas très proche de la durée de la peine privative de liberté à laquelle il faut s'attendre concrètement en cas de condamnation (ATF 132 I 21 consid. 4.1 p. 27; ATF 128 I 149 consid. 2.2 p. 151; ATF 107 Ia 256 consid. 2 et 3 p. 257 ss et les références). Il convient d'accorder une attention particulière à cette limite, car le juge de l'action pénale pourrait être enclin à prendre en considération dans la fixation de la peine la durée de la détention préventive à imputer selon l'art. 51 CP (cf. ATF 124 ...",
+      "language": "fr",
+      "legal_area_static": "constitutional and public law",
+      "llm_enrichment": {
+        "legal_area": "criminal law",
+        "primary_domain": "pretrial detention",
+        "secondary_domain": "proportionality of detention",
+        "legal_domain_path": [
+          "constitutional law",
+          "criminal procedure",
+          "detention rights"
+        ],
+        "topic": "detention duration",
+        "subtopic": "proportionality standard",
+        "micro_topic": "duration of pretrial detention and proportionality",
+        "concepts_en": [
+          "proportionality",
+          "pretrial detention",
+          "fundamental rights",
+          "reasonable time",
+          "criminal procedure"
+        ],
+        "terms_original": [
+          "Art. 31 al. 3 Cst.",
+          "Art. 5 par. 3 CEDH",
+          "détention préventive",
+          "peine privative de liberté",
+          "proportionnalité"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "Duration of detention must not exceed probable sentence duration",
+        "fact_pattern_tags": [
+          "pretrial detention",
+          "proportionality",
+          "constitutional rights",
+          "criminal procedure"
+        ],
+        "procedural_context": "constitutional review",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Swiss Federal Court",
+          "European Court of Human Rights"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 132 I 21 E. 3.2.2": {
+      "_source_row": 1487660,
+      "citation": "BGE 132 I 21 E. 3.2.2",
+      "text": "Nach Abschluss der Strafuntersuchung (und insbesondere nach Durchführung einer erstinstanzlichen Hauptverhandlung) bedarf der Haftgrund der Kollusionsgefahr einer besonders sorgfältigen Prüfung. Er dient primär der Sicherung einer ungestörten Strafuntersuchung. Zwar ist auch die richterliche Sachaufklärung vor unzulässigen Einflussnahmen zu bewahren. Dies gilt insbesondere im Hinblick auf die (in der Regel beschränkte) Unmittelbarkeit der Beweisaufnahme anlässlich der Hauptverhandlung (vgl. BGE 117 Ia 257 E. 4b S. 261; s. auch §§ 280 und 285 StPO/ZH; dazu NIKLAUS SCHMID, Strafprozessrecht, 4. Aufl., Zürich 2004, Rz. 196-199; derselbe, in: Donatsch/Schmid, a.a.O., § 183 N. 4-14 i.V.m. § 285). Je weiter das Strafverfahren vorangeschritten ist und je präziser der Sachverhalt bereits abgeklärt werden konnte, desto höhere Anforderungen sind jedoch grundsätzlich an den Nachweis von Verdunkelungsgefahr zu stellen (vgl. ALBRECHT, a.a.O., S. 12; DONATSCH, ibidem; MEIER/RÜEGG, ibidem).",
+      "language": "de",
+      "legal_area_static": "constitutional and public law",
+      "llm_enrichment": {
+        "legal_area": "criminal procedure",
+        "primary_domain": "preliminary investigation",
+        "secondary_domain": "custody and detention",
+        "legal_domain_path": [
+          "criminal law",
+          "procedural law",
+          "preliminary investigation"
+        ],
+        "topic": "grounds for detention",
+        "subtopic": "collusion danger",
+        "micro_topic": "collusion danger as basis for detention",
+        "concepts_en": [
+          "custody",
+          "collusion",
+          "preliminary investigation",
+          "evidence gathering"
+        ],
+        "terms_original": [
+          "Haftgrund",
+          "Kollusionsgefahr",
+          "Strafuntersuchung",
+          "Unmittelbarkeit",
+          "Beweisaufnahme"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "criminal_procedure",
+          "preliminary_investigation",
+          "custody",
+          "collusion"
+        ],
+        "procedural_context": "criminal procedure",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Swiss Federal Court",
+          "legal commentary"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 137 IV 122 E. 6.2": {
+      "_source_row": 1741599,
+      "citation": "BGE 137 IV 122 E. 6.2",
+      "text": "Nach Art. 237 Abs. 1 StPO ordnet das zuständige Gericht an Stelle der Untersuchungs- oder der Sicherheitshaft eine oder mehrere mildere Massnahmen an, wenn sie den gleichen Zweck wie die Haft erfüllen. Als Ersatzmassnahmen kommen gemäss Art. 237 Abs. 2 StPO namentlich in Frage: a. die Sicherheitsleistung; b. die Ausweis- und Schriftensperre; c. die Auflage, sich nur oder sich nicht an einem bestimmten Ort oder in einem bestimmten Haus aufzuhalten; d. die Auflage, sich regelmässig bei einer Amtsstelle zu melden; e. die Auflage, einer geregelten Arbeit nachzugehen; f. die Auflage, sich einer ärztlichen Behandlung oder einer Kontrolle zu unterziehen; g. das Verbot, mit bestimmten Personen Kontakte zu pflegen. Die Strafprozessordnung sieht damit die vorliegend ausgesprochenen Ersatzmassnahmen der Aufenthaltsbeschränkung (Art. 237 Abs. 2 lit. c StPO), der Meldepflicht (Art. 237 Abs. 2 lit. d StPO) und des Kontaktverbots (Art. 237 Abs. 2 lit. g StPO) ausdrücklich vor. Die Aufenthaltsbeschränkung gemäss Art. 237 Abs. 2 lit. c StPO besteht entweder in der Verpflichtung, ein bestimmtes Gebiet nicht zu verlassen (Eingrenzung), oder in jener, eine bestimmte Gegend nicht zu betreten (Ausgrenzu...",
+      "language": "de",
+      "legal_area_static": "criminal law and criminal procedure",
+      "llm_enrichment": {
+        "legal_area": "Criminal Procedure",
+        "primary_domain": "Detention Alternatives",
+        "secondary_domain": "Pre-trial Measures",
+        "legal_domain_path": [
+          "Swiss Law",
+          "Criminal Procedure",
+          "Detention Alternatives"
+        ],
+        "topic": "Alternative Detention Measures",
+        "subtopic": "Substitution of Pre-trial Detention",
+        "micro_topic": "Specific alternative measures to pre-trial detention under Swiss Criminal Procedure Code",
+        "concepts_en": [
+          "Alternative Detention",
+          "Pre-trial Measures",
+          "Safeguards",
+          "Legal Compliance",
+          "Judicial Discretion"
+        ],
+        "terms_original": [
+          "Sicherheitsleistung",
+          "Ausweis- und Schriftensperre",
+          "Auflage",
+          "Meldepflicht",
+          "Kontaktverbot"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Pre-trial",
+          "Detention",
+          "Substitution",
+          "Legal Provisions"
+        ],
+        "procedural_context": "Substitution of Detention",
+        "paragraph_role": "legal_standard",
+        "authority_role": [
+          "Swiss Criminal Procedure Code"
+        ],
+        "specificity_score": 0.9
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 143 IV 168 E. 5.1": {
+      "_source_row": 1741618,
+      "citation": "BGE 143 IV 168 E. 5.1",
+      "text": "En vertu des art. 31 al. 3 Cst. et 5 par. 3 CEDH, toute personne qui est mise en détention préventive a le droit d'être jugée dans un délai raisonnable ou d'être libérée pendant la procédure pénale. L'art. 212 al. 3 CPP rappelle cette exigence en précisant que la détention provisoire ou pour des motifs de sûreté ne doit pas durer plus longtemps que la peine privative de liberté prévisible. Le juge peut dès lors maintenir la détention préventive aussi longtemps qu'elle n'est pas très proche de la durée de la peine privative de liberté à laquelle il faut s'attendre concrètement en cas de condamnation (ATF 139 IV 270 consid. 3.1 p. 275 et les arrêts cités). Lorsque le détenu a déjà été jugé en première instance, ce prononcé constitue un indice important quant à la peine susceptible de devoir être finalement exécutée (ATF 139 IV 270 consid. 3.1 p. 275 s. et les arrêts cités). Afin d'éviter d'empiéter sur les compétences du juge du fond, le juge de la détention ne tient en principe pas compte de la possibilité éventuelle de l'octroi, par l'autorité de jugement, d'un sursis, d'un sursis partiel (ATF 139 IV 270 consid. 3.1 p. 275) ou d'une libération conditionnelle (arrêt 1B_82/2013 du 27...",
+      "language": "fr",
+      "legal_area_static": "criminal law and criminal procedure",
+      "llm_enrichment": {
+        "legal_area": "criminal law",
+        "primary_domain": "detention",
+        "secondary_domain": "preliminary detention",
+        "legal_domain_path": [
+          "Swiss law",
+          "criminal procedure",
+          "detention"
+        ],
+        "topic": "detention duration",
+        "subtopic": "reasonable time for trial",
+        "micro_topic": "duration of preliminary detention based on expected sentence",
+        "concepts_en": [
+          "reasonable time",
+          "preliminary detention",
+          "expected sentence",
+          "judicial discretion",
+          "criminal procedure"
+        ],
+        "terms_original": [
+          "détention préventive",
+          "peine privative de liberté",
+          "sursis",
+          "libération conditionnelle",
+          "CPP"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "detention",
+          "expected sentence",
+          "judicial discretion",
+          "criminal procedure"
+        ],
+        "procedural_context": "criminal procedure",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Swiss law",
+          "case law"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 139 IV 270 E. 3.1": {
+      "_source_row": 2230037,
+      "citation": "BGE 139 IV 270 E. 3.1",
+      "text": "En vertu des art. 31 al. 3 Cst. et 5 par. 3 CEDH, toute personne qui est mise en détention préventive a le droit d'être jugée dans un délai raisonnable ou d'être libérée pendant la procédure pénale. Une durée excessive de la détention constitue une limitation disproportionnée de ce droit fondamental, qui est notamment violé lorsque la durée de la détention préventive dépasse la durée probable de la peine privative de liberté à laquelle il faut s'attendre. L'art. 212 al. 3 CPP prévoit ainsi que la détention provisoire ou pour des motifs de sûreté ne doit pas durer plus longtemps que la peine privative de liberté prévisible. Le juge peut dès lors maintenir la détention préventive aussi longtemps qu'elle n'est pas très proche de la durée de la peine privative de liberté à laquelle il faut s'attendre concrètement en cas de condamnation (ATF 133 I 168 consid. 4.1 p. 170; ATF 132 I 21 consid. 4.1 p. 27; ATF 107 Ia 256 consid. 2 et 3 p. 257 ss et les références). Il convient d'accorder une attention particulière à cette limite, car le juge - de première instance ou d'appel - pourrait être enclin à prendre en considération dans la fixation de la peine la durée de la détention préventive à ...",
+      "language": "fr",
+      "legal_area_static": "criminal law and criminal procedure",
+      "llm_enrichment": {
+        "legal_area": "criminal law",
+        "primary_domain": "preliminary detention",
+        "secondary_domain": "duration and limits",
+        "legal_domain_path": [
+          "criminal law",
+          "preliminary detention",
+          "duration limits"
+        ],
+        "topic": "detention duration",
+        "subtopic": "reasonable time requirement",
+        "micro_topic": "maximum duration of preventive detention",
+        "concepts_en": [
+          "reasonable time",
+          "preventive detention",
+          "proportionality",
+          "criminal procedure",
+          "sentence duration"
+        ],
+        "terms_original": [
+          "détention préventive",
+          "durée raisonnable",
+          "peine privative de liberté",
+          "CPP",
+          "CEDH"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "detention",
+          "duration",
+          "proportionality",
+          "criminal"
+        ],
+        "procedural_context": "criminal procedure",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "CEDH",
+          "CPP"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 137 IV 122 E. 4.1": {
+      "_source_row": 2236860,
+      "citation": "BGE 137 IV 122 E. 4.1",
+      "text": "Der Beschwerdeführer bestreitet das Vorliegen von Kollusionsgefahr. Zwar sei die richterliche Sachaufklärung im Hinblick auf die beschränkte Unmittelbarkeit der Beweisaufnahme anlässlich der Hauptverhandlung vor unzulässigen Einflussnahmen zu bewahren. Die blosse Wahrscheinlichkeit einer Einvernahme des mutmasslichen Opfers durch das Gericht genüge jedoch zur Begründung von Kollusionsgefahr nicht.",
+      "language": "de",
+      "legal_area_static": "criminal law and criminal procedure",
+      "llm_enrichment": {
+        "legal_area": "Civil procedure",
+        "primary_domain": "Evidence",
+        "secondary_domain": "Collusion danger",
+        "legal_domain_path": [
+          "Procedural law",
+          "Evidence",
+          "Collusion"
+        ],
+        "topic": "Collusion danger",
+        "subtopic": "Burden of proof",
+        "micro_topic": "Sufficient proof for collusion danger",
+        "concepts_en": [
+          "Burden of proof",
+          "Collusion",
+          "Evidence",
+          "Judicial review",
+          "Proof"
+        ],
+        "terms_original": [
+          "Kollusionsgefahr",
+          "Beweisaufnahme",
+          "Unzulässige Einflussnahmen",
+          "Beweis",
+          "Richterliche Sachaufklärung"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Collusion",
+          "Evidence",
+          "Judicial review",
+          "Burden of proof"
+        ],
+        "procedural_context": "Civil procedure",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Swiss Federal Court"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "BGE 137 IV 122 E. 6.4": {
+      "_source_row": 2236861,
+      "citation": "BGE 137 IV 122 E. 6.4",
+      "text": "Eine Eingrenzung auf ein bestimmtes Gebiet kommt, wie dargelegt (vgl. E. 6.2 hiervor), primär bei Fluchtgefahr in Betracht. Geht es demgegenüber darum, einer Kollusionsgefahr in Form der möglichen Beeinflussung des mutmasslichen Opfers zu begegnen, dürfte in aller Regel eine Ausgrenzung als mildere Massnahme genügen. Dies ist auch vorliegend der Fall. Die Verpflichtung, den BGE 137 IV 122 S. 133 Kanton Bern nicht zu verlassen, schränkt den Beschwerdeführer in seiner persönlichen Freiheit stark ein. Das Ziel, zu verhindern, dass er seine Ehefrau aufsucht oder sich auch nur in deren Nähe begibt, kann ebenso durch die weniger einschneidende Massnahme der Ausgrenzung in Form der Auflage, den Wohnkanton seiner Ehefrau ausserhalb der festgelegten Besuchszeiten für seine Tochter nicht zu betreten, erreicht werden. Als Zwischenfazit ist festzuhalten, dass die Eingrenzung des Beschwerdeführers auf das Gebiet des Kantons Bern nicht verhältnismässig ist. Als Massnahme gegen mögliche Kollusionshandlungen ist eine Ausgrenzung, das heisst ein Verbot, den Kanton Waadt zu betreten, ausreichend. Die Ersatzmassnahme der Meldepflicht wird ebenfalls vor allem zur Herabsetzung von Fluchtgefahr angeordn...",
+      "language": "de",
+      "legal_area_static": "criminal law and criminal procedure",
+      "llm_enrichment": {
+        "legal_area": "Administrative law",
+        "primary_domain": "Restrictions",
+        "secondary_domain": "Freedom of movement",
+        "legal_domain_path": [
+          "Administrative law",
+          "Restrictions",
+          "Freedom of movement"
+        ],
+        "topic": "Restriction proportionality",
+        "subtopic": "Proportionality of territorial restrictions",
+        "micro_topic": "Proportionality of territorial restrictions in administrative law",
+        "concepts_en": [
+          "Proportionality",
+          "Freedom of movement",
+          "Administrative restriction",
+          "Territorial limitation",
+          "Collusion risk"
+        ],
+        "terms_original": [
+          "Fluchtgefahr",
+          "Kollusionsgefahr",
+          "Ausgrenzung",
+          "Meldepflicht",
+          "Besuchszeiten"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Administrative restriction",
+          "Proportionality",
+          "Freedom of movement",
+          "Collusion risk"
+        ],
+        "procedural_context": "Administrative decision review",
+        "paragraph_role": "reasoning",
+        "authority_role": [
+          "Swiss Federal Court",
+          "Administrative law"
+        ],
+        "specificity_score": 0.8
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    },
+    "1B_357/2022 E. 3.1": {
+      "_source_row": 2266778,
+      "citation": "1B_357/2022 E. 3.1",
+      "text": "3.1. Der besondere Haftgrund der Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass der oder die Beschuldigte Personen beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Verdunkelung kann nach der bundesgerichtlichen Praxis insbesondere in der Weise erfolgen, dass sich die beschuldigte Person mit Zeugen, Auskunftspersonen, Sachverständigen oder Mitbeschuldigten ins Einvernehmen setzt oder sie zu wahrheitswidrigen Aussagen veranlasst, oder dass sie Spuren und Beweismittel beseitigt. Untersuchungshaft wegen Kollusionsgefahr soll verhindern, dass die beschuldigte Person die wahrheitsgetreue Abklärung des Sachverhaltes vereitelt oder gefährdet. Die theoretische Möglichkeit, dass sie kolludieren könnte, genügt indessen nicht, um Untersuchungshaft unter diesem Titel zu rechtfertigen. Es müssen vielmehr konkrete Indizien für die Annahme von Verdunkelungsgefahr sprechen. Das Vorliegen des Haftgrundes ist nach Massgabe der Umstände des jeweiligen Einzelfalles zu prüfen (BGE 137 IV 122 E. 4.2; 132 I 21 E. 3.2 mit Hinweisen). Konkrete Anhaltspunkte für Kollusionsgefahr können sich nach der Rechtsprechung des...",
+      "language": "de",
+      "legal_area_static": "criminal procedure and coercive measures",
+      "llm_enrichment": {
+        "legal_area": "Criminal law",
+        "primary_domain": "Detention law",
+        "secondary_domain": "Reasons for detention",
+        "legal_domain_path": [
+          "Criminal procedure",
+          "Detention",
+          "Grounds for detention"
+        ],
+        "topic": "Grounds for detention",
+        "subtopic": "Collusion danger",
+        "micro_topic": "Collusion danger as a basis for detention",
+        "concepts_en": [
+          "Detention",
+          "Collusion",
+          "Evidence",
+          "Interference",
+          "Criminal procedure"
+        ],
+        "terms_original": [
+          "Kollusionsgefahr",
+          "Verdunkelung",
+          "Untersuchungshaft",
+          "StPO",
+          "BGE"
+        ],
+        "doctrinal_rule": "",
+        "legal_test": "",
+        "fact_pattern_tags": [
+          "Collusion",
+          "Detention",
+          "Evidence",
+          "Interference"
+        ],
+        "procedural_context": "Detention justification",
+        "paragraph_role": "legal_standard",
+        "authority_role": [
+          "Swiss Federal Court",
+          "Case law"
+        ],
+        "specificity_score": 0.9
+      },
+      "llm_generation": {
+        "model": "Qwen/Qwen3-8B-AWQ",
+        "method": "minimal_descriptor_only",
+        "attention_backend": "auto",
+        "kv_cache_dtype": null,
+        "speculative": false,
+        "status": "ok",
+        "attempt_count": 1,
+        "error": null,
+        "raw_output": null
+      }
+    }
+  }
+}

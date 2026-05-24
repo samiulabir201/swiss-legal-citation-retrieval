@@ -1,0 +1,2724 @@
+﻿total cells: 9
+
+========== CELL 0 [code] ==========
+!pip install faiss-gpu-cu12
+--- output text ---
+Collecting faiss-gpu-cu12
+  Downloading faiss_gpu_cu12-1.14.1.post1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (13 kB)
+Requirement already satisfied: numpy<3,>=2 in /usr/local/lib/python3.12/dist-packages (from faiss-gpu-cu12) (2.0.2)
+Requirement already satisfied: packaging in /usr/local/lib/python3.12/dist-packages (from faiss-gpu-cu12) (26.0)
+Requirement already satisfied: nvidia-cuda-runtime-cu12>=12.1.105 in /usr/local/lib/python3.12/dist-packages (from faiss-gpu-cu12) (12.8.90)
+Requirement already satisfied: nvidia-cublas-cu12>=12.1.3.1 in /usr/local/lib/python3.12/dist-packages (from faiss-gpu-cu12) (12.8.4.1)
+Downloading faiss_gpu_cu12-1.14.1.post1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (48.4 MB)
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m48.4/48.4 MB[0m [31m48.6 MB/s[0m eta [36m0:00:00[0m
+[?25hInstalling collected packages: faiss-gpu-cu12
+Successfully installed faiss-gpu-cu12-1.14.1.post1
+
+
+========== CELL 1 [code] ==========
+!pip install sacremoses
+--- output text ---
+Collecting sacremoses
+  Downloading sacremoses-0.1.1-py3-none-any.whl.metadata (8.3 kB)
+Requirement already satisfied: regex in /usr/local/lib/python3.12/dist-packages (from sacremoses) (2025.11.3)
+Requirement already satisfied: click in /usr/local/lib/python3.12/dist-packages (from sacremoses) (8.3.1)
+Requirement already satisfied: joblib in /usr/local/lib/python3.12/dist-packages (from sacremoses) (1.5.3)
+Requirement already satisfied: tqdm in /usr/local/lib/python3.12/dist-packages (from sacremoses) (4.67.3)
+Downloading sacremoses-0.1.1-py3-none-any.whl (897 kB)
+[?25l   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/897.5 kB[0m [31m?[0m eta [36m-:--:--[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m897.5/897.5 kB[0m [31m55.8 MB/s[0m eta [36m0:00:00[0m
+[?25hInstalling collected packages: sacremoses
+Successfully installed sacremoses-0.1.1
+
+
+========== CELL 2 [code] ==========
+"""
+option_a_translate_and_embed.py
+================================
+Option A: Translate German article texts to English, rebuild bilingual
+embed_text, re-embed with Qwen3-Embedding-4B, rebuild FAISS index.
+
+Run on Google Colab Pro (A100 80GB).
+
+Setup cell (run once):
+    !pip install -q transformers>=4.51 accelerate sentencepiece \
+                    safetensors faiss-gpu tqdm pyarrow pandas numpy
+
+Steps
+-----
+  1  Translate 171,654 German article texts  -> translations.json   (~25 min)
+  2  Rebuild corpus.parquet with new embed_text
+  3  Re-embed with Qwen3-Embedding-4B        -> corpus_embeddings_v2.npy  (~2 hr)
+  4  Build FAISS IndexFlatIP                 -> faiss_index_v2.bin
+  5  Evaluate recall on val queries (with Instruct: prefix)
+
+All steps are independently checkpointed — safe to interrupt and resume.
+"""
+
+# ── 0. imports & config ───────────────────────────────────────────────────────
+
+import os, sys, json, math, pickle, re
+os.environ["PYTHONIOENCODING"]         = "utf-8"
+os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"]   = "false"
+
+import numpy as np
+import pandas as pd
+import faiss
+import torch
+import torch.nn.functional as F
+from numpy.lib.format import open_memmap
+from pathlib import Path
+from tqdm.auto import tqdm
+from transformers import AutoTokenizer, AutoModel, MarianMTModel, MarianTokenizer
+
+# ── paths ─────────────────────────────────────────────────────────────────────
+BASE      = Path("/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition")
+RETRIEVAL = BASE / "retrieval"
+DATA      = BASE / "data"
+
+CORPUS_IN       = RETRIEVAL / "corpus.parquet"
+KB_PATH         = RETRIEVAL / "laws_knowledge_base.jsonl"
+VAL_PATH        = DATA      / "val.csv"
+
+TRANSLATIONS_OUT = RETRIEVAL / "article_translations_de_en.json"  # step 1 output
+CORPUS_V2_OUT    = RETRIEVAL / "corpus_v2.parquet"                # step 2 output
+EMB_V2_OUT       = RETRIEVAL / "corpus_embeddings_v2.npy"         # step 3 output
+IDS_V2_OUT       = RETRIEVAL / "corpus_embed_ids_v2.pkl"          # step 3 output
+CKPT_IDX_OUT     = RETRIEVAL / "_embed_v2_checkpoint_idx.txt"     # step 3 resume
+FAISS_V2_OUT     = RETRIEVAL / "faiss_index_v2.bin"               # step 4 output
+
+# ── model names ───────────────────────────────────────────────────────────────
+TRANSLATE_MODEL = "Helsinki-NLP/opus-mt-de-en"   # MarianMT DE->EN, ~300 MB, fast
+EMBED_MODEL     = "Qwen/Qwen3-Embedding-4B"
+
+# ── tuning ────────────────────────────────────────────────────────────────────
+TRANSLATE_BATCH  = 512    # A100: large batch for MarianMT
+TRANSLATE_MAXLEN = 512    # MarianMT hard limit; articles median=24 words, fine
+EMBED_BATCH      = 64    # A100 80GB: same as original step 3
+EMBED_MAXLEN     = 1024   # bilingual text is ~2x longer; keep 1024
+EMBED_DIM        = 2560
+CKPT_EVERY       = 25_000
+
+EMBED_INSTR = (
+    "Given a legal fact pattern, retrieve the most relevant "
+    "Swiss statutory provisions (law article citations)."
+)
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+def sep(title):
+    print("\n" + "=" * 72)
+    print(f"  {title}")
+    print("=" * 72)
+
+def hr():
+    print("-" * 72)
+
+def is_law_citation(c):
+    return bool(c and re.match(r"^Art\.\s+\d", c.strip()))
+
+def parse_gold(raw):
+    if not isinstance(raw, str):
+        return []
+    return [c.strip() for c in raw.split(";") if c.strip() and is_law_citation(c.strip())]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 1 — Translate German article texts to English
+# ─────────────────────────────────────────────────────────────────────────────
+sep("STEP 1 — TRANSLATE GERMAN ARTICLE TEXTS  (MarianMT DE->EN)")
+
+if TRANSLATIONS_OUT.exists():
+    print(f"  Found existing translations: {TRANSLATIONS_OUT}")
+    with open(TRANSLATIONS_OUT, "r", encoding="utf-8") as f:
+        translations = json.load(f)
+    print(f"  Loaded {len(translations):,} cached translations.")
+else:
+    translations = {}
+
+corpus = pd.read_parquet(CORPUS_IN)
+print(f"  Corpus: {len(corpus):,} articles")
+
+cits_all   = corpus["citation_canon"].tolist()
+texts_all  = corpus["text"].tolist()
+need_trans = [(cit, txt) for cit, txt in zip(cits_all, texts_all)
+              if cit not in translations and isinstance(txt, str) and txt.strip()]
+
+print(f"  Already translated: {len(translations):,}")
+print(f"  Still to translate: {len(need_trans):,}")
+
+if need_trans:
+    print(f"\n  Loading {TRANSLATE_MODEL} ...")
+    mt_tok = MarianTokenizer.from_pretrained(TRANSLATE_MODEL)
+    mt_mdl = MarianMTModel.from_pretrained(TRANSLATE_MODEL)
+    mt_mdl = mt_mdl.to("cuda").eval()
+    print(f"  VRAM: {torch.cuda.memory_allocated()/1e9:.2f} GB")
+
+    def translate_batch(texts: list[str]) -> list[str]:
+        # MarianMT expects plain text; handle very long articles by truncating
+        enc = mt_tok(
+            texts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=TRANSLATE_MAXLEN,
+        ).to("cuda")
+        with torch.no_grad():
+            out = mt_mdl.generate(**enc, num_beams=2, max_new_tokens=512)
+        return mt_tok.batch_decode(out, skip_special_tokens=True)
+
+    batch_cits  = [c for c, _ in need_trans]
+    batch_texts = [t for _, t in need_trans]
+    flush_every = 50_000
+
+    for start in tqdm(range(0, len(batch_texts), TRANSLATE_BATCH),
+                      desc="Translating", unit="batch", dynamic_ncols=True):
+        end    = min(start + TRANSLATE_BATCH, len(batch_texts))
+        batch  = batch_texts[start:end]
+        cits_b = batch_cits[start:end]
+        trans  = translate_batch(batch)
+        for cit, t in zip(cits_b, trans):
+            translations[cit] = t
+        # periodic flush to Drive
+        if (end % flush_every) < TRANSLATE_BATCH or end == len(batch_texts):
+            with open(TRANSLATIONS_OUT, "w", encoding="utf-8") as f:
+                json.dump(translations, f, ensure_ascii=False)
+            print(f"    Flushed at {end:,}")
+
+    # final save
+    with open(TRANSLATIONS_OUT, "w", encoding="utf-8") as f:
+        json.dump(translations, f, ensure_ascii=False)
+    print(f"\n  Saved {len(translations):,} translations -> {TRANSLATIONS_OUT}")
+
+    # free VRAM before loading embedding model
+    del mt_mdl, mt_tok
+    torch.cuda.empty_cache()
+else:
+    print("  All translations available. Skipping translation step.")
+
+# quick sanity check
+sample_cit = "Art. 221 Abs. 1 STPO"
+if sample_cit in translations:
+    print(f"\n  Sample translation ({sample_cit}):")
+    print(f"    EN: {translations[sample_cit][:200]}")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 2 — Build KB maps & rebuild corpus_v2.parquet with new embed_text
+# ─────────────────────────────────────────────────────────────────────────────
+sep("STEP 2 — REBUILD CORPUS WITH BILINGUAL EMBED_TEXT")
+
+# 2a. Load KB maps
+law_name_en_map    = {}
+provision_type_map = {}
+
+print("  Parsing laws_knowledge_base.jsonl ...")
+with open(KB_PATH, "r", encoding="utf-8") as f:
+    for line in tqdm(f, desc="Reading KB", unit="lines", dynamic_ncols=True, leave=False):
+        rec  = json.loads(line)
+        cit  = rec.get("citation_canon", "")
+        law  = rec.get("law", {}) or {}
+        abbr = law.get("law_abbreviation") or ""
+        lnen = law.get("law_name_en") or ""
+        if abbr and lnen and abbr not in law_name_en_map:
+            law_name_en_map[abbr] = lnen
+        ptype = (rec.get("semantic", {}) or {}).get("provision_type") or ""
+        if cit and ptype and ptype != "None":
+            provision_type_map[cit] = ptype
+
+print(f"  law_name_en:   {len(law_name_en_map):,}  entries")
+print(f"  provision_type:{len(provision_type_map):,} entries")
+
+# 2b. Build new embed_text for each article
+def build_embed_text_v2(row) -> str:
+    """
+    Bilingual embed_text: English metadata + English translation FIRST,
+    then German original text. English anchors the embedding space for
+    EN queries; German ensures article-level specificity.
+    """
+    cit         = row["citation_canon"]
+    abbrev      = row["law_abbrev"]
+    group       = str(row.get("group", "") or "")
+    subgroup    = str(row.get("subgroup", "") or "")
+    law_name_de = str(row.get("law_full_name", "") or row.get("title", "") or "")
+    text_de     = str(row.get("text", "") or "")
+    art_topic   = str(row.get("article_topic", "") or "")
+
+    law_name_en = law_name_en_map.get(abbrev, "")
+    prov_type   = provision_type_map.get(cit, "")
+    text_en     = translations.get(cit, "")
+
+    parts = [
+        "[DOC_TYPE] Swiss law article",
+        f"[CITATION] {cit}",
+        f"[LAW_ABBREV] {abbrev}",
+    ]
+    # --- English block first ---
+    if group:
+        parts.append(f"[GROUP] {group}")
+    if subgroup:
+        parts.append(f"[SUBGROUP] {subgroup}")
+    if law_name_en:
+        parts.append(f"[LAW_NAME_EN] {law_name_en}")
+    if prov_type:
+        parts.append(f"[PROVISION_TYPE] {prov_type}")
+    if text_en:
+        parts.append(f"[TEXT_EN]\n{text_en}")
+    # --- German block second ---
+    if law_name_de:
+        parts.append(f"[LAW_NAME_DE] {law_name_de[:150]}")
+    if art_topic:
+        parts.append(f"[ARTICLE_TOPIC_DE] {art_topic}")
+    if text_de:
+        parts.append(f"[TEXT_DE]\n{text_de}")
+
+    return "\n".join(parts)
+
+if CORPUS_V2_OUT.exists():
+    print(f"\n  corpus_v2.parquet already exists, loading ...")
+    corpus_v2 = pd.read_parquet(CORPUS_V2_OUT)
+    print(f"  {len(corpus_v2):,} rows")
+else:
+    print("\n  Building new embed_text for all articles ...")
+    corpus_v2 = corpus.copy()
+    new_embed_texts = []
+    for _, row in tqdm(corpus_v2.iterrows(), total=len(corpus_v2),
+                       desc="Building embed_text", unit="doc",
+                       dynamic_ncols=True, leave=True):
+        new_embed_texts.append(build_embed_text_v2(row))
+    corpus_v2["embed_text"] = new_embed_texts
+    corpus_v2.to_parquet(CORPUS_V2_OUT, index=False)
+    print(f"  Saved corpus_v2.parquet  ({len(corpus_v2):,} rows)")
+
+# Show example
+ex = corpus_v2[corpus_v2["citation_canon"] == "Art. 221 Abs. 1 STPO"]
+if not ex.empty:
+    print("\n  NEW embed_text (Art. 221 Abs. 1 STPO):")
+    for line in str(ex.iloc[0]["embed_text"]).split("\n")[:12]:
+        print(f"    {line}")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 3 — Re-embed with Qwen3-Embedding-4B
+# ─────────────────────────────────────────────────────────────────────────────
+sep("STEP 3 — RE-EMBED WITH Qwen3-Embedding-4B  (~2 hr on A100)")
+
+texts_v2 = corpus_v2["embed_text"].tolist()
+cit_ids  = corpus_v2["citation_canon"].tolist()
+N        = len(texts_v2)
+
+# Resume support
+start_idx = 0
+if CKPT_IDX_OUT.exists():
+    start_idx = int(CKPT_IDX_OUT.read_text().strip())
+    start_idx = max(0, min(start_idx, N))
+    print(f"  Resuming from doc {start_idx:,}  ({start_idx/N*100:.1f}% done)")
+
+# Open or create memmap
+if EMB_V2_OUT.exists() and start_idx > 0:
+    mmap = open_memmap(EMB_V2_OUT, mode="r+")
+    if mmap.shape != (N, EMBED_DIM):
+        raise ValueError(f"Existing memmap shape {mmap.shape} != expected ({N},{EMBED_DIM})")
+    print(f"  Opened existing memmap for resume: {mmap.shape}")
+else:
+    mmap = open_memmap(EMB_V2_OUT, mode="w+", dtype="float32", shape=(N, EMBED_DIM))
+    print(f"  Created new memmap: {mmap.shape}  (~{N*EMBED_DIM*4/1e9:.2f} GB)")
+
+if start_idx < N:
+    print(f"\n  Loading {EMBED_MODEL} ...")
+    emb_tok = AutoTokenizer.from_pretrained(EMBED_MODEL, trust_remote_code=True)
+    emb_mdl = AutoModel.from_pretrained(
+        EMBED_MODEL,
+        torch_dtype=torch.bfloat16,
+        device_map="cuda",
+        trust_remote_code=True,
+    )
+    emb_mdl.eval()
+    print(f"  VRAM: {torch.cuda.memory_allocated()/1e9:.2f} GB")
+
+    def last_token_pool(hidden, mask):
+        left_pad = (mask[:, -1].sum() == mask.shape[0])
+        if left_pad:
+            return hidden[:, -1]
+        seq_len = mask.sum(dim=1) - 1
+        return hidden[torch.arange(hidden.shape[0], device=hidden.device), seq_len]
+
+    to_process = N - start_idx
+    print(f"  Embedding {to_process:,} docs  (batch={EMBED_BATCH}, max_len={EMBED_MAXLEN}) ...")
+    pbar       = tqdm(total=to_process, unit="docs", dynamic_ncols=True)
+    last_flush = start_idx
+
+    for batch_start in range(start_idx, N, EMBED_BATCH):
+        batch_end = min(batch_start + EMBED_BATCH, N)
+        batch     = texts_v2[batch_start:batch_end]
+        enc = emb_tok(
+            batch,
+            max_length=EMBED_MAXLEN,
+            padding=True,
+            truncation=True,
+            return_tensors="pt",
+        )
+        enc = {k: v.to("cuda", non_blocking=True) for k, v in enc.items()}
+        with torch.inference_mode():
+            out = emb_mdl(**enc)
+            emb = last_token_pool(out.last_hidden_state, enc["attention_mask"])
+            emb = F.normalize(emb, p=2, dim=1)
+        mmap[batch_start:batch_end] = emb.float().cpu().numpy()
+        done = batch_end
+        pbar.update(done - batch_start)
+        if (done - last_flush) >= CKPT_EVERY or done == N:
+            mmap.flush()
+            CKPT_IDX_OUT.write_text(str(done))
+            last_flush = done
+            pbar.set_postfix_str(f"checkpoint@{done:,}")
+
+    pbar.close()
+    print(f"\n  Embedding complete: {N:,} vectors")
+    print(f"  Peak VRAM: {torch.cuda.max_memory_allocated()/1e9:.2f} GB")
+
+    del emb_mdl, emb_tok
+    torch.cuda.empty_cache()
+else:
+    print(f"  Embeddings already complete ({N:,} vectors).")
+
+# Save IDs
+with open(IDS_V2_OUT, "wb") as f:
+    pickle.dump(cit_ids, f)
+
+# Sanity check
+sample = np.array(mmap[:3], dtype=np.float32)
+norms  = np.linalg.norm(sample, axis=1)
+print(f"\n  Sanity — first 3 norms (should be ~1.0): {norms.tolist()}")
+
+# Clean up checkpoint
+if CKPT_IDX_OUT.exists():
+    CKPT_IDX_OUT.unlink()
+
+del mmap
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 4 — Build FAISS IndexFlatIP
+# ─────────────────────────────────────────────────────────────────────────────
+sep("STEP 4 — BUILD FAISS INDEX")
+
+if FAISS_V2_OUT.exists():
+    print(f"  Found existing index: {FAISS_V2_OUT}")
+    faiss_idx = faiss.read_index(str(FAISS_V2_OUT))
+    print(f"  Vectors: {faiss_idx.ntotal:,}")
+else:
+    print("  Loading embeddings ...")
+    embeddings = np.load(EMB_V2_OUT).astype(np.float32)
+    print(f"  Shape: {embeddings.shape}")
+
+    print("  Building IndexFlatIP ...")
+    faiss_idx = faiss.IndexFlatIP(embeddings.shape[1])
+    faiss_idx.add(embeddings)
+    print(f"  Vectors: {faiss_idx.ntotal:,}")
+
+    faiss.write_index(faiss_idx, str(FAISS_V2_OUT))
+    print(f"  Saved: {FAISS_V2_OUT}  ({FAISS_V2_OUT.stat().st_size/1e6:.1f} MB)")
+    del embeddings
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 5 — Evaluate recall on val queries
+# ─────────────────────────────────────────────────────────────────────────────
+sep("STEP 5 — EVALUATE RECALL  (val queries, Instruct: prefix)")
+
+with open(IDS_V2_OUT, "rb") as f:
+    embed_ids_v2 = pickle.load(f)
+id2idx = {c: i for i, c in enumerate(embed_ids_v2)}
+
+val = pd.read_csv(VAL_PATH)
+cit_lower = {c.lower(): c for c in id2idx}
+val_rows = []
+for _, row in val.iterrows():
+    gold_raw = parse_gold(str(row.get("gold_citations", "") or ""))
+    gold     = [cit_lower.get(c.lower(), c) for c in gold_raw]
+    gold_in  = [c for c in gold if c in id2idx]
+    val_rows.append({"qid": row["query_id"], "query": row["query"], "gold": gold_in})
+
+# load embedding model for query embedding
+print(f"  Loading {EMBED_MODEL} for query embedding ...")
+eq_tok = AutoTokenizer.from_pretrained(EMBED_MODEL, trust_remote_code=True)
+eq_mdl = AutoModel.from_pretrained(
+    EMBED_MODEL,
+    torch_dtype=torch.bfloat16,
+    device_map="cuda",
+    trust_remote_code=True,
+)
+eq_mdl.eval()
+
+def embed_texts(texts, max_len=512, batch_size=32):
+    all_vecs = []
+    for start in range(0, len(texts), batch_size):
+        batch = texts[start:start + batch_size]
+        enc   = eq_tok(batch, max_length=max_len, padding=True,
+                       truncation=True, return_tensors="pt")
+        enc   = {k: v.to("cuda") for k, v in enc.items()}
+        with torch.no_grad():
+            out = eq_mdl(**enc)
+        emb = last_token_pool(out.last_hidden_state, enc["attention_mask"])
+        emb = F.normalize(emb, p=2, dim=1)
+        all_vecs.append(emb.float().cpu().numpy())
+    return np.vstack(all_vecs).astype(np.float32)
+
+# Need last_token_pool without model ref
+def last_token_pool(hidden, mask):
+    left_pad = (mask[:, -1].sum() == mask.shape[0])
+    if left_pad:
+        return hidden[:, -1]
+    seq_len = mask.sum(dim=1) - 1
+    return hidden[torch.arange(hidden.shape[0], device=hidden.device), seq_len]
+
+q_texts = [f"Instruct: {EMBED_INSTR}\nQuery: {vr['query']}" for vr in val_rows]
+print(f"  Embedding {len(q_texts)} val queries ...")
+q_embs = embed_texts(q_texts, max_len=512, batch_size=10)
+
+TOPK = (30, 100, 300, 500, 1000, 1500)
+print(f"\n  {'QID':<14}" + "".join(f"  R@{k:>4}" for k in TOPK) + f"  {'gold':>5}")
+hr()
+macro = {k: [] for k in TOPK}
+
+for vr, q_emb in zip(val_rows, q_embs):
+    gold = vr["gold"]
+    if not gold:
+        continue
+    _, idxs = faiss_idx.search(q_emb[np.newaxis].astype(np.float32), k=1500)
+    retrieved = [embed_ids_v2[i] for i in idxs[0] if i >= 0]
+    rec = {}
+    for k in TOPK:
+        top_k  = set(retrieved[:k])
+        rec[k] = sum(1 for c in gold if c in top_k) / len(gold)
+        macro[k].append(rec[k])
+    line = f"  {str(vr['qid'])[:14]:<14}" + "".join(f"  {rec[k]:>6.3f}" for k in TOPK)
+    line += f"  {len(gold):>5}"
+    print(line)
+
+hr()
+avg = f"  {'MACRO AVG':<14}" + "".join(
+    f"  {sum(macro[k])/len(macro[k]):>6.3f}" for k in TOPK
+)
+print(avg)
+
+sep("COMPARISON vs OLD EMBEDDINGS")
+print("""
+  OLD (German-only embed_text, with Instruct: prefix):
+    R@30=0.325  R@100=0.402  R@300=0.458  R@1500=0.564
+
+  OPTION C (+ English metadata, same German text):
+    R@30=0.471  R@100=0.605  R@300=0.732  R@1500=0.888  (mini-index, not comparable)
+    -> Full-index result: WORSE than old (avg delta = -0.026)
+
+  OPTION A (this run — bilingual: English translation + German text):
+    [results above]
+
+  BM25 baseline (reference):
+    R@30=0.845  R@1500=0.981
+""")
+
+print("Done.")
+
+--- output text ---
+
+========================================================================
+  STEP 1 — TRANSLATE GERMAN ARTICLE TEXTS  (MarianMT DE->EN)
+========================================================================
+  Found existing translations: /content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition/retrieval/article_translations_de_en.json
+  Loaded 171,654 cached translations.
+  Corpus: 171,654 articles
+  Already translated: 171,654
+  Still to translate: 0
+  All translations available. Skipping translation step.
+
+  Sample translation (Art. 221 Abs. 1 STPO):
+    EN: 1 Investigation and security detention shall be permitted only if the accused person of a crime or offence is urgently suspected and is seriously concerned that:a. withdraws from the criminal proceedi
+
+========================================================================
+  STEP 2 — REBUILD CORPUS WITH BILINGUAL EMBED_TEXT
+========================================================================
+  Parsing laws_knowledge_base.jsonl ...
+
+--- output data ---
+Reading KB: 0lines [00:00, ?lines/s]
+--- output text ---
+  law_name_en:   1,125  entries
+  provision_type:171,654 entries
+
+  corpus_v2.parquet already exists, loading ...
+  171,654 rows
+
+  NEW embed_text (Art. 221 Abs. 1 STPO):
+    [DOC_TYPE] Swiss law article
+    [CITATION] Art. 221 Abs. 1 STPO
+    [LAW_ABBREV] StPO
+    [GROUP] Criminal Law
+    [SUBGROUP] Criminal Procedure
+    [LAW_NAME_EN] Code of Criminal Procedure
+    [PROVISION_TYPE] general provision
+    [TEXT_EN]
+    1 Investigation and security detention shall be permitted only if the accused person of a crime or offence is urgently suspected and is seriously concerned that:a. withdraws from the criminal proceedings or the expected sanction by flight;b. influences persons or acts on evidence in order to affect the truth-finding; or c.111 by crimes or serious offences directly endangers the security of others after having committed similar crimes in the past.
+    [LAW_NAME_DE] Schweizerische Strafprozessordnung vom 5. Oktober 2007 (Strafprozessordnung, StPO) - 1. Kapitel:  Geltungsbereich und Ausübung der Strafrechtspflege
+    [ARTICLE_TOPIC_DE] Strafrecht Allgemein | Strafprozessrecht
+    [TEXT_DE]
+
+========================================================================
+  STEP 3 — RE-EMBED WITH Qwen3-Embedding-4B  (~2 hr on A100)
+========================================================================
+  Resuming from doc 125,440  (73.1% done)
+  Opened existing memmap for resume: (171654, 2560)
+
+  Loading Qwen/Qwen3-Embedding-4B ...
+
+--- output text ---
+`torch_dtype` is deprecated! Use `dtype` instead!
+
+--- output text ---
+  VRAM: 8.04 GB
+  Embedding 46,214 docs  (batch=64, max_len=1024) ...
+
+--- output data ---
+  0%|          | 0/46214 [00:00<?, ?docs/s]
+--- output text ---
+
+  Embedding complete: 171,654 vectors
+  Peak VRAM: 32.95 GB
+
+  Sanity — first 3 norms (should be ~1.0): [0.9964219331741333, 0.9978081583976746, 1.0031052827835083]
+
+========================================================================
+  STEP 4 — BUILD FAISS INDEX
+========================================================================
+  Loading embeddings ...
+  Shape: (171654, 2560)
+  Building IndexFlatIP ...
+  Vectors: 171,654
+  Saved: /content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition/retrieval/faiss_index_v2.bin  (1757.7 MB)
+
+========================================================================
+  STEP 5 — EVALUATE RECALL  (val queries, Instruct: prefix)
+========================================================================
+  Loading Qwen/Qwen3-Embedding-4B for query embedding ...
+  Embedding 10 val queries ...
+
+  QID             R@  30  R@ 100  R@ 300  R@ 500  R@1000  R@1500   gold
+------------------------------------------------------------------------
+  val_001          0.211   0.263   0.263   0.263   0.263   0.263     19
+  val_002          0.105   0.263   0.421   0.474   0.579   0.579     19
+  val_003          0.083   0.083   0.167   0.250   0.292   0.333     24
+  val_004          0.222   0.556   0.556   0.556   0.556   0.556      9
+  val_005          0.333   0.500   0.667   0.667   0.833   0.833      6
+  val_006          0.273   0.364   0.545   0.545   0.636   0.636     11
+  val_007          0.143   0.214   0.357   0.571   0.571   0.643     14
+  val_008          0.050   0.050   0.050   0.050   0.100   0.100     20
+  val_009          0.182   0.545   0.636   0.636   0.818   0.818     11
+  val_010          0.000   0.071   0.143   0.214   0.357   0.357     14
+------------------------------------------------------------------------
+  MACRO AVG        0.160   0.291   0.380   0.423   0.501   0.512
+
+========================================================================
+  COMPARISON vs OLD EMBEDDINGS
+========================================================================
+
+  OLD (German-only embed_text, with Instruct: prefix):
+    R@30=0.325  R@100=0.402  R@300=0.458  R@1500=0.564
+
+  OPTION C (+ English metadata, same German text):
+    R@30=0.471  R@100=0.605  R@300=0.732  R@1500=0.888  (mini-index, not comparable)
+    -> Full-index result: WORSE than old (avg delta = -0.026)
+
+  OPTION A (this run — bilingual: English translation + German text):
+    [results above]
+
+  BM25 baseline (reference):
+    R@30=0.845  R@1500=0.981
+
+Done.
+
+
+========== CELL 3 [code] ==========
+"""
+test_better_translation.py
+==========================
+Targeted experiment: does a better translator fix dense recall?
+
+Mini-index:
+  - gold articles for the 5 worst val queries
+  - 1000 random distractors
+
+Compares:
+  A. German-only embed_text  (original corpus.parquet)
+  B. MarianMT bilingual      (cached article_translations_de_en.json)
+  C. NLLB-200-3.3B bilingual (fresh high-quality translation)
+
+Colab A100-ready.
+"""
+
+import os
+import re
+import json
+import random
+import math
+import gc
+import warnings
+from pathlib import Path
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+import numpy as np
+import pandas as pd
+import faiss
+import torch
+import torch.nn.functional as F
+from tqdm.auto import tqdm
+from transformers import (
+    AutoTokenizer,
+    AutoModel,
+    AutoModelForSeq2SeqLM,
+)
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+DRIVE     = Path("/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition")
+RETRIEVAL = DRIVE / "retrieval"
+DATA      = DRIVE / "data"
+
+# ── Config ────────────────────────────────────────────────────────────────────
+WORST_QIDS    = ["val_008", "val_001", "val_003", "val_010", "val_004"]
+N_DISTRACTORS = 1000
+RANDOM_SEED   = 42
+TOPK_LIST     = (10, 30, 100, 300, 500)
+
+EMBED_INSTR = (
+    "Given a legal fact pattern, retrieve the most relevant "
+    "Swiss statutory provisions (law article citations)."
+)
+
+NLLB_MODEL = "facebook/nllb-200-3.3B"
+EMBED_MODEL = "Qwen/Qwen3-Embedding-4B"
+
+# A100-friendly starting points
+NLLB_BATCH_SIZE = 8
+NLLB_MAX_INPUT_TOKENS = 768
+NLLB_MAX_NEW_TOKENS = 384
+
+QUERY_BATCH_SIZE = 16
+DOC_BATCH_SIZE = 64
+QUERY_MAX_LEN = 512
+DOC_MAX_LEN = 1024
+
+# NLLB language codes
+SRC_LANG = "deu_Latn"
+TGT_LANG = "eng_Latn"
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def sep(title):
+    print("\n" + "=" * 72)
+    print(f"  {title}")
+    print("=" * 72)
+
+def hr():
+    print("-" * 72)
+
+def is_law_citation(c):
+    return bool(c and re.match(r"^Art\.\s+\d", c.strip()))
+
+def parse_gold(raw):
+    if not isinstance(raw, str):
+        return []
+    return [c.strip() for c in raw.split(";") if c.strip() and is_law_citation(c.strip())]
+
+# ── STEP 1: Load data ─────────────────────────────────────────────────────────
+sep("LOADING DATA")
+
+corpus = pd.read_parquet(RETRIEVAL / "corpus.parquet")
+cit2idx = {c: i for i, c in enumerate(corpus["citation_canon"].tolist())}
+cit_lower_map = {c.lower(): c for c in cit2idx}
+print(f"  Corpus: {len(corpus):,} articles")
+
+val = pd.read_csv(DATA / "val.csv")
+val_rows = []
+for _, row in val.iterrows():
+    gold_raw  = parse_gold(str(row.get("gold_citations", "") or ""))
+    gold_norm = [cit_lower_map.get(c.lower(), c) for c in gold_raw]
+    gold_in   = [c for c in gold_norm if c in cit2idx]
+    val_rows.append({
+        "qid": row["query_id"],
+        "query": row["query"],
+        "gold": gold_in
+    })
+
+target_rows = [vr for vr in val_rows if vr["qid"] in WORST_QIDS]
+print(f"\n  Target queries (5 worst from Option A):")
+for vr in target_rows:
+    print(f"    {vr['qid']}: {len(vr['gold'])} gold articles")
+
+print("\n  Loading MarianMT cached translations ...")
+with open(RETRIEVAL / "article_translations_de_en.json", "r", encoding="utf-8") as f:
+    marian_cache = json.load(f)
+print(f"  {len(marian_cache):,} cached translations loaded")
+
+# ── STEP 2: Build mini-index ──────────────────────────────────────────────────
+sep("BUILDING MINI-INDEX")
+
+gold_cits = set(c for vr in target_rows for c in vr["gold"])
+all_cits  = corpus["citation_canon"].tolist()
+non_gold  = [c for c in all_cits if c not in gold_cits]
+
+random.seed(RANDOM_SEED)
+distractors = set(random.sample(non_gold, min(N_DISTRACTORS, len(non_gold))))
+sample_cits = list(gold_cits) + list(distractors)
+
+print(f"  Gold (5 worst queries): {len(gold_cits)}")
+print(f"  Distractors:            {len(distractors):,}")
+print(f"  Total mini-index:       {len(sample_cits):,}")
+
+sample_df  = corpus[corpus["citation_canon"].isin(set(sample_cits))].copy().reset_index(drop=True)
+sample_ids = sample_df["citation_canon"].tolist()
+
+# ── STEP 3: Parse KB metadata ────────────────────────────────────────────────
+sep("PARSING KB METADATA")
+
+law_name_en_map    = {}
+provision_type_map = {}
+
+with open(RETRIEVAL / "laws_knowledge_base.jsonl", "r", encoding="utf-8") as f:
+    for line in tqdm(f, desc="Reading KB", unit="lines", dynamic_ncols=True):
+        rec  = json.loads(line)
+        cit  = rec.get("citation_canon", "")
+        law  = rec.get("law", {}) or {}
+        abbr = law.get("law_abbreviation") or ""
+        lnen = law.get("law_name_en") or ""
+        if abbr and lnen and abbr not in law_name_en_map:
+            law_name_en_map[abbr] = lnen
+        ptype = rec.get("semantic", {}).get("provision_type") or ""
+        if cit and ptype and ptype != "None":
+            provision_type_map[cit] = ptype
+
+print(f"  law_name_en:    {len(law_name_en_map):,}")
+print(f"  provision_type: {len(provision_type_map):,}")
+
+# ── STEP 4: Translate with NLLB-200-3.3B ─────────────────────────────────────
+sep("TRANSLATING WITH NLLB-200-3.3B")
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"  Device: {device}")
+
+print(f"  Loading tokenizer: {NLLB_MODEL}")
+nllb_tok = AutoTokenizer.from_pretrained(NLLB_MODEL, use_fast=True)
+nllb_tok.src_lang = SRC_LANG
+
+print(f"  Loading model: {NLLB_MODEL}")
+nllb_model = AutoModelForSeq2SeqLM.from_pretrained(
+    NLLB_MODEL,
+    torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+    device_map="auto" if device == "cuda" else None,
+)
+
+if device == "cuda":
+    print(f"  NLLB loaded. VRAM: {torch.cuda.memory_allocated()/1e9:.1f} GB")
+
+forced_bos_token_id = nllb_tok.convert_tokens_to_ids(TGT_LANG)
+
+def translate_nllb(texts, batch_size=NLLB_BATCH_SIZE):
+    outputs = [""] * len(texts)
+
+    non_empty_pairs = [(i, t) for i, t in enumerate(texts) if isinstance(t, str) and t.strip()]
+    if not non_empty_pairs:
+        return outputs
+
+    non_empty_idxs  = [x[0] for x in non_empty_pairs]
+    non_empty_texts = [x[1] for x in non_empty_pairs]
+
+    for start in tqdm(
+        range(0, len(non_empty_texts), batch_size),
+        total=math.ceil(len(non_empty_texts) / batch_size),
+        desc="NLLB translate",
+        unit="batch",
+        dynamic_ncols=True,
+        leave=True,
+    ):
+        batch_texts = non_empty_texts[start:start + batch_size]
+        batch_idxs  = non_empty_idxs[start:start + batch_size]
+
+        enc = nllb_tok(
+            batch_texts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=NLLB_MAX_INPUT_TOKENS,
+        )
+
+        if device == "cuda":
+            enc = {k: v.to("cuda") for k, v in enc.items()}
+
+        with torch.no_grad():
+            gen = nllb_model.generate(
+                **enc,
+                forced_bos_token_id=forced_bos_token_id,
+                max_new_tokens=NLLB_MAX_NEW_TOKENS,
+                num_beams=5,
+                length_penalty=1.0,
+                early_stopping=True,
+            )
+
+        decoded = nllb_tok.batch_decode(gen, skip_special_tokens=True)
+
+        for idx_in_sample, txt in zip(batch_idxs, decoded):
+            outputs[idx_in_sample] = txt.strip()
+
+    return outputs
+
+sample_texts_de = [row.get("text", "") or "" for _, row in sample_df.iterrows()]
+print(f"  Translating {sum(bool(t.strip()) for t in sample_texts_de):,} non-empty articles ...")
+nllb_translations = translate_nllb(sample_texts_de, batch_size=NLLB_BATCH_SIZE)
+print(f"  Translated: {sum(1 for t in nllb_translations if t):,} articles")
+
+gold_example = next((i for i, cid in enumerate(sample_ids) if cid in gold_cits), None)
+if gold_example is not None:
+    cit_ex = sample_ids[gold_example]
+    print(f"\n  Translation comparison for: {cit_ex}")
+    print(f"  German:   {sample_texts_de[gold_example][:250]}")
+    print(f"  MarianMT: {marian_cache.get(cit_ex, '')[:250]}")
+    print(f"  NLLB:     {nllb_translations[gold_example][:250]}")
+
+# free translation model before loading embedder
+del nllb_model, nllb_tok
+gc.collect()
+if device == "cuda":
+    torch.cuda.empty_cache()
+    print(f"\n  NLLB unloaded. VRAM now: {torch.cuda.memory_allocated()/1e9:.1f} GB")
+
+# ── STEP 5: Build embed_texts ────────────────────────────────────────────────
+sep("BUILDING EMBED_TEXTS (3 variants)")
+
+def build_bilingual(row, translation_en: str) -> str:
+    cit           = row["citation_canon"]
+    abbrev        = row["law_abbrev"]
+    group         = row.get("group", "") or ""
+    subgroup      = row.get("subgroup", "") or ""
+    law_name_de   = row.get("law_full_name", "") or row.get("title", "") or ""
+    text_de       = row.get("text", "") or ""
+    article_topic = row.get("article_topic", "") or ""
+    law_name_en   = law_name_en_map.get(abbrev, "")
+    prov_type     = provision_type_map.get(cit, "")
+
+    parts = [
+        "[DOC_TYPE] Swiss law article",
+        f"[CITATION] {cit}",
+        f"[LAW_ABBREV] {abbrev}",
+    ]
+    if group:
+        parts.append(f"[GROUP] {group}")
+    if subgroup:
+        parts.append(f"[SUBGROUP] {subgroup}")
+    if law_name_en:
+        parts.append(f"[LAW_NAME_EN] {law_name_en}")
+    if prov_type:
+        parts.append(f"[PROVISION_TYPE] {prov_type}")
+    if translation_en:
+        parts.append(f"[TEXT_EN]\n{translation_en}")
+    if law_name_de:
+        parts.append(f"[LAW_NAME_DE] {law_name_de[:150]}")
+    if article_topic:
+        parts.append(f"[ARTICLE_TOPIC_DE] {article_topic}")
+    if text_de:
+        parts.append(f"[TEXT_DE]\n{text_de}")
+    return "\n".join(parts)
+
+texts_german_only = []
+texts_marian      = []
+texts_nllb        = []
+
+for i, (_, row) in enumerate(tqdm(
+    sample_df.iterrows(),
+    total=len(sample_df),
+    desc="Building embed_texts",
+    unit="doc",
+    dynamic_ncols=True,
+    leave=True,
+)):
+    cit = row["citation_canon"]
+    texts_german_only.append(row.get("embed_text", "") or "")
+    texts_marian.append(build_bilingual(row, marian_cache.get(cit, "")))
+    texts_nllb.append(build_bilingual(row, nllb_translations[i]))
+
+print(f"  Built {len(texts_german_only):,} embed_texts per variant")
+
+# ── STEP 6: Load Qwen embedder ───────────────────────────────────────────────
+sep("LOADING QWEN3-EMBEDDING-4B")
+
+dtype_emb = torch.bfloat16 if device == "cuda" else torch.float32
+
+tok = AutoTokenizer.from_pretrained(EMBED_MODEL, trust_remote_code=True)
+mdl = AutoModel.from_pretrained(
+    EMBED_MODEL,
+    torch_dtype=dtype_emb,
+    device_map="auto" if device == "cuda" else None,
+    trust_remote_code=True,
+)
+mdl.eval()
+
+if device == "cuda":
+    print(f"  VRAM: {torch.cuda.memory_allocated()/1e9:.1f} GB")
+
+def last_token_pool(hidden, mask):
+    left_pad = (mask[:, -1].sum() == mask.shape[0])
+    if left_pad:
+        return hidden[:, -1]
+    seq_len = mask.sum(dim=1) - 1
+    return hidden[torch.arange(hidden.shape[0], device=hidden.device), seq_len]
+
+def embed_texts(texts, max_len=1024, batch_size=64, desc="Embedding"):
+    all_vecs = []
+
+    for start in tqdm(
+        range(0, len(texts), batch_size),
+        total=math.ceil(len(texts) / batch_size),
+        desc=desc,
+        unit="batch",
+        dynamic_ncols=True,
+        leave=True,
+    ):
+        batch = texts[start:start + batch_size]
+        enc = tok(
+            batch,
+            max_length=max_len,
+            padding=True,
+            truncation=True,
+            return_tensors="pt",
+        )
+
+        if device == "cuda":
+            enc = {k: v.to("cuda") for k, v in enc.items()}
+
+        with torch.no_grad():
+            out = mdl(**enc)
+
+        emb = last_token_pool(out.last_hidden_state, enc["attention_mask"])
+        emb = F.normalize(emb, p=2, dim=1)
+        all_vecs.append(emb.float().cpu().numpy())
+
+    return np.vstack(all_vecs).astype(np.float32)
+
+# ── STEP 7: Embed queries ────────────────────────────────────────────────────
+sep("EMBEDDING QUERIES")
+
+q_texts = [f"Instruct: {EMBED_INSTR}\nQuery: {vr['query']}" for vr in target_rows]
+print(f"  {len(q_texts)} queries")
+q_embs = embed_texts(q_texts, max_len=QUERY_MAX_LEN, batch_size=QUERY_BATCH_SIZE, desc="Queries")
+print(f"  Shape: {q_embs.shape}")
+
+# ── STEP 8: Embed docs ───────────────────────────────────────────────────────
+sep("EMBEDDING DOCUMENTS")
+
+print("\n  Variant A: German-only ...")
+embs_german = embed_texts(texts_german_only, max_len=DOC_MAX_LEN, batch_size=DOC_BATCH_SIZE, desc="German-only")
+
+print("\n  Variant B: MarianMT bilingual ...")
+embs_marian = embed_texts(texts_marian, max_len=DOC_MAX_LEN, batch_size=DOC_BATCH_SIZE, desc="MarianMT")
+
+print("\n  Variant C: NLLB-200-3.3B bilingual ...")
+embs_nllb = embed_texts(texts_nllb, max_len=DOC_MAX_LEN, batch_size=DOC_BATCH_SIZE, desc="NLLB-3.3B")
+
+# ── STEP 9: Recall evaluation ────────────────────────────────────────────────
+sep("RECALL EVALUATION")
+
+def eval_recall(q_embs, doc_embs, doc_ids, query_rows, label):
+    dim = doc_embs.shape[1]
+    index = faiss.IndexFlatIP(dim)
+    index.add(doc_embs)
+    doc_id_set = set(doc_ids)
+
+    k_max = min(max(TOPK_LIST), len(doc_ids))
+
+    print(f"\n  -- {label} --")
+    print(f"  {'QID':<12}" + "".join(f"  R@{k:>4}" for k in TOPK_LIST) + f"  {'gold':>5}")
+    hr()
+
+    macro = {k: [] for k in TOPK_LIST}
+
+    for vr, q_emb in zip(query_rows, q_embs):
+        gold_in = [c for c in vr["gold"] if c in doc_id_set]
+        if not gold_in:
+            continue
+
+        _, idxs = index.search(q_emb[np.newaxis].astype(np.float32), k=k_max)
+        retrieved = [doc_ids[i] for i in idxs[0] if i >= 0]
+
+        rec = {}
+        for k in TOPK_LIST:
+            top_k = set(retrieved[:k])
+            rec[k] = sum(1 for c in gold_in if c in top_k) / len(gold_in)
+            macro[k].append(rec[k])
+
+        row_str = f"  {vr['qid']:<12}" + "".join(f"  {rec[k]:>6.3f}" for k in TOPK_LIST)
+        row_str += f"  {len(gold_in):>5}"
+        print(row_str)
+
+    hr()
+    avg = {k: (sum(macro[k]) / len(macro[k]) if macro[k] else 0.0) for k in TOPK_LIST}
+    avg_str = f"  {'MACRO AVG':<12}" + "".join(f"  {avg[k]:>6.3f}" for k in TOPK_LIST)
+    print(avg_str)
+    return avg
+
+print(f"  Mini-index: {len(sample_ids):,} docs  |  {len(gold_cits)} gold  |  {len(distractors):,} distractors")
+print(f"  NOTE: Relative delta matters more than absolute recall.\n")
+
+r_german = eval_recall(q_embs, embs_german, sample_ids, target_rows, "A. German-only (baseline)")
+r_marian = eval_recall(q_embs, embs_marian, sample_ids, target_rows, "B. MarianMT bilingual")
+r_nllb   = eval_recall(q_embs, embs_nllb,   sample_ids, target_rows, "C. NLLB-200-3.3B bilingual")
+
+# ── STEP 10: Delta summary ───────────────────────────────────────────────────
+sep("DELTA SUMMARY (vs German-only baseline)")
+
+print(f"  {'K':>6}  {'German':>8}  {'MarianMT':>10}  {'MarianΔ':>10}  {'NLLB-3.3B':>10}  {'NLLBΔ':>10}")
+hr()
+
+for k in TOPK_LIST:
+    g = r_german[k]
+    m = r_marian[k]
+    n = r_nllb[k]
+    print(f"  {k:>6}  {g:>8.3f}  {m:>10.3f}  {m-g:>+10.3f}  {n:>10.3f}  {n-g:>+10.3f}")
+
+avg_nllb_delta   = sum(r_nllb[k]   - r_german[k] for k in TOPK_LIST) / len(TOPK_LIST)
+avg_marian_delta = sum(r_marian[k] - r_german[k] for k in TOPK_LIST) / len(TOPK_LIST)
+
+sep("VERDICT")
+print(f"""
+  Average delta vs German-only:
+    MarianMT:  {avg_marian_delta:+.3f}
+    NLLB-3.3B: {avg_nllb_delta:+.3f}
+""")
+
+print("Done.")
+--- output text ---
+
+========================================================================
+  LOADING DATA
+========================================================================
+  Corpus: 171,654 articles
+
+  Target queries (5 worst from Option A):
+    val_001: 19 gold articles
+    val_003: 24 gold articles
+    val_004: 9 gold articles
+    val_008: 20 gold articles
+    val_010: 14 gold articles
+
+  Loading MarianMT cached translations ...
+  171,654 cached translations loaded
+
+========================================================================
+  BUILDING MINI-INDEX
+========================================================================
+  Gold (5 worst queries): 64
+  Distractors:            1,000
+  Total mini-index:       1,064
+
+========================================================================
+  PARSING KB METADATA
+========================================================================
+
+--- output data ---
+Reading KB: 0lines [00:00, ?lines/s]
+--- output text ---
+  law_name_en:    1,125
+  provision_type: 171,654
+
+========================================================================
+  TRANSLATING WITH NLLB-200-3.3B
+========================================================================
+  Device: cuda
+  Loading tokenizer: facebook/nllb-200-3.3B
+  Loading model: facebook/nllb-200-3.3B
+
+--- output text ---
+The tied weights mapping and config for this model specifies to tie model.shared.weight to lm_head.weight, but both are present in the checkpoints, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning
+The tied weights mapping and config for this model specifies to tie model.shared.weight to model.decoder.embed_tokens.weight, but both are present in the checkpoints, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning
+The tied weights mapping and config for this model specifies to tie model.shared.weight to model.encoder.embed_tokens.weight, but both are present in the checkpoints, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning
+
+--- output text ---
+  NLLB loaded. VRAM: 18.9 GB
+  Translating 1,064 non-empty articles ...
+
+--- output data ---
+NLLB translate:   0%|          | 0/133 [00:00<?, ?batch/s]
+--- output text ---
+  Translated: 1,064 articles
+
+  Translation comparison for: Art. 29 Abs. 2 BV
+  German:   2 Die Parteien haben Anspruch auf rechtliches Gehör.
+  MarianMT: 2 The parties are entitled to be heard.
+  NLLB:     2 The parties have the right to a hearing in a court of law. 2 The parties have the right to a hearing in a court of law.
+
+  NLLB unloaded. VRAM now: 9.0 GB
+
+========================================================================
+  BUILDING EMBED_TEXTS (3 variants)
+========================================================================
+
+--- output data ---
+Building embed_texts:   0%|          | 0/1064 [00:00<?, ?doc/s]
+--- output text ---
+  Built 1,064 embed_texts per variant
+
+========================================================================
+  LOADING QWEN3-EMBEDDING-4B
+========================================================================
+  VRAM: 17.1 GB
+
+========================================================================
+  EMBEDDING QUERIES
+========================================================================
+  5 queries
+
+--- output data ---
+Queries:   0%|          | 0/1 [00:00<?, ?batch/s]
+--- output text ---
+  Shape: (5, 2560)
+
+========================================================================
+  EMBEDDING DOCUMENTS
+========================================================================
+
+  Variant A: German-only ...
+
+--- output data ---
+German-only:   0%|          | 0/17 [00:00<?, ?batch/s]
+--- output text ---
+
+  Variant B: MarianMT bilingual ...
+
+--- output data ---
+MarianMT:   0%|          | 0/17 [00:00<?, ?batch/s]
+--- output text ---
+
+  Variant C: NLLB-200-3.3B bilingual ...
+
+--- output data ---
+NLLB-3.3B:   0%|          | 0/17 [00:00<?, ?batch/s]
+--- output text ---
+
+========================================================================
+  RECALL EVALUATION
+========================================================================
+  Mini-index: 1,064 docs  |  64 gold  |  1,000 distractors
+  NOTE: Relative delta matters more than absolute recall.
+
+
+  -- A. German-only (baseline) --
+  QID           R@  10  R@  30  R@ 100  R@ 300  R@ 500   gold
+------------------------------------------------------------------------
+  val_001        0.263   0.579   0.947   0.947   1.000     19
+  val_003        0.167   0.458   0.792   0.875   0.958     24
+  val_004        0.556   0.667   0.889   0.889   0.889      9
+  val_008        0.100   0.200   0.650   0.850   0.950     20
+  val_010        0.286   0.500   0.929   1.000   1.000     14
+------------------------------------------------------------------------
+  MACRO AVG      0.274   0.481   0.841   0.912   0.959
+
+  -- B. MarianMT bilingual --
+  QID           R@  10  R@  30  R@ 100  R@ 300  R@ 500   gold
+------------------------------------------------------------------------
+  val_001        0.263   0.526   0.789   0.947   1.000     19
+  val_003        0.208   0.375   0.667   0.875   0.917     24
+  val_004        0.556   0.667   0.889   0.889   0.889      9
+  val_008        0.100   0.150   0.300   0.800   0.950     20
+  val_010        0.357   0.429   0.786   0.929   1.000     14
+------------------------------------------------------------------------
+  MACRO AVG      0.297   0.429   0.686   0.888   0.951
+
+  -- C. NLLB-200-3.3B bilingual --
+  QID           R@  10  R@  30  R@ 100  R@ 300  R@ 500   gold
+------------------------------------------------------------------------
+  val_001        0.368   0.632   0.895   0.947   1.000     19
+  val_003        0.292   0.500   0.708   0.833   0.917     24
+  val_004        0.556   0.556   0.778   0.889   0.889      9
+  val_008        0.100   0.100   0.250   0.750   0.850     20
+  val_010        0.214   0.357   0.643   0.929   1.000     14
+------------------------------------------------------------------------
+  MACRO AVG      0.306   0.429   0.655   0.870   0.931
+
+========================================================================
+  DELTA SUMMARY (vs German-only baseline)
+========================================================================
+       K    German    MarianMT     MarianΔ   NLLB-3.3B       NLLBΔ
+------------------------------------------------------------------------
+      10     0.274       0.297      +0.023       0.306      +0.032
+      30     0.481       0.429      -0.051       0.429      -0.052
+     100     0.841       0.686      -0.155       0.655      -0.187
+     300     0.912       0.888      -0.024       0.870      -0.043
+     500     0.959       0.951      -0.008       0.931      -0.028
+
+========================================================================
+  VERDICT
+========================================================================
+
+  Average delta vs German-only:
+    MarianMT:  -0.043
+    NLLB-3.3B: -0.056
+
+Done.
+
+
+========== CELL 4 [code] ==========
+ !pip install -q rank_bm25 deep_translator tqdm pandas pyarrow
+--- output text ---
+[?25l   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/42.3 kB[0m [31m?[0m eta [36m-:--:--[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m42.3/42.3 kB[0m [31m4.3 MB/s[0m eta [36m0:00:00[0m
+[?25h
+
+========== CELL 5 [code] ==========
+"""
+bm25_hybrid_v12_colab.py — PRODUCTION HYBRID PIPELINE
+======================================================
+BM25 top-100 → Reranker scoring → Fused threshold → LLM judge (borderline only)
+
+Key insight: BM25 recall@100 ≈ 0.90. Don't let the LLM destroy it.
+Use fused score for confident decisions (80% of candidates).
+Use Qwen3-8B judge ONLY for borderline candidates (~20%).
+
+Swiss domain knowledge embedded in judge prompt:
+- Swiss Federal Court citation practice
+- 7 categories of citations in legal decisions
+- Forced German text reading before verdict
+"""
+
+import subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q",
+    "rank_bm25", "deep_translator", "transformers>=4.51", "accelerate",
+    "tqdm", "pandas", "pyarrow", "numpy"], check=False)
+
+try:
+    from google.colab import drive
+    drive.mount("/content/drive", force_remount=False)
+    print("✓ Drive mounted.")
+except ImportError:
+    print("✓ Not in Colab.")
+
+import os, re, json, pickle, math, gc, random, time, datetime
+import numpy as np, pandas as pd
+from collections import defaultdict, Counter
+from dataclasses import dataclass, fields as dc_fields
+from pathlib import Path
+from rank_bm25 import BM25Okapi
+from tqdm.auto import tqdm
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+for _sn in ("stdout","stderr"):
+    _s = getattr(sys,_sn,None)
+    if _s and hasattr(_s,"reconfigure"):
+        try: _s.reconfigure(encoding="utf-8",errors="replace")
+        except: pass
+random.seed(42)
+
+def P(m="",end="\n"): print(m,end=end,flush=True)
+def SEP(t=""): P("\n"+"="*70); (P(f"  {t}"),P("="*70)) if t else None
+def HR(): P("-"*70)
+
+DRIVE_BASE = Path("/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition")
+BASE_DIR   = DRIVE_BASE
+CACHE_DIR  = DRIVE_BASE / "retrieval" / "pipeline_cache"
+OUTPUT_DIR = DRIVE_BASE / "retrieval" / "pipeline_output_v12"
+
+TOP_BM25       = 100
+TRAIN_SAMPLE   = 10
+RERANKER_MODEL = "Qwen/Qwen3-Reranker-8B"
+JUDGE_MODEL    = "Qwen/Qwen3-8B"
+RERANKER_BATCH = 8
+JUDGE_BATCH    = 4
+HIGH_THRESH    = 0.55   # auto-YES
+LOW_THRESH     = 0.25   # auto-NO
+DEVICE         = "auto"
+
+RERANKER_INSTRUCTION = (
+    "Given a query about Swiss law, determine whether the provided law "
+    "article is related to or applicable to the legal issue."
+)
+
+# ═══════════════════════════════════════════════════════════════
+#  CITATION UTILS
+# ═══════════════════════════════════════════════════════════════
+def build_parent_expansion_map(ldc):
+    ci=defaultdict(list); es=set(ldc)
+    for c in ldc:
+        p=c.split()
+        if len(p)>=4 and p[0]=='Art.' and p[2]=='Abs.': ci[(p[1],p[-1])].append(c)
+    return ci,es
+def expand_gold(cit,ci,es,clm,itr):
+    cit=cit.strip(); p=cit.split()
+    if len(p)<3 or p[0]!='Art.': return []
+    m=clm.get(cit.lower())
+    if m and m in itr: return [m]
+    if 'Abs.' in cit: return []
+    an,la=p[1],p[-1]; ch=ci.get((an,la),[])
+    if not ch:
+        for (a2,l2),c2 in ci.items():
+            if a2==an and l2.lower()==la.lower(): ch=c2; break
+    if ch:
+        r=[clm.get(c.lower()) for c in ch]; r=[x for x in r if x and x in itr]
+        if r: return r
+    m=clm.get(cit.lower())
+    return [m] if m and m in itr else []
+def build_gold_set(gs,ci,es,clm,itr):
+    raw=[c.strip() for c in str(gs or"").split(";") if c.strip()]
+    lc=[c for c in raw if re.match(r'^Art\.\s+\d',c)]
+    gi,gm=set(),[]
+    for c in lc:
+        e=expand_gold(c,ci,es,clm,itr)
+        if e: gi.update(e)
+        else: gm.append(c)
+    return gi,gm
+
+_TOKEN_RE=re.compile(r"[^\w\d]+",re.UNICODE)
+def tokenise(t):
+    if not t: return []
+    return [w for w in _TOKEN_RE.split(t.lower().strip()) if len(w)>=2 or w.isdigit()]
+def build_query_tokens(q,de=None):
+    en=tokenise(q)
+    if not de: return en
+    seen=set();c=[]
+    for t in en+tokenise(de):
+        if t not in seen: seen.add(t); c.append(t)
+    return c
+def compute_f1(ps,gs):
+    if not ps and not gs: return 1.,1.,1.
+    if not ps or not gs: return 0.,0.,0.
+    tp=len(ps&gs);p=tp/len(ps);r=tp/len(gs)
+    return p,r,(2*p*r/(p+r) if p+r>0 else 0.)
+
+@dataclass
+class Candidate:
+    citation_canon:str; bm25_rank:int; bm25_score:float
+    title:str=""; text:str=""; law_abbreviation:str=""; law_name_en:str=""
+    context_heading_title:str=""; provision_type:str=""
+    reranker_score:float=0.; fused_score:float=0.
+    zone:str=""  # "yes", "no", "borderline"
+    llm_verdict:str=""
+
+def _copy(c):
+    return Candidate(**{f.name:getattr(c,f.name) for f in dc_fields(c)})
+
+# ═══════════════════════════════════════════════════════════════
+def load_all(bd):
+    SEP("STAGE 0: LOADING DATA")
+    ret=bd/"retrieval"; kbd=ret/"knowledge_base_optimized_hybrid_retrieval"
+    corpus=pd.read_parquet(ret/"corpus.parquet"); P(f"  Corpus: {len(corpus):,}")
+    kb={}
+    with open(ret/"laws_knowledge_base.jsonl",encoding="utf-8") as f:
+        for l in f:
+            try: r=json.loads(l); c=r.get("citation_canon",""); kb[c]=r if c else None
+            except: pass
+    lne={}
+    for r in kb.values():
+        a=r.get("law",{}).get("law_abbreviation",""); n=r.get("law",{}).get("law_name_en","")
+        if a and n and a not in lne: lne[a]=n
+    train=pd.read_csv(bd/"data"/"train.csv"); val=pd.read_csv(bd/"data"/"val.csv")
+    P(f"  Train:{len(train):,} Val:{len(val):,}")
+    tf=kbd/"query_translations_trainval.json"; qt={}
+    if tf.exists():
+        with open(tf,encoding="utf-8") as f: qt=json.load(f)
+
+    # laws_de
+    laws_de=None
+    for p in [bd/"data"/"laws_de.csv"]:
+        if p.exists(): laws_de=pd.read_csv(p); break
+    if laws_de is None:
+        pl=[]
+        for i in range(1,10):
+            for loc in [bd/"data",ret]:
+                fp=loc/f"laws_de_part{i}.csv"
+                if fp.exists(): pl.append(pd.read_csv(fp)); break
+        if pl: laws_de=pd.concat(pl,ignore_index=True)
+    if laws_de is None: laws_de=pd.DataFrame(columns=["citation","text","title"])
+    P(f"  laws_de: {len(laws_de):,}")
+    laws_text={str(r.get("citation","")).strip(): str(r.get("text","") or "")
+               for _,r in laws_de.iterrows() if pd.notna(r.get("citation"))}
+
+    corpus_cits=corpus["citation_canon"].tolist()
+    clm={c.lower():c for c in corpus_cits}
+    itr={c:i for i,c in enumerate(corpus_cits)}
+    ci,es=build_parent_expansion_map(list(laws_text.keys()))
+
+    with open(ret/"bm25_v2_index.pkl","rb") as f: bm25=pickle.load(f)
+    with open(ret/"bm25_v2_ids.pkl","rb") as f: bm25_ids=pickle.load(f)["citation_canon"]
+    P(f"  ✓ BM25: {len(bm25_ids):,}")
+
+    tlf=defaultdict(Counter)
+    for _,r in train.iterrows():
+        gi,_=build_gold_set(str(r.get("gold_citations","") or ""),ci,es,clm,itr)
+        if not gi: continue
+        ab={c.split()[-1].lower() for c in gi}
+        tks=build_query_tokens(r["query"],qt.get(r["query_id"]))
+        for t in set(tks):
+            for a in ab: tlf[t][a]+=1
+    ttc={t:sum(c.values()) for t,c in tlf.items()}
+    cd=corpus.set_index("citation_canon").to_dict("index")
+    P("  ✓ Done.")
+    return (corpus,kb,lne,train,val,qt,clm,itr,ci,es,
+            bm25,bm25_ids,tlf,ttc,cd,laws_text)
+
+def enhance(tokens,bm25,tlf,ttc):
+    base=list(dict.fromkeys(tokens)); sc={}
+    for t in set(tokens):
+        if t not in tlf: continue
+        idf=bm25.idf.get(t,0.);
+        if idf<1.: continue
+        tot=ttc.get(t,1)
+        for a,cnt in tlf[t].items(): sc[a]=sc.get(a,0.)+(cnt/tot)*idf
+    for a,_ in sorted(sc.items(),key=lambda x:-x[1])[:5]: base.extend([a]*5)
+    return base
+
+def bm25_retrieve(qtxt,qid,bm25,ids,cd,kb,lne,qt,tlf,ttc):
+    de=qt.get(qid); tks=build_query_tokens(qtxt,de); enh=enhance(tks,bm25,tlf,ttc)
+    sc=bm25.get_scores(enh); order=sc.argsort()[::-1][:TOP_BM25]
+    cands=[]
+    for rank,idx in enumerate(order,1):
+        cn=ids[idx]; s=float(sc[idx]); rd=cd.get(cn,{})
+        k=kb.get(cn,{}); li=k.get("law",{}) if k else {}; la=str(rd.get("law_abbrev","") or "")
+        sem=k.get("semantic",{}) if k else {}; st=k.get("structure",{}) if k else {}
+        cands.append(Candidate(
+            citation_canon=cn,bm25_rank=rank,bm25_score=s,
+            title=str(rd.get("title","") or ""),text=str(rd.get("text","") or ""),
+            law_abbreviation=la,law_name_en=li.get("law_name_en","") or lne.get(la,""),
+            context_heading_title=st.get("context_heading_title","") or "",
+            provision_type=sem.get("provision_type","") or ""))
+    return cands
+
+# ═══════════════════════════════════════════════════════════════
+#  STAGE 2: RERANKER
+# ═══════════════════════════════════════════════════════════════
+def _slug(m): return re.sub(r"[^a-zA-Z0-9_-]","_",m)
+
+def load_reranker(mn,dev="auto"):
+    import torch; from transformers import AutoTokenizer, AutoModelForCausalLM
+    P(f"  Loading reranker: {mn}")
+    tok=AutoTokenizer.from_pretrained(mn,trust_remote_code=True,padding_side='left')
+    mdl=AutoModelForCausalLM.from_pretrained(mn,torch_dtype=torch.bfloat16,
+        device_map=dev,trust_remote_code=True); mdl.eval()
+    pfx=tok.encode('<|im_start|>system\nJudge whether the Document meets the '
+        'requirements based on the Query and the Instruct provided. '
+        'Note that the answer can only be "yes" or "no".'
+        '<|im_end|>\n<|im_start|>user\n',add_special_tokens=False)
+    sfx=tok.encode('<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n',
+        add_special_tokens=False)
+    yi=tok.convert_tokens_to_ids("yes"); ni=tok.convert_tokens_to_ids("no")
+    P(f"  ✓ yes={yi} no={ni}"); return tok,mdl,pfx,sfx,yi,ni
+
+def _fmt_rr(query,c):
+    doc=(f"{c.citation_canon}\nLaw: {c.law_abbreviation} — {c.law_name_en}\n"
+         f"Title: {c.title}\nHeading: {c.context_heading_title}\n"
+         f"Type: {c.provision_type}\nText: {c.text[:500]}")
+    return f"<Instruct>: {RERANKER_INSTRUCTION}\n<Query>: {query}\n<Document>: {doc}"
+
+def rerank_batch(query,cands,tok,mdl,pfx,sfx,yi,ni,bs=8,ml=4096):
+    import torch
+    pairs=[_fmt_rr(query,c) for c in cands]; all_sc=[]
+    for i in range(0,len(pairs),bs):
+        batch=pairs[i:i+bs]
+        inp=tok(batch,padding=False,truncation='longest_first',
+            return_attention_mask=False,max_length=ml-len(pfx)-len(sfx))
+        for j in range(len(inp['input_ids'])): inp['input_ids'][j]=pfx+inp['input_ids'][j]+sfx
+        inp=tok.pad(inp,padding=True,return_tensors="pt")
+        inp={k:v.to(mdl.device) for k,v in inp.items()}
+        with torch.no_grad(): logits=mdl(**inp).logits[:,-1,:]
+        st=torch.stack([logits[:,ni],logits[:,yi]],dim=1)
+        sc=torch.nn.functional.log_softmax(st,dim=1)[:,1].exp().cpu().tolist()
+        all_sc.extend(sc)
+    for c,s in zip(cands,all_sc): c.reranker_score=float(s)
+    return cands
+
+def run_reranker(all_qc, cache_dir, bs=8, dev="auto"):
+    SEP("STAGE 2: RERANKER")
+    slug=_slug(RERANKER_MODEL); cache={}
+    for sfx in ["_v12","_v7","_v6b","_v5b","_v5","_full_v4",""]:
+        cf=cache_dir/f"reranker_{slug}{sfx}.json"
+        if cf.exists():
+            try:
+                with open(cf,encoding="utf-8") as f: ld=json.load(f)
+                for k,v in ld.items():
+                    if k not in cache: cache[k]=v
+            except: pass
+    P(f"  Cached: {len(cache)}")
+    need=[(q,t,c) for q,t,c in all_qc if q not in cache]
+    if need:
+        P(f"  Scoring {len(need)} queries ...")
+        tok,mdl,pfx,sfx,yi,ni=load_reranker(RERANKER_MODEL,dev)
+        for qid,qtxt,cands in tqdm(need,desc="  Reranking"):
+            rerank_batch(qtxt,cands,tok,mdl,pfx,sfx,yi,ni,bs,4096)
+            cache[qid]={c.citation_canon:c.reranker_score for c in cands}
+        del mdl,tok; gc.collect()
+        import torch; torch.cuda.empty_cache()
+        cf=cache_dir/f"reranker_{slug}_v12.json"
+        cf.parent.mkdir(parents=True,exist_ok=True)
+        with open(cf,"w",encoding="utf-8") as f: json.dump(cache,f,ensure_ascii=False,indent=2)
+        P(f"  ✓ Saved ({len(cache)})")
+    else: P("  ✓ All cached.")
+    # Apply scores
+    for qid,_,cands in all_qc:
+        sm=cache.get(qid,{})
+        for c in cands: c.reranker_score=sm.get(c.citation_canon,0.)
+    return cache
+
+# ═══════════════════════════════════════════════════════════════
+#  STAGE 3: FUSED SCORE + ZONE SPLIT
+# ═══════════════════════════════════════════════════════════════
+def compute_fused_and_split(all_qc, hi=0.55, lo=0.25):
+    SEP(f"STAGE 3: FUSED SCORE + ZONE SPLIT (hi={hi}, lo={lo})")
+    stats = {"yes":0,"no":0,"borderline":0}
+    for qid,_,cands in all_qc:
+        bsc=[c.bm25_score for c in cands]
+        bmin,bmax=min(bsc),max(bsc); brng=max(bmax-bmin,1e-9)
+        for c in cands:
+            c.fused_score = 0.7*((c.bm25_score-bmin)/brng) + 0.3*c.reranker_score
+            if c.fused_score >= hi: c.zone="yes"
+            elif c.fused_score < lo: c.zone="no"
+            else: c.zone="borderline"
+            stats[c.zone] += 1
+    P(f"  auto-YES: {stats['yes']}  borderline: {stats['borderline']}  auto-NO: {stats['no']}")
+    P(f"  Avg borderline/query: {stats['borderline']/max(len(all_qc),1):.1f}")
+
+# ═══════════════════════════════════════════════════════════════
+#  STAGE 4: LLM JUDGE (borderline only) — Qwen3-8B
+# ═══════════════════════════════════════════════════════════════
+
+JUDGE_SYSTEM = """You are a Swiss Federal Court (Bundesgericht) legal citation expert.
+
+DOMAIN KNOWLEDGE — Swiss Legal Citation Practice:
+Swiss court decisions (BGE) and legal briefs cite provisions across multiple categories:
+
+1. SUBSTANTIVE LAW: The core articles governing the legal issue (e.g., StGB for criminal offenses, OR for contracts, ZGB for civil matters)
+2. DEFINITIONS: Articles that define key legal terms used in the case (e.g., Art. 8 ATSG defines invalidity)
+3. PROCEDURAL RULES: Articles governing how the case is processed (StPO for criminal procedure, ZPO for civil procedure)
+4. APPEAL PROVISIONS: Articles about legal remedies — Beschwerde (Art. 393ff StPO), Berufung, appeal deadlines
+5. COST ALLOCATION: Articles about who pays court costs and attorney fees (Art. 422, 428 StPO; Art. 64 BGG)
+6. COURT JURISDICTION: Articles defining which court decides (Art. 37/39 StBOG, Art. 100 BGG for Federal Court)
+7. CONSTITUTIONAL PRINCIPLES: Fair trial (Art. 29 BV), proportionality, good faith (Art. 2 ZGB)
+
+A query about pre-trial detention will cite detention rules AND appeal rules AND cost rules AND court jurisdiction.
+A query about disability insurance will cite insurance provisions AND definitions AND procedural rules.
+
+YOUR TASK: For each candidate article, read the German text carefully and decide YES or NO.
+Say YES if the article belongs in ANY of the 7 categories above for this specific legal query.
+Say NO only if the article is from a completely unrelated legal domain.
+
+When uncertain, say YES — it is better to include a marginally relevant article than to miss one.
+
+For each candidate, respond with exactly:
+CITATION | VERDICT: YES or NO"""
+
+def get_text(cand, laws_text):
+    if cand.citation_canon in laws_text: return laws_text[cand.citation_canon]
+    for k,v in laws_text.items():
+        if k.lower()==cand.citation_canon.lower(): return v
+    return cand.text
+
+def build_judge_prompt(query_en, query_de, borderline_cands, laws_text):
+    parts = [f"LEGAL QUERY: {query_en[:600]}"]
+    if query_de: parts.append(f"ANFRAGE (Deutsch): {query_de[:400]}")
+    parts.append(f"\n{len(borderline_cands)} BORDERLINE CANDIDATES to judge:\n")
+    for i,c in enumerate(borderline_cands,1):
+        txt = get_text(c, laws_text)
+        parts.append(
+            f"[{i}] {c.citation_canon}\n"
+            f"    Law: {c.law_abbreviation} — {c.law_name_en}\n"
+            f"    German text: {(txt or '(kein Text)')[:400]}\n")
+    parts.append("\nFor each candidate, output: CITATION | VERDICT: YES or NO")
+    return "\n".join(parts)
+
+def load_judge(mn, dev="auto"):
+    import torch; from transformers import AutoTokenizer, AutoModelForCausalLM
+    P(f"  Loading judge: {mn}")
+    tok=AutoTokenizer.from_pretrained(mn,trust_remote_code=True)
+    mdl=AutoModelForCausalLM.from_pretrained(mn,torch_dtype=torch.bfloat16,
+        device_map=dev,trust_remote_code=True); mdl.eval()
+    P(f"  ✓ VRAM: {torch.cuda.memory_allocated()/1e9:.1f}GB"); return tok,mdl
+
+def judge_borderline(query_en, query_de, borderline_cands, laws_text, tok, mdl):
+    """Judge borderline candidates. Returns dict: citation→verdict."""
+    import torch
+    if not borderline_cands: return {}
+    prompt = build_judge_prompt(query_en, query_de, borderline_cands, laws_text)
+    messages = [
+        {"role":"system","content":JUDGE_SYSTEM},
+        {"role":"user","content":prompt},
+    ]
+    text = tok.apply_chat_template(messages,tokenize=False,
+                                    add_generation_prompt=True,
+                                    enable_thinking=True)
+    inputs = tok(text,return_tensors="pt",truncation=True,
+                 max_length=20000).to(mdl.device)
+    with torch.no_grad():
+        out = mdl.generate(**inputs,max_new_tokens=3000,
+            do_sample=True,temperature=0.5,top_k=20,top_p=0.95,
+            pad_token_id=tok.eos_token_id)
+    gen = out[0][inputs["input_ids"].shape[1]:]
+    raw = tok.decode(gen,skip_special_tokens=True).strip()
+    if "</think>" in raw: raw=raw.split("</think>")[-1].strip()
+
+    # Parse verdicts
+    verdicts = {}
+    valid = {c.citation_canon for c in borderline_cands}
+    valid_lower = {c.lower():c for c in valid}
+    for line in raw.split("\n"):
+        line = line.strip()
+        if "|" not in line: continue
+        parts = line.split("|")
+        cit_part = parts[0].strip().lstrip("[0-9] ").strip()
+        verdict_part = parts[-1].strip().upper()
+        v = "YES" if "YES" in verdict_part else "NO"
+        # Match citation
+        if cit_part in valid: verdicts[cit_part]=v
+        elif cit_part.lower() in valid_lower: verdicts[valid_lower[cit_part.lower()]]=v
+        else:
+            # Try regex match
+            m = re.search(r'Art\.\s+\d+[a-z]?(?:\s+Abs\.\s+\d+[a-z]?(?:bis)?)?\s+\S+', cit_part)
+            if m:
+                found=m.group(0).strip()
+                if found in valid: verdicts[found]=v
+                elif found.lower() in valid_lower: verdicts[valid_lower[found.lower()]]=v
+
+    # Default: anything not explicitly judged → YES (err on inclusion for borderline)
+    for c in borderline_cands:
+        if c.citation_canon not in verdicts:
+            verdicts[c.citation_canon] = "YES"
+
+    return verdicts, raw[:500]
+
+def run_judge(all_qc, qt, laws_text, cache_dir, dev="auto"):
+    SEP("STAGE 4: LLM JUDGE (borderline only, Qwen3-8B)")
+    cache_file = cache_dir / "llm_judge_v12_borderline.json"
+    cache = {}
+    if cache_file.exists():
+        try:
+            with open(cache_file,encoding="utf-8") as f: cache=json.load(f)
+            P(f"  Cache: {len(cache)}")
+        except: pass
+
+    need = [(q,t,c) for q,t,c in all_qc if q not in cache]
+    if need:
+        borderline_counts = [sum(1 for c in cs if c.zone=="borderline") for _,_,cs in need]
+        total_bl = sum(borderline_counts)
+        P(f"  {len(need)} queries, {total_bl} borderline candidates total")
+        tok,mdl = load_judge(JUDGE_MODEL, dev)
+        for qid,qtxt,cands in tqdm(need,desc="  Judging"):
+            bl = [c for c in cands if c.zone=="borderline"]
+            if bl:
+                verdicts, raw = judge_borderline(qtxt, qt.get(qid,""), bl, laws_text, tok, mdl)
+            else:
+                verdicts, raw = {}, ""
+            cache[qid] = {"verdicts":verdicts, "raw":raw, "n_borderline":len(bl)}
+        del mdl,tok; gc.collect()
+        import torch; torch.cuda.empty_cache()
+        cache_file.parent.mkdir(parents=True,exist_ok=True)
+        with open(cache_file,"w",encoding="utf-8") as f:
+            json.dump(cache,f,ensure_ascii=False,indent=2)
+        P(f"  ✓ Saved ({len(cache)})")
+    else: P(f"  ✓ All {len(all_qc)} cached.")
+    return cache
+
+# ═══════════════════════════════════════════════════════════════
+#  STAGE 5: FINAL PREDICTIONS
+# ═══════════════════════════════════════════════════════════════
+def build_final_preds(all_qc, judge_cache):
+    """Final = auto_yes ∪ borderline_yes"""
+    preds = {}
+    for qid,_,cands in all_qc:
+        jc = judge_cache.get(qid, {})
+        verdicts = jc.get("verdicts", {})
+        selected = set()
+        for c in cands:
+            if c.zone == "yes":
+                selected.add(c.citation_canon)
+            elif c.zone == "borderline":
+                v = verdicts.get(c.citation_canon, "YES")  # default YES for unparsed
+                if v == "YES":
+                    selected.add(c.citation_canon)
+        if not selected and cands:
+            selected = {cands[0].citation_canon}  # fallback
+        preds[qid] = list(selected)
+    return preds
+
+# ═══════════════════════════════════════════════════════════════
+def evaluate(label, preds, df, ci, es, clm, itr, per_query=True):
+    if per_query:
+        P(f"\n  ─── {label} ───")
+        P(f"  {'QID':<14} {'P':>6} {'R':>6} {'F1':>6} {'Pred':>5} {'Gold':>5}")
+        HR()
+    mp,mr,mf=[],[],[]
+    for _,row in df.iterrows():
+        qid=row["query_id"]
+        gold,_=build_gold_set(row.get("gold_citations",""),ci,es,clm,itr)
+        if not gold: continue
+        pred=set(preds.get(qid,[]))
+        p,r,f=compute_f1(pred,gold)
+        mp.append(p);mr.append(r);mf.append(f)
+        if per_query:
+            P(f"  {qid:<14} {p:6.3f} {r:6.3f} {f:6.3f} {len(pred):5d} {len(gold):5d}")
+    if per_query: HR()
+    ap=sum(mp)/max(len(mp),1);ar=sum(mr)/max(len(mr),1);af=sum(mf)/max(len(mf),1)
+    avg_k=sum(len(preds.get(row["query_id"],[]))for _,row in df.iterrows())/max(len(df),1)
+    if per_query: P(f"  {'MACRO':>14} {ap:6.3f} {ar:6.3f} {af:6.3f}  avg_k={avg_k:.1f}")
+    return {"p":ap,"r":ar,"f1":af,"avg_k":avg_k}
+
+def main():
+    t0=time.time()
+    OUTPUT_DIR.mkdir(parents=True,exist_ok=True)
+    CACHE_DIR.mkdir(parents=True,exist_ok=True)
+
+    SEP("v12: BM25 → Reranker → Threshold → LLM Judge (borderline)")
+
+    (corpus,kb,lne,train,val,qt,clm,itr,ci,es,
+     bm25,bm25_ids,tlf,ttc,cd,laws_text) = load_all(BASE_DIR)
+
+    if TRAIN_SAMPLE and TRAIN_SAMPLE < len(train):
+        train_eval=train.sample(n=TRAIN_SAMPLE,random_state=42).reset_index(drop=True)
+    else: train_eval=train
+
+    # Stage 1: BM25
+    SEP(f"STAGE 1: BM25 RETRIEVAL (top-{TOP_BM25})")
+    combined=pd.concat([train_eval,val],ignore_index=True)
+    all_qc=[]
+    for _,row in tqdm(combined.iterrows(),total=len(combined),desc="  BM25"):
+        cands=bm25_retrieve(row["query"],row["query_id"],bm25,bm25_ids,cd,kb,lne,qt,tlf,ttc)
+        all_qc.append((row["query_id"],row["query"],cands))
+
+    # Recall check
+    P("\n  BM25 Recall@100:")
+    for qid,_,cands in all_qc:
+        r_df=combined[combined["query_id"]==qid].iloc[0]
+        gold,_=build_gold_set(r_df.get("gold_citations",""),ci,es,clm,itr)
+        bc={c.citation_canon for c in cands}
+        r=len(gold&bc)/max(len(gold),1)
+        if r<1.0: P(f"  {qid}: R={r:.3f} gold={len(gold)} missed={len(gold-bc)}")
+        else: P(f"  {qid}: R=1.000 gold={len(gold)} ✓")
+
+    # Stage 2: Reranker
+    run_reranker(all_qc, CACHE_DIR, RERANKER_BATCH, DEVICE)
+
+    # Stage 3: Fused + split
+    compute_fused_and_split(all_qc, HIGH_THRESH, LOW_THRESH)
+
+    # Show zone distribution per query
+    P("\n  Zone distribution:")
+    for qid,_,cands in all_qc:
+        ny=sum(1 for c in cands if c.zone=="yes")
+        nb=sum(1 for c in cands if c.zone=="borderline")
+        nn=sum(1 for c in cands if c.zone=="no")
+        P(f"  {qid}: auto_yes={ny} borderline={nb} auto_no={nn}")
+
+    # Stage 4: LLM judge borderline
+    judge_cache = run_judge(all_qc, qt, laws_text, CACHE_DIR, DEVICE)
+
+    # Stage 5: Final predictions
+    preds_hybrid = build_final_preds(all_qc, judge_cache)
+
+    val_ids=set(val["query_id"].tolist())
+    train_ids=set(train_eval["query_id"].tolist())
+    results = {}
+
+    for sn,sdf,sids in [("VAL",val,val_ids),("TRAIN",train_eval,train_ids)]:
+        SEP(f"{sn} EVALUATION")
+
+        # Hybrid
+        preds_h = {q:v for q,v in preds_hybrid.items() if q in sids}
+        results[f"{sn}_hybrid_v12"] = evaluate(f"{sn}_hybrid_v12", preds_h, sdf, ci, es, clm, itr)
+
+        # Also: threshold-only (no LLM judge) for comparison
+        preds_thresh = {}
+        for qid,_,cands in all_qc:
+            if qid not in sids: continue
+            preds_thresh[qid] = [c.citation_canon for c in cands if c.fused_score >= HIGH_THRESH]
+            if not preds_thresh[qid]: preds_thresh[qid]=[cands[0].citation_canon]
+        results[f"{sn}_thresh_only"] = evaluate(f"{sn}_thresh_only", preds_thresh, sdf, ci, es, clm, itr)
+
+        # BM25 baselines
+        for k in [3,5,8,12,15,20]:
+            pk={qid:[c.citation_canon for c in cs[:k]] for qid,_,cs in all_qc if qid in sids}
+            results[f"{sn}_bm25_K{k}"]=evaluate(f"{sn}_bm25_K{k}",pk,sdf,ci,es,clm,itr)
+
+        # Detail for hybrid
+        P(f"\n  ─── {sn} HYBRID DETAIL ───")
+        for qid,_,cands in all_qc:
+            if qid not in sids: continue
+            r=sdf[sdf["query_id"]==qid].iloc[0]
+            gold,_=build_gold_set(r.get("gold_citations",""),ci,es,clm,itr)
+            pred=set(preds_h.get(qid,[]))
+            tp=pred&gold;fp=pred-gold;fn=gold-pred
+            bc={c.citation_canon for c in cands}
+            jc=judge_cache.get(qid,{})
+            P(f"\n  {qid}: gold={len(gold)} pred={len(pred)} TP={len(tp)} FP={len(fp)} FN={len(fn)}")
+            P(f"    zones: yes={sum(1 for c in cands if c.zone=='yes')} "
+              f"bl={jc.get('n_borderline',0)} no={sum(1 for c in cands if c.zone=='no')}")
+            for c in sorted(tp): P(f"    ✓ {c}")
+            for c in sorted(list(fp)[:10]): P(f"    ✗ {c}")
+            if len(fp)>10: P(f"    ... +{len(fp)-10} more FP")
+            for c in sorted(fn):
+                tag='in100' if c in bc else 'NOT'
+                P(f"    MISS {c} ({tag})")
+
+    # Summary
+    SEP("SUMMARY")
+    P(f"  {'Method':<25} {'P':>6} {'R':>6} {'F1':>6} {'AvgK':>5}")
+    HR()
+    for k,v in sorted(results.items(),key=lambda x:-x[1]["f1"]):
+        P(f"  {k:<25} {v['p']:6.3f} {v['r']:6.3f} {v['f1']:6.3f} {v['avg_k']:5.1f}")
+
+    # Consistency
+    vm={k.replace("VAL_",""):v for k,v in results.items() if k.startswith("VAL_")}
+    tm={k.replace("TRAIN_",""):v for k,v in results.items() if k.startswith("TRAIN_")}
+    common=sorted(set(vm.keys())&set(tm.keys()),key=lambda m:-vm[m]["f1"])
+    if common:
+        SEP("CONSISTENCY")
+        P(f"  {'Method':<25} {'VAL':>6} {'TRAIN':>6} {'Delta':>7} {'AvgF1':>6}")
+        HR()
+        for m in common:
+            vf=vm[m]["f1"];tf=tm[m]["f1"];d=vf-tf;avg=(vf+tf)/2
+            flag=" ✓" if abs(d)<0.15 else " ⚠️"
+            P(f"  {m:<25} {vf:6.3f} {tf:6.3f} {d:+7.3f} {avg:6.3f}{flag}")
+
+    P(f"\n  Total: {time.time()-t0:.0f}s")
+    ts=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    with open(OUTPUT_DIR/f"summary_{ts}.json","w",encoding="utf-8") as f:
+        json.dump(results,f,indent=2)
+    P(f"  ✓ Saved")
+
+if __name__=="__main__": main()
+--- output text ---
+Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount("/content/drive", force_remount=True).
+✓ Drive mounted.
+
+======================================================================
+  v12: BM25 → Reranker → Threshold → LLM Judge (borderline)
+======================================================================
+
+======================================================================
+  STAGE 0: LOADING DATA
+======================================================================
+  Corpus: 171,654
+  Train:1,139 Val:10
+  laws_de: 179,641
+  ✓ BM25: 171,654
+  ✓ Done.
+
+======================================================================
+  STAGE 1: BM25 RETRIEVAL (top-100)
+======================================================================
+
+--- output data ---
+  BM25:   0%|          | 0/20 [00:00<?, ?it/s]
+--- output text ---
+
+  BM25 Recall@100:
+  train_0789: R=0.636 gold=11 missed=4
+  train_0905: R=1.000 gold=2 ✓
+  train_0290: R=0.000 gold=2 missed=2
+  train_1041: R=1.000 gold=1 ✓
+  train_0333: R=0.400 gold=5 missed=3
+  train_0110: R=1.000 gold=1 ✓
+  train_0527: R=1.000 gold=1 ✓
+  train_0057: R=0.800 gold=5 missed=1
+  train_0753: R=1.000 gold=1 ✓
+  train_0241: R=1.000 gold=1 ✓
+  val_001: R=0.947 gold=19 missed=1
+  val_002: R=0.789 gold=19 missed=4
+  val_003: R=0.958 gold=24 missed=1
+  val_004: R=1.000 gold=9 ✓
+  val_005: R=1.000 gold=6 ✓
+  val_006: R=0.818 gold=11 missed=2
+  val_007: R=0.857 gold=14 missed=2
+  val_008: R=0.750 gold=20 missed=5
+  val_009: R=1.000 gold=11 ✓
+  val_010: R=0.929 gold=14 missed=1
+
+======================================================================
+  STAGE 2: RERANKER
+======================================================================
+  Cached: 0
+  Scoring 20 queries ...
+  Loading reranker: Qwen/Qwen3-Reranker-8B
+
+--- output data ---
+config.json:   0%|          | 0.00/729 [00:00<?, ?B/s]
+--- output data ---
+tokenizer_config.json: 0.00B [00:00, ?B/s]
+--- output data ---
+vocab.json: 0.00B [00:00, ?B/s]
+--- output data ---
+merges.txt: 0.00B [00:00, ?B/s]
+--- output data ---
+tokenizer.json:   0%|          | 0.00/11.4M [00:00<?, ?B/s]
+--- output data ---
+model.safetensors.index.json: 0.00B [00:00, ?B/s]
+--- output data ---
+Downloading (incomplete total...): 0.00B [00:00, ?B/s]
+--- output data ---
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]
+--- output data ---
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]
+--- output data ---
+generation_config.json:   0%|          | 0.00/214 [00:00<?, ?B/s]
+--- output text ---
+  ✓ yes=9693 no=2152
+
+--- output data ---
+  Reranking:   0%|          | 0/20 [00:00<?, ?it/s]
+--- output text ---
+  ✓ Saved (20)
+
+======================================================================
+  STAGE 3: FUSED SCORE + ZONE SPLIT (hi=0.55, lo=0.25)
+======================================================================
+  auto-YES: 104  borderline: 180  auto-NO: 1716
+  Avg borderline/query: 9.0
+
+  Zone distribution:
+  train_0789: auto_yes=3 borderline=35 auto_no=62
+  train_0905: auto_yes=3 borderline=18 auto_no=79
+  train_0290: auto_yes=2 borderline=22 auto_no=76
+  train_1041: auto_yes=1 borderline=5 auto_no=94
+  train_0333: auto_yes=5 borderline=26 auto_no=69
+  train_0110: auto_yes=1 borderline=2 auto_no=97
+  train_0527: auto_yes=7 borderline=2 auto_no=91
+  train_0057: auto_yes=6 borderline=10 auto_no=84
+  train_0753: auto_yes=1 borderline=1 auto_no=98
+  train_0241: auto_yes=1 borderline=3 auto_no=96
+  val_001: auto_yes=11 borderline=6 auto_no=83
+  val_002: auto_yes=10 borderline=2 auto_no=88
+  val_003: auto_yes=6 borderline=17 auto_no=77
+  val_004: auto_yes=4 borderline=2 auto_no=94
+  val_005: auto_yes=4 borderline=6 auto_no=90
+  val_006: auto_yes=5 borderline=2 auto_no=93
+  val_007: auto_yes=6 borderline=9 auto_no=85
+  val_008: auto_yes=9 borderline=4 auto_no=87
+  val_009: auto_yes=8 borderline=4 auto_no=88
+  val_010: auto_yes=11 borderline=4 auto_no=85
+
+======================================================================
+  STAGE 4: LLM JUDGE (borderline only, Qwen3-8B)
+======================================================================
+  20 queries, 180 borderline candidates total
+  Loading judge: Qwen/Qwen3-8B
+
+--- output data ---
+config.json:   0%|          | 0.00/728 [00:00<?, ?B/s]
+--- output data ---
+tokenizer_config.json: 0.00B [00:00, ?B/s]
+--- output data ---
+vocab.json: 0.00B [00:00, ?B/s]
+--- output data ---
+merges.txt: 0.00B [00:00, ?B/s]
+--- output data ---
+tokenizer.json:   0%|          | 0.00/11.4M [00:00<?, ?B/s]
+--- output data ---
+model.safetensors.index.json: 0.00B [00:00, ?B/s]
+--- output data ---
+Downloading (incomplete total...): 0.00B [00:00, ?B/s]
+--- output data ---
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]
+--- output data ---
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]
+--- output data ---
+generation_config.json:   0%|          | 0.00/239 [00:00<?, ?B/s]
+--- output text ---
+  ✓ VRAM: 16.4GB
+
+--- output data ---
+  Judging:   0%|          | 0/20 [00:00<?, ?it/s]
+--- output text ---
+  ✓ Saved (20)
+
+======================================================================
+  VAL EVALUATION
+======================================================================
+
+  ─── VAL_hybrid_v12 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.895  0.944    17    19
+  val_002         1.000  0.632  0.774    12    19
+  val_003         0.957  0.917  0.936    23    24
+  val_004         1.000  0.667  0.800     6     9
+  val_005         0.500  0.833  0.625    10     6
+  val_006         0.857  0.545  0.667     7    11
+  val_007         0.600  0.643  0.621    15    14
+  val_008         0.923  0.600  0.727    13    20
+  val_009         0.750  0.818  0.783    12    11
+  val_010         0.867  0.929  0.897    15    14
+----------------------------------------------------------------------
+           MACRO  0.845  0.748  0.777  avg_k=13.0
+
+  ─── VAL_thresh_only ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.579  0.733    11    19
+  val_002         1.000  0.526  0.690    10    19
+  val_003         1.000  0.250  0.400     6    24
+  val_004         1.000  0.444  0.615     4     9
+  val_005         1.000  0.667  0.800     4     6
+  val_006         1.000  0.455  0.625     5    11
+  val_007         1.000  0.429  0.600     6    14
+  val_008         1.000  0.450  0.621     9    20
+  val_009         1.000  0.727  0.842     8    11
+  val_010         1.000  0.786  0.880    11    14
+----------------------------------------------------------------------
+           MACRO  1.000  0.531  0.681  avg_k=7.4
+
+  ─── VAL_bm25_K3 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.158  0.273     3    19
+  val_002         1.000  0.158  0.273     3    19
+  val_003         1.000  0.125  0.222     3    24
+  val_004         1.000  0.333  0.500     3     9
+  val_005         1.000  0.500  0.667     3     6
+  val_006         1.000  0.273  0.429     3    11
+  val_007         1.000  0.214  0.353     3    14
+  val_008         1.000  0.150  0.261     3    20
+  val_009         1.000  0.273  0.429     3    11
+  val_010         1.000  0.214  0.353     3    14
+----------------------------------------------------------------------
+           MACRO  1.000  0.240  0.376  avg_k=3.0
+
+  ─── VAL_bm25_K5 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.263  0.417     5    19
+  val_002         1.000  0.263  0.417     5    19
+  val_003         1.000  0.208  0.345     5    24
+  val_004         1.000  0.556  0.714     5     9
+  val_005         1.000  0.833  0.909     5     6
+  val_006         1.000  0.455  0.625     5    11
+  val_007         1.000  0.357  0.526     5    14
+  val_008         1.000  0.250  0.400     5    20
+  val_009         1.000  0.455  0.625     5    11
+  val_010         1.000  0.357  0.526     5    14
+----------------------------------------------------------------------
+           MACRO  1.000  0.400  0.550  avg_k=5.0
+
+  ─── VAL_bm25_K8 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.421  0.593     8    19
+  val_002         1.000  0.421  0.593     8    19
+  val_003         1.000  0.333  0.500     8    24
+  val_004         0.875  0.778  0.824     8     9
+  val_005         0.750  1.000  0.857     8     6
+  val_006         0.750  0.545  0.632     8    11
+  val_007         1.000  0.571  0.727     8    14
+  val_008         1.000  0.400  0.571     8    20
+  val_009         1.000  0.727  0.842     8    11
+  val_010         1.000  0.571  0.727     8    14
+----------------------------------------------------------------------
+           MACRO  0.938  0.577  0.687  avg_k=8.0
+
+  ─── VAL_bm25_K12 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.632  0.774    12    19
+  val_002         1.000  0.632  0.774    12    19
+  val_003         1.000  0.500  0.667    12    24
+  val_004         0.583  0.778  0.667    12     9
+  val_005         0.500  1.000  0.667    12     6
+  val_006         0.500  0.545  0.522    12    11
+  val_007         0.667  0.571  0.615    12    14
+  val_008         1.000  0.600  0.750    12    20
+  val_009         0.750  0.818  0.783    12    11
+  val_010         1.000  0.857  0.923    12    14
+----------------------------------------------------------------------
+           MACRO  0.800  0.693  0.714  avg_k=12.0
+
+  ─── VAL_bm25_K15 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         1.000  0.789  0.882    15    19
+  val_002         0.933  0.737  0.824    15    19
+  val_003         1.000  0.625  0.769    15    24
+  val_004         0.467  0.778  0.583    15     9
+  val_005         0.400  1.000  0.571    15     6
+  val_006         0.467  0.636  0.538    15    11
+  val_007         0.533  0.571  0.552    15    14
+  val_008         0.867  0.650  0.743    15    20
+  val_009         0.600  0.818  0.692    15    11
+  val_010         0.867  0.929  0.897    15    14
+----------------------------------------------------------------------
+           MACRO  0.713  0.753  0.705  avg_k=15.0
+
+  ─── VAL_bm25_K20 ───
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  val_001         0.850  0.895  0.872    20    19
+  val_002         0.700  0.737  0.718    20    19
+  val_003         1.000  0.833  0.909    20    24
+  val_004         0.350  0.778  0.483    20     9
+  val_005         0.300  1.000  0.462    20     6
+  val_006         0.350  0.636  0.452    20    11
+  val_007         0.
+
+========== CELL 6 [code] ==========
+
+
+========== CELL 7 [code] ==========
+"""
+submission_v3.py — TRAIN-TUNED submission
+==========================================
+INSIGHT: Val is leaked. Train is honest. Tune on train only.
+BM25 recall@30 on train is good. Rerank top-30, pick best K.
+Generate test submissions at K=5,10,15,20,25,30.
+"""
+
+import subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q",
+    "rank_bm25", "deep_translator", "transformers>=4.51", "accelerate",
+    "tqdm", "pandas", "pyarrow", "numpy"], check=False)
+
+try:
+    from google.colab import drive
+    drive.mount("/content/drive", force_remount=False)
+    print("✓ Drive mounted.")
+except ImportError:
+    print("✓ Not in Colab.")
+
+import os, re, json, pickle, math, gc, random, time, datetime
+import numpy as np, pandas as pd
+from collections import defaultdict, Counter
+from dataclasses import dataclass
+from pathlib import Path
+from rank_bm25 import BM25Okapi
+from tqdm.auto import tqdm
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+random.seed(42)
+
+def P(m="",end="\n"): print(m,end=end,flush=True)
+def SEP(t=""): P("\n"+"="*70); (P(f"  {t}"),P("="*70)) if t else None
+def HR(): P("-"*70)
+
+DRIVE_BASE = Path("/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition")
+BD = DRIVE_BASE
+CACHE_DIR = BD/"retrieval"/"pipeline_cache"
+OUTPUT_DIR = BD/"retrieval"/"pipeline_output_v3"
+TOP_BM25 = 30
+TRAIN_N = 100  # use 100 train queries for robust tuning
+RERANKER_MODEL = "Qwen/Qwen3-Reranker-8B"
+RR_BATCH = 8
+RR_MAXLEN = 4096
+RR_INST = ("Given a query about Swiss law, determine whether the provided law "
+    "article is related to or applicable to the legal issue. Consider broadly: "
+    "substantive provisions, procedural rules, definitions, penalties, exceptions, "
+    "and supporting provisions should all be considered relevant if they pertain "
+    "to the same legal area or could be cited when addressing the query.")
+
+_TOKEN_RE = re.compile(r"[^\w\d]+", re.UNICODE)
+def tokenise(t):
+    if not t: return []
+    return [w for w in _TOKEN_RE.split(t.lower().strip()) if len(w)>=2 or w.isdigit()]
+def is_law(c): return bool(c and re.match(r"^Art\.\s+\d",c.strip()))
+def bqt(q, de=None):
+    en=tokenise(q)
+    if not de: return en
+    seen=set(); c=[]
+    for t in en+tokenise(de):
+        if t not in seen: seen.add(t); c.append(t)
+    return c
+def translate(t):
+    try:
+        from deep_translator import GoogleTranslator
+        return GoogleTranslator(source="en",target="de").translate(t[:4999])
+    except: return None
+def f1(pred, gold):
+    if not pred and not gold: return 1.,1.,1.
+    if not pred or not gold: return 0.,0.,0.
+    tp=len(pred&gold); p=tp/len(pred); r=tp/len(gold)
+    return p,r,(2*p*r/(p+r) if p+r>0 else 0.)
+
+# Gold expansion
+def build_exp(ldc):
+    ci=defaultdict(list)
+    for c in ldc:
+        p=c.split()
+        if len(p)>=4 and p[0]=='Art.' and p[2]=='Abs.': ci[(p[1],p[-1])].append(c)
+    return ci
+def exp_gold(cit,ci,clm,itr):
+    cit=cit.strip(); p=cit.split()
+    if len(p)<2 or p[0]!='Art.': return []
+    m=clm.get(cit.lower())
+    if m and m in itr: return [m]
+    if 'Abs.' in cit: return []
+    an,la=p[1],p[-1]
+    ch=ci.get((an,la),[])
+    if not ch:
+        for (a2,l2),c2 in ci.items():
+            if a2==an and l2.lower()==la.lower(): ch=c2; break
+    return [m2 for c in ch for m2 in [clm.get(c.lower())] if m2 and m2 in itr]
+def gold_set(gs,ci,clm,itr):
+    raw=[c.strip() for c in str(gs or"").split(";") if c.strip()]
+    gi=set()
+    for c in raw:
+        if is_law(c):
+            e=exp_gold(c,ci,clm,itr)
+            gi.update(e)
+        else: gi.add(c)  # court citations kept
+    return gi
+
+@dataclass
+class Cand:
+    cn:str; rank:int; bm25:float; title:str=""; text:str=""
+    law:str=""; law_en:str=""; heading:str=""; ptype:str=""
+    rr:float=0.; fused:float=0.
+
+def load():
+    SEP("LOADING")
+    ret=BD/"retrieval"; kbd=ret/"knowledge_base_optimized_hybrid_retrieval"
+    corpus=pd.read_parquet(ret/"corpus.parquet"); P(f"  Corpus: {len(corpus):,}")
+    kb={}
+    with open(ret/"laws_knowledge_base.jsonl",encoding="utf-8") as f:
+        for l in f:
+            try: r=json.loads(l); c=r.get("citation_canon",""); kb[c]=r if c else None
+            except: pass
+    lne={}
+    for r in kb.values():
+        a=r.get("law",{}).get("law_abbreviation",""); n=r.get("law",{}).get("law_name_en","")
+        if a and n and a not in lne: lne[a]=n
+    train=pd.read_csv(BD/"data"/"train.csv")
+    test=pd.read_csv(BD/"data"/"test.csv")
+    P(f"  Train:{len(train):,} Test:{len(test):,}")
+    tf=kbd/"query_translations_trainval.json"; qt={}
+    if tf.exists():
+        with open(tf,encoding="utf-8") as f: qt=json.load(f)
+    # Translate missing
+    miss=[r["query_id"] for _,r in pd.concat([train,test]).iterrows() if r["query_id"] not in qt]
+    if miss:
+        P(f"  Translating {len(miss)} ...")
+        for _,row in tqdm(pd.concat([train,test])[pd.concat([train,test])["query_id"].isin(miss)].iterrows(),total=len(miss)):
+            de=translate(row["query"])
+            if de: qt[row["query_id"]]=de
+        with open(tf,"w",encoding="utf-8") as f: json.dump(qt,f,ensure_ascii=False,indent=2)
+    P(f"  Translations: {len(qt):,}")
+    # laws_de
+    laws_de=None
+    for p in [BD/"data"/"laws_de.csv"]:
+        if p.exists(): laws_de=pd.read_csv(p); break
+    if laws_de is None:
+        pl=[]
+        for i in range(1,10):
+            for loc in [BD/"data",ret]:
+                fp=loc/f"laws_de_part{i}.csv"
+                if fp.exists(): pl.append(pd.read_csv(fp)); break
+        if pl: laws_de=pd.concat(pl,ignore_index=True)
+    ldc=[]
+    if laws_de is not None:
+        P(f"  laws_de: {len(laws_de):,}")
+        ldc=[str(r.get("citation","")).strip() for _,r in laws_de.iterrows() if pd.notna(r.get("citation"))]
+    ci=build_exp(ldc)
+    ccits=corpus["citation_canon"].tolist()
+    clm={c.lower():c for c in ccits}
+    itr={c:i for i,c in enumerate(ccits)}
+    with open(ret/"bm25_v2_index.pkl","rb") as f: bm25=pickle.load(f)
+    with open(ret/"bm25_v2_ids.pkl","rb") as f: bm25_ids=pickle.load(f)["citation_canon"]
+    P(f"  ✓ BM25: {len(bm25_ids):,}")
+    # TLM
+    tlf=defaultdict(Counter)
+    for _,r in train.iterrows():
+        gi=gold_set(r.get("gold_citations",""),ci,clm,itr)
+        gi={c for c in gi if c in itr}  # law only in corpus
+        if not gi: continue
+        ab={c.split()[-1].lower() for c in gi}
+        tks=bqt(r["query"],qt.get(r["query_id"]))
+        for t in set(tks):
+            for a in ab: tlf[t][a]+=1
+    ttc={t:sum(c.values()) for t,c in tlf.items()}
+    cd=corpus.set_index("citation_canon").to_dict("index")
+    P("  ✓ Done.")
+    return train,test,qt,kb,lne,clm,itr,ci,bm25,bm25_ids,tlf,ttc,cd
+
+def enhance(toks,bm25,tlf,ttc):
+    base=list(dict.fromkeys(toks)); sc={}
+    for t in set(toks):
+        if t not in tlf: continue
+        idf=bm25.idf.get(t,0.)
+        if idf<1.: continue
+        tot=ttc.get(t,1)
+        for a,cnt in tlf[t].items(): sc[a]=sc.get(a,0.)+(cnt/tot)*idf
+    for a,_ in sorted(sc.items(),key=lambda x:-x[1])[:5]: base.extend([a]*5)
+    return base
+
+def retr(qtxt,qid,bm25,ids,cd,kb,lne,qt,tlf,ttc):
+    de=qt.get(qid); tks=bqt(qtxt,de); enh=enhance(tks,bm25,tlf,ttc)
+    sc=bm25.get_scores(enh); order=sc.argsort()[::-1][:TOP_BM25]
+    cands=[]
+    for rank,idx in enumerate(order,1):
+        cn=ids[idx]; s=float(sc[idx]); rd=cd.get(cn,{})
+        k=kb.get(cn,{}); li=k.get("law",{}) if k else {}; la=str(rd.get("law_abbrev","") or "")
+        sem=k.get("semantic",{}) if k else {}; st=k.get("structure",{}) if k else {}
+        cands.append(Cand(cn=cn,rank=rank,bm25=s,
+            title=str(rd.get("title","") or ""),text=str(rd.get("text","") or ""),
+            law=la,law_en=li.get("law_name_en","") or lne.get(la,""),
+            heading=st.get("context_heading_title","") or "",
+            ptype=sem.get("provision_type","") or ""))
+    return cands
+
+def _slug(m): return re.sub(r"[^a-zA-Z0-9_-]","_",m)
+def _fmt(q,c):
+    doc=f"{c.cn}\nLaw: {c.law} — {c.law_en}\nTitle: {c.title}\nHeading: {c.heading}\nType: {c.ptype}\nText: {c.text[:500]}"
+    return f"<Instruct>: {RR_INST}\n<Query>: {q}\n<Document>: {doc}"
+
+def rerank(all_qc):
+    SEP("RERANKER (top-30)")
+    import torch
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    slug=_slug(RERANKER_MODEL); cache={}
+    for sfx in ["_v3","_final","_v2","_v12","_v7","_v6b","_v5b","_v5","_full_v4",""]:
+        cf=CACHE_DIR/f"reranker_{slug}{sfx}.json"
+        if cf.exists():
+            try:
+                with open(cf,encoding="utf-8") as f: ld=json.load(f)
+                for k,v in ld.items():
+                    if k not in cache: cache[k]=v
+            except: pass
+    P(f"  Cached: {len(cache)}")
+    need=[(q,t,c) for q,t,c in all_qc if q not in cache]
+    if need:
+        P(f"  Scoring {len(need)} queries × {TOP_BM25} candidates ...")
+        tok=AutoTokenizer.from_pretrained(RERANKER_MODEL,trust_remote_code=True,padding_side='left')
+        mdl=AutoModelForCausalLM.from_pretrained(RERANKER_MODEL,torch_dtype=torch.bfloat16,
+            device_map="auto",trust_remote_code=True); mdl.eval()
+        pfx=tok.encode('<|im_start|>system\nJudge whether the Document meets the requirements based on the Query and the Instruct provided. Note that the answer can only be "yes" or "no".<|im_end|>\n<|im_start|>user\n',add_special_tokens=False)
+        sfx=tok.encode('<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n',add_special_tokens=False)
+        yi=tok.convert_tokens_to_ids("yes"); ni=tok.convert_tokens_to_ids("no")
+        for qid,qtxt,cands in tqdm(need,desc="  Reranking"):
+            pairs=[_fmt(qtxt,c) for c in cands]; scores=[]
+            for i in range(0,len(pairs),RR_BATCH):
+                b=pairs[i:i+RR_BATCH]
+                inp=tok(b,padding=False,truncation='longest_first',return_attention_mask=False,
+                    max_length=RR_MAXLEN-len(pfx)-len(sfx))
+                for j in range(len(inp['input_ids'])): inp['input_ids'][j]=pfx+inp['input_ids'][j]+sfx
+                inp=tok.pad(inp,padding=True,return_tensors="pt")
+                inp={k:v.to(mdl.device) for k,v in inp.items()}
+                with torch.no_grad(): logits=mdl(**inp).logits[:,-1,:]
+                tv=logits[:,yi];fv=logits[:,ni];st=torch.stack([fv,tv],dim=1)
+                lp=torch.nn.functional.log_softmax(st,dim=1);s=lp[:,1].exp().cpu().tolist()
+                scores.extend(s)
+            cache[qid]={c.cn:float(s) for c,s in zip(cands,scores)}
+        del mdl,tok; gc.collect()
+        try: torch.cuda.synchronize(); torch.cuda.empty_cache()
+        except: pass
+        cf=CACHE_DIR/f"reranker_{slug}_v3.json"
+        cf.parent.mkdir(parents=True,exist_ok=True)
+        with open(cf,"w",encoding="utf-8") as f: json.dump(cache,f,ensure_ascii=False,indent=2)
+        P(f"  ✓ Saved ({len(cache)})")
+    else: P(f"  ✓ All cached")
+    # Apply scores + fuse
+    for qid,_,cands in all_qc:
+        rrs=cache.get(qid,{})
+        for c in cands: c.rr=rrs.get(c.cn,0.)
+        bsc=[c.bm25 for c in cands]; bmin,bmax=min(bsc),max(bsc); brng=max(bmax-bmin,1e-9)
+        for c in cands:
+            c.fused=0.7*((c.bm25-bmin)/brng)+0.3*c.rr
+        cands.sort(key=lambda c:-c.fused)
+    return cache
+
+def main():
+    t0=time.time()
+    OUTPUT_DIR.mkdir(parents=True,exist_ok=True)
+    CACHE_DIR.mkdir(parents=True,exist_ok=True)
+
+    SEP("v3: TRAIN-TUNED, BM25 top-30, reranked, scan K")
+    train,test,qt,kb,lne,clm,itr,ci,bm25,bm25_ids,tlf,ttc,cd = load()
+
+    # Sample train
+    train_eval=train.sample(n=min(TRAIN_N,len(train)),random_state=42).reset_index(drop=True)
+    P(f"  Train eval: {len(train_eval)} queries")
+
+    # BM25 + rerank
+    SEP(f"BM25 + RERANK (top-{TOP_BM25})")
+    all_qc=[]
+    for df_name,df in [("train",train_eval),("test",test)]:
+        for _,row in tqdm(df.iterrows(),total=len(df),desc=f"  {df_name}"):
+            cands=retr(row["query"],row["query_id"],bm25,bm25_ids,cd,kb,lne,qt,tlf,ttc)
+            all_qc.append((row["query_id"],row["query"],cands))
+    rerank(all_qc)
+
+    train_ids=set(train_eval["query_id"]); test_ids=set(test["query_id"])
+
+    # ═══════════════════════════════════════════════════════════
+    #  EVALUATE on TRAIN at K=5,10,15,20,25,30
+    # ═══════════════════════════════════════════════════════════
+    SEP("TRAIN F1 at different K (ALL GOLD: law+court)")
+    P(f"  {'K':>3} {'P':>8} {'R':>8} {'F1':>8} {'AvgK':>6}")
+    HR()
+    best_k=5; best_f1=0
+    for K in [5,10,15,20,25,30]:
+        mp,mr,mf=[],[],[]
+        for _,row in train_eval.iterrows():
+            qid=row["query_id"]
+            gold=gold_set(row.get("gold_citations",""),ci,clm,itr)
+            gold={c for c in gold if c in itr or not is_law(c)}  # keep court as-is
+            if not gold: continue
+            # Get reranked top-K
+            for q,_,cands in all_qc:
+                if q==qid:
+                    pred=set(c.cn for c in cands[:K])
+                    break
+            else: pred=set()
+            p,r,fv=f1(pred,gold)
+            mp.append(p);mr.append(r);mf.append(fv)
+        ap=np.mean(mp);ar=np.mean(mr);af=np.mean(mf)
+        P(f"  {K:3d} {ap:8.4f} {ar:8.4f} {af:8.4f} {K:6.1f}")
+        if af>best_f1: best_f1=af; best_k=K
+
+    P(f"\n  ★ Best K={best_k} with F1={best_f1:.4f}")
+
+    # Per-query detail at best K
+    SEP(f"TRAIN PER-QUERY at K={best_k}")
+    P(f"  {'QID':<14} {'P':>6} {'R':>6} {'F1':>6} {'Pred':>5} {'Gold':>5}")
+    HR()
+    for _,row in train_eval.iterrows():
+        qid=row["query_id"]
+        gold=gold_set(row.get("gold_citations",""),ci,clm,itr)
+        gold={c for c in gold if c in itr or not is_law(c)}
+        if not gold: continue
+        for q,_,cands in all_qc:
+            if q==qid:
+                pred=set(c.cn for c in cands[:best_k])
+                break
+        p,r,fv=f1(pred,gold)
+        P(f"  {qid:<14} {p:6.3f} {r:6.3f} {fv:6.3f} {len(pred):5d} {len(gold):5d}")
+    HR()
+
+    # BM25 recall@30 on train
+    SEP("BM25 RECALL@30 on train")
+    for _,row in train_eval.head(20).iterrows():
+        qid=row["query_id"]
+        gold=gold_set(row.get("gold_citations",""),ci,clm,itr)
+        gold_law={c for c in gold if c in itr}
+        for q,_,cands in all_qc:
+            if q==qid:
+                bm25_c={c.cn for c in cands}
+                break
+        r30=len(gold_law&bm25_c)/max(len(gold_law),1)
+        missed=gold_law-bm25_c
+        P(f"  {qid}: R@30={r30:.3f} gold_law={len(gold_law)}"
+          + (f" missed={len(missed)}" if missed else ""))
+
+    # ═══════════════════════════════════════════════════════════
+    #  GENERATE TEST SUBMISSIONS at K=5,10,15,20,25,30
+    # ═══════════════════════════════════════════════════════════
+    SEP("GENERATING TEST SUBMISSIONS")
+    for K in [5,10,15,20,25,30]:
+        rows=[]
+        for _,row in test.iterrows():
+            qid=row["query_id"]
+            for q,_,cands in all_qc:
+                if q==qid:
+                    preds=[c.cn for c in cands[:K]]
+                    break
+            rows.append({"query_id":qid,"predicted_citations":";".join(preds)})
+        sub=pd.DataFrame(rows)
+        fname=f"submission_K{K}.csv"
+        sub.to_csv(OUTPUT_DIR/fname, index=False)
+        P(f"  {fname}: {len(sub)} queries, K={K}")
+
+    # Show test sample
+    SEP("TEST SAMPLE (K=best)")
+    for _,row in test.head(5).iterrows():
+        qid=row["query_id"]
+        for q,_,cands in all_qc:
+            if q==qid:
+                preds=[c.cn for c in cands[:best_k]]
+                break
+        P(f"  {qid}: {preds[:5]}...")
+
+    P(f"\n  Total: {time.time()-t0:.0f}s")
+    P(f"  ★ RECOMMENDED: submission_K{best_k}.csv (train F1={best_f1:.4f})")
+    P(f"  Also try: K={best_k-5} and K={best_k+5} submissions")
+
+if __name__=="__main__": main()
+--- output text ---
+Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount("/content/drive", force_remount=True).
+✓ Drive mounted.
+
+======================================================================
+  v3: TRAIN-TUNED, BM25 top-30, reranked, scan K
+======================================================================
+
+======================================================================
+  LOADING
+======================================================================
+  Corpus: 171,654
+  Train:1,139 Test:40
+  Translations: 1,189
+  laws_de: 179,641
+  ✓ BM25: 171,654
+  ✓ Done.
+  Train eval: 100 queries
+
+======================================================================
+  BM25 + RERANK (top-30)
+======================================================================
+
+--- output data ---
+  train:   0%|          | 0/100 [00:00<?, ?it/s]
+--- output data ---
+  test:   0%|          | 0/40 [00:00<?, ?it/s]
+--- output text ---
+
+======================================================================
+  RERANKER (top-30)
+======================================================================
+  Cached: 0
+  Scoring 140 queries × 30 candidates ...
+
+--- output data ---
+config.json:   0%|          | 0.00/729 [00:00<?, ?B/s]
+--- output data ---
+tokenizer_config.json: 0.00B [00:00, ?B/s]
+--- output data ---
+vocab.json: 0.00B [00:00, ?B/s]
+--- output data ---
+merges.txt: 0.00B [00:00, ?B/s]
+--- output data ---
+tokenizer.json:   0%|          | 0.00/11.4M [00:00<?, ?B/s]
+--- output text ---
+`torch_dtype` is deprecated! Use `dtype` instead!
+
+--- output data ---
+model.safetensors.index.json: 0.00B [00:00, ?B/s]
+--- output data ---
+Downloading (incomplete total...): 0.00B [00:00, ?B/s]
+--- output data ---
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]
+--- output data ---
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]
+--- output data ---
+generation_config.json:   0%|          | 0.00/214 [00:00<?, ?B/s]
+--- output data ---
+  Reranking:   0%|          | 0/140 [00:00<?, ?it/s]
+--- output text ---
+  ✓ Saved (140)
+
+======================================================================
+  TRAIN F1 at different K (ALL GOLD: law+court)
+======================================================================
+    K        P        R       F1   AvgK
+----------------------------------------------------------------------
+    5   0.3571   0.4956   0.3364    5.0
+   10   0.2235   0.5831   0.2695   10.0
+   15   0.1599   0.6050   0.2175   15.0
+   20   0.1245   0.6164   0.1822   20.0
+   25   0.1004   0.6186   0.1544   25.0
+   30   0.0840   0.6197   0.1339   30.0
+
+  ★ Best K=5 with F1=0.3364
+
+======================================================================
+  TRAIN PER-QUERY at K=5
+======================================================================
+  QID                 P      R     F1  Pred  Gold
+----------------------------------------------------------------------
+  train_0789      0.400  0.182  0.250     5    11
+  train_0905      0.400  1.000  0.571     5     2
+  train_0290      0.000  0.000  0.000     5     2
+  train_1041      0.200  1.000  0.333     5     1
+  train_0333      0.000  0.000  0.000     5     5
+  train_0110      0.200  1.000  0.333     5     1
+  train_0527      0.200  1.000  0.333     5     1
+  train_0057      0.400  0.400  0.400     5     5
+  train_0753      0.200  1.000  0.333     5     1
+  train_0241      0.200  1.000  0.333     5     1
+  train_0918      0.000  0.000  0.000     5     3
+  train_0087      1.000  0.556  0.714     5     9
+  train_0732      0.400  0.286  0.333     5     7
+  train_0773      0.200  0.167  0.182     5     6
+  train_1039      1.000  0.143  0.250     5    35
+  train_0920      0.600  0.500  0.545     5     6
+  train_0446      0.600  0.750  0.667     5     4
+  train_0825      0.600  0.600  0.600     5     5
+  train_0614      0.400  0.286  0.333     5     7
+  train_0430      0.400  1.000  0.571     5     2
+  train_0102      0.000  0.000  0.000     5     2
+  train_0718      0.200  0.100  0.133     5    10
+  train_0972      0.000  0.000  0.000     5     8
+  train_0157      0.600  1.000  0.750     5     3
+  train_0159      0.200  1.000  0.333     5     1
+  train_0045      0.400  0.286  0.333     5     7
+  train_0425      0.200  0.200  0.200     5     5
+  train_0291      0.000  0.000  0.000     5     3
+  train_0276      0.600  0.500  0.545     5     6
+  train_0097      0.000  0.000  0.000     5     2
+  train_0114      0.200  1.000  0.333     5     1
+  train_0498      0.200  1.000  0.333     5     1
+  train_0322      0.600  1.000  0.750     5     3
+  train_0534      0.200  1.000  0.333     5     1
+  train_0840      0.600  0.333  0.429     5     9
+  train_0024      0.400  1.000  0.571     5     2
+  train_0785      0.400  1.000  0.571     5     2
+  train_0529      0.200  0.167  0.182     5     6
+  train_0462      0.200  1.000  0.333     5     1
+  train_1037      0.200  1.000  0.333     5     1
+  train_0299      0.200  1.000  0.333     5     1
+  train_0644      0.400  0.143  0.211     5    14
+  train_0179      0.200  1.000  0.333     5     1
+  train_1034      0.000  0.000  0.000     5     2
+  train_0271      0.200  0.200  0.200     5     5
+  train_0089      1.000  0.227  0.370     5    22
+  train_1005      0.200  1.000  0.333     5     1
+  train_0937      0.200  1.000  0.333     5     1
+  train_0725      0.200  1.000  0.333     5     1
+  train_0852      0.000  0.000  0.000     5     2
+  train_0495      1.000  0.714  0.833     5     7
+  train_0617      0.800  0.800  0.800     5     5
+  train_1125      0.200  0.250  0.222     5     4
+  train_0071      0.200  0.250  0.222     5     4
+  train_1117      0.000  0.000  0.000     5     5
+  train_0297      0.400  1.000  0.571     5     2
+  train_0199      0.200  1.000  0.333     5     1
+  train_0546      0.400  0.667  0.500     5     3
+  train_0800      0.600  0.375  0.462     5     8
+  train_0554      0.000  0.000  0.000     5     1
+  train_0052      0.600  1.000  0.750     5     3
+  train_0399      0.600  0.231  0.333     5    13
+  train_1137      1.000  0.455  0.625     5    11
+  train_0561      0.200  0.167  0.182     5     6
+  train_0689      0.200  0.500  0.286     5     2
+  train_0412      0.000  0.000  0.000     5     1
+  train_0450      0.000  0.000  0.000     5     2
+  train_0834      0.000  0.000  0.000     5     1
+  train_0528      0.200  0.500  0.286     5     2
+  train_1133      0.000  0.000  0.000     5     8
+  train_0739      0.600  0.429  0.500     5     7
+  train_0823      0.200  1.000  0.333     5     1
+  train_0423      0.400  0.400  0.400     5     5
+  train_0248      0.400  0.133  0.200     5    15
+  train_0751      0.000  0.000  0.000     5     1
+  train_0479      0.600  0.429  0.500     5     7
+  train_0389      0.400  0.667  0.500     5     3
+  train_0129      0.600  0.333  0.429     5     9
+  train_0300      1.000  0.556  0.714     5     9
+  train_0032      0.600  0.600  0.600     5     5
+  train_0977      1.000  0.455  0.625     5    11
+  train_0694      1.000  0.263  0.417     5    19
+  train_0372      1.000  0.556  0.714     5     9
+  train_0524      0.600  0.429  0.500     5     7
+  train_0579      0.000  0.000  0.000     5     1
+  train_0530      0.000  0.000  0.000     5     7
+  train_0175      0.200  0.167  0.182     5     6
+  train_0535      0.200  1.000  0.333     5     1
+  train_0941      1.000  0.357  0.526     5    14
+  train_1139      0.400  0.286  0.333     5     7
+  train_0671      0.200  1.000  0.333     5     1
+  train_0141      0.000  0.000  0.000     5     2
+  train_0542      0.800  0.444  0.571     5     9
+  train_0383      0.200  0.333  0.250     5     3
+  train_0244      0.200  1.000  0.333     5     1
+  train_0334      0.200  0.250  0.222     5     4
+  train_0332      0.200  1.000  0.333     5     1
+  train_0802      1.000  0.556  0.714     5     9
+----------------------------------------------------------------------
+
+======================================================================
+  BM25 RECALL@30 on train
+=======================================================
+
+========== CELL 8 [code] ==========
+

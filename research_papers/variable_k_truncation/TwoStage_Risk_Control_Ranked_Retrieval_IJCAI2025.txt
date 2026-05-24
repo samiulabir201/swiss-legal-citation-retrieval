@@ -1,0 +1,643 @@
+Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+Two-stage Risk Control with Application to Ranked Retrieval
+
+           Yunpeng Xu1 , Mufang Ying2 , Wenge Guo3 , Zhi Wei1
+
+    1Department of Computer Science, New Jersey Institute of Technology
+         2Department of Statistics, Rutgers University­New Brunswick
+
+ 3Department of Mathematical Sciences, New Jersey Institute of Technology
+
+                         Abstract                                step. However, this assumption does not hold for many real-
+                                                                 world systems, which often involve two or more concate-
+      Practical machine learning systems often operate in        nated stages. One notable example is ranked retrieval sys-
+      multiple sequential stages, as seen in ranking and         tems, such as search engines, where the task is to retrieve and
+      recommendation systems, which typically include            rank documents based on their relevance to a user's query.
+      a retrieval phase followed by a ranking phase. Ef-         These systems typically involve two sequential stages: (1)
+      fectively assessing prediction uncertainty and en-         the retrieval stage, which identifies a set of candidate doc-
+      suring effective risk control in such systems pose         uments from a large repository, and (2) the ranking stage,
+      significant challenges due to their inherent com-          which refines and orders these candidates to produce the fi-
+      plexity. To address these challenges, we devel-            nal ranked list presented to the user [Yin and et al, 2016;
+      oped two-stage risk control methods based on the           Khattab et al., 2020]. This two-stage approach is necessary
+      recently proposed learn-then-test (LTT) and con-           because the massive volume of documents often exceeds the
+      formal risk control (CRC) frameworks. Unlike the           capacity of a single-stage ranking model, particularly when
+      methods in prior work that address multiple risks,         employing computationally intensive methods. In such two-
+      our approach leverages the sequential nature of the        stage problems, each stage is designed with distinct optimiza-
+      problem, resulting in reduced computational bur-           tion objectives, and errors from one stage can propagate to
+      den. We provide theoretical guarantees for our pro-        the next. Consequently, the two-stage process introduces ad-
+      posed methods and design novel loss functions tai-         ditional complexity, making it more challenging to accurately
+      lored for ranked retrieval tasks. The effectiveness        quantify and control uncertainty.
+      of our approach is validated through experiments
+      on two large-scale, widely-used datasets: MSLR-               To address these challenges, we propose two-stage con-
+      Web and Yahoo LTRC.                                        formal prediction methods to quantify and control the un-
+                                                                 certainty inherent in such problems. Specifically, we apply
+1 Introduction                                                   the learn-then-test framework [Angelopoulos et al., 2021a]
+                                                                 and extend the recently developed single-stage conformal risk
+As machine learning models become more integrated into           control framework [Angelopoulos et al., 2024] to a two-stage
+our daily lives, the need for transparency and reliability       setup, where each stage has its own distinct risk control re-
+in their predictions is crucial. Moving beyond black-box         quirement. Risk control is achieved by identifying parameters
+approaches, the ability to understand and quantify uncer-        that jointly satisfy the risk constraints for both stages. Fur-
+tainty in these models is increasingly important to ensure       thermore, to address the specific purpose of the two stages in
+their effectiveness in real-world applications. Conformal pre-   ranked retrieval problems, we introduce the retrieval risk and
+diction, a distribution-free and statistically valid approach    the ranking risk, respectively, and then apply our proposed
+that is straightforward to integrate with existing models, has   two-stage risk control methods to derive their correspond-
+emerged as a promising solution for quantifying uncertainty      ing prediction sets while controlling both risks at the pre-
+in machine learning [Vovk et al., 2005]. Its primary objective   specified levels. Our proposed methods are model-agnostic
+is to generate uncertainty sets for model predictions while      and can be seamlessly integrated into existing ranked retrieval
+ensuring a specified coverage level. Recently, the confor-       systems.
+mal risk control framework [Angelopoulos et al., 2024] has
+expanded upon traditional miscoverage control by enabling        1.1 Related work
+control over the expected value of any loss function. This ex-
+tension greatly enhances its applicability across a wider range  Conformal prediction Conformal prediction, originally
+of contexts.                                                     developed by Vovk and collaborators, has recently emerged
+                                                                 as a prominent method for uncertainty quantification in sta-
+   Most existing research on conformal prediction focuses on     tistical machine learning [Vovk et al., 1999; Papadopoulos
+a single-stage process, where the machine learning system        et al., 2002; Vovk et al., 2005; Lei et al., 2015]. A recent
+processes the input and generates the prediction in a single     survey by Angelopoulos and Bates outlines the significance
+
+9104
+                      Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+and wide applications of the topic [Angelopoulos and Bates,         When there exists a set of feasible tuning parameter pairs, R,
+2021]. Our work builds upon the learn-then-test framework           that satisfy (1), we are also interested in a uniform expected
+[Angelopoulos et al., 2021a] and the recently developed con-        risk control guarantee
+formal risk control (CRC) framework [Angelopoulos et al.,
+2024]. The application discussed in our work shares similar-                          E sup R(1)()  1, and
+ities with [Angelopoulos et al., 2023], which uses the LTT
+technique [Angelopoulos et al., 2021a] to control the false                                      (,)R
+
+discovery rate in recommender systems and optimize recom-                                                                                 (2)
+                                                                                      E sup R(2)(, )  2,
+mendation diversity. However, despite addressing the same
+ranked retrieval challenges, our work and that of [Angelopou-                                    (,)R
+los et al., 2023] differ in both objectives and methodologies.
+                                                                    as this would allow us to select tuning parameter pair from R
+Ranked retrieval Ranked retrieval has been extensively              based on certain objective function with valid expected risk
+                                                                    control guarantee. Note that the selection of  and  encodes
+studied, with models evolving from traditional IR approaches        the prediction set sizes. Throughout the paper, we assume
+like BM25 [Baeza-Yates and Ribeiro-Neto, 1999; Stephen              1, 2 are fixed to be in the interval [0, 1], which implies fea-
+and K., 1976] to modern learning-to-rank algorithms [Liu,           sible risk control.
+2009]. Recent advances in deep learning have also been
+successfully applied to ranked retrieval [Severyn and Mos-             With regard to two-stage risk control, one might wonder:
+chitti, 2015; Guo et al., 2016], with methods broadly catego-       if we can manage risk effectively in the second stage, why in-
+rized into pointwise [Crammer and Singer, 2001; Chu and             vest effort in controlling it in the first stage? The reason is that
+Ghahramani, 2005], pairwise [Burges et al., 2005; Freund            controlling risk in the first stage is foundational to the entire
+et al., 2003], and listwise approaches [Burges et al., 2006;        process. In the case of the ranked retrieval problem, retrieving
+Cao et al., 2007], based on their loss functions. A recent          all documents in the first stage imposes a significant computa-
+study [Wang and Joachims, 2023] also examines a similar             tional burden on the ranking stage. Conversely, retrieving too
+                                                                    few relevant documents in the first stage undermines the fea-
+two-stage problem in recommender systems but focuses on             sibility of second-stage risk control and compromises ranking
+                                                                    quality. Thus, this paper focuses on simultaneously control-
+group fairness in the first stage, differing from our objective.    ling risks at both stages.
+Another work [Guo et al., 2023] introduces stochastic rank-
+                                                                    2.1 Data Structure in Ranked Retrieval Problem
+ing at inference to ensure utility or fairness in learning-to-
+                                                                    Before discussing how to achieve risk control as specified in
+rank models. In contrast, our work addresses a distinct focus.      equations (1) and (2), we first outline the structure of the data
+                                                                    for the ranked retrieval problem. Consider a set of i.i.d cal-
+2 Problem Setup                                                     ibration data points {(Xi, Yi, Zi)}in=1, with (Xi, Yi, Zi) 
+                                                                    X × Y × Z, where Yi and Zi are the labeled responses
+Formally, in the first stage, consider an i.i.d collection of       of feature vector Xi corresponding to the two stages re-
+                                                                    spectively. In the ranked retrieval problem, Xi represents
+non-increasing, right-continuous random functions Li(1) :           a query along with its associated candidate documents. We
+  [0, 1], i = 1, . . . , n + 1, representing the associ-            let Xi = {qi, {di,j}Nj=i1}, where qi denotes the user query
+                                                                    and {di,j}Nj=i1 denotes its associated documents with size Ni.
+ated losses. We denote by  the tuning parameter in this             Each pair of qi and di,j is associated with a ground truth rel-
+                                                                    evance score ri,j  {0, 1, . . . , R}, where a higher value of
+stage. In the second stage, we consider another i.i.d col-          ri.j indicates a higher relevance of di,j to qi. This score is
+                                                                    only observable for the training data and is hidden for the
+lection of random functions, L(i2) :  ×   [0, 1], i =               test data. Here we denote the relevant documents with a
+1, . . . , n + 1, to represent the associated losses in the second  relevance score great than 0 in the retrieval results of qi by
+                                                                    Yi = {di,j : ri,j > 0}. In the ranking stage, with a fo-
+stage, incorporating an additional tuning parameter . Here,         cus on the ranking quality of documents with a ground truth
+                                                                    relevance level r0  [R] or above, the set of r0-relevant doc-
+L(i2)(, ) is assumed to be non-increasing and right contin-         uments for qi: {di,j : ri,j  r0} is considered. Then, Zi de-
+uous in each coordinate. Furthermore, the following condi-          notes the ordered set of the r0-relevant documents, sorted in
+                                                                    descending order based on the ground truth relevance scores
+tions hold: Li(1)(0) = 1, Li(1)(1) = 0, L(i2)(0, 0) = 1, and        with ties broken arbitrarily: Zi = {di,(1), di,(2), . . .}.
+Li(2)(1, 1) = 0. We use R(1)() and R(2)(, ) to denote the
+expected risk functions at each stage with fixed tuning pa-            Without loss of generality, we assume that each stage is
+                                                                    associated with a model learned on the training data for all
+rameter  and , i.e., R(1)() = EL(n1+) 1() and R(2)(, ) =            queries, denoted by Mretrieval for the retrieval model and by
+                                                                    Mrank for the ranking model, respectively. Note that the form
+ELn(2+) 1(, ), and use Rn(1)() and Rn(2)(, ) to denote the          of the retrieval model is flexible; it can range from a sim-
+                                                                    ple Okapi BM25 model, which counts word occurrences, to a
+empirical risk functions, i.e.,  Rn(1)()  =  1  n    L(i1)()  and   more complex large language model that generates embed-
+                                             n  i=1                 dings for embedding-based retrieval. Typically, the model
+
+Rn(2)(, )  =  1  n    Li(2)(,      ).  Without loss of generality,
+              n  i=1
+we assume that the parameter  is chosen from a finite set
+
+ = {i : i  [m]}, and the parameter  is chosen from a
+finite set  = {i : i  [m]}. We assume the values are
+
+ordered such that 0  1 < 2 < · · · < m  1 and
+
+0  1 < 2 < · · · < m  1.
+
+   For pre-specified risk levels 1, 2, we aim to utilize ran-
+dom functions {Li(1)()}in=1 and {Li(2)(, )}in=1 to identify
+data-dependent tuning parameter pairs (, ) that satisfies the
+
+expected risk control guarantee
+
+ER(1)()  1 and ER(2)(, )  2.                                  (1)
+
+                                                              9105
+                         Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+used in the retrieval stage is more efficient but less power-              m(1)     m(2,)m       m(2,)m-1                         m(2,)1
+ful than the one in the ranking stage. For both stages, by                                                                      m(2-) 1,1
+leveraging the pre-trained model and calibration data, we can             m(1-) 1  m(2-) 1,m     (m2-) 1,m-1
+construct prediction sets C^(1)(x; ) for the unknown response
+y  Y and C^(2)(x; , ) for the unknown response z  Z,                      1(1)      1(2,m)       1(2,m) -1                       1(2,1)
+given a test data point (x, y, z)  X × Y × Z. By employing
+the loss functions l(1) and l(2) for the first and second stages,
+respectively, we obtain:
+
+              Li(1)() = l(1)(C^(1)(Xi; ), Yi), and
+              L(i2)(, ) = l(2)(C^(2)(Xi; , ), Zi).
+
+We will specify the choice of C^(1)(·; ), C^(2)(·; , ), l(1), and
+l(2) for ranked retrieval problem in Section 4.
+
+                                                                          Figure 1: Graphical ordering of hypothesis tests
+
+3 Two-stage Risk Control                                                  Here the function h(a, b) is given by:
+
+In this section, we present two approaches for achieving ex-                                  a                                 1-a
+pected risk control. The first is a direct application of the LTT         h(a, b) = a log + (1 - a) log                                  .
+framework [Angelopoulos et al., 2021b], included for com-                                     b                                 1-b
+pleteness, as high-probability risk control offers a stronger
+guarantee than expected risk control. In the second approach,                To sequentially test the families F (1) and Fi(2) for each
+we extend the conformal risk control framework [Angelopou-                i  [1, m], one can employ the FWER controlling algorithm
+los et al., 2024] to accommodate the two-stage setting.                   to obtain the tuning parameter pairs [Angelopoulos et al.,
+                                                                          2021a]. Given that the loss function in the first stage, L(i1)(),
+3.1 LTT Framework                                                         is non-increasing in , and the loss function in the second
+                                                                          stage, L(i2)(, ), is non-increasing in both  and , the fixed-
+In the first stage, the value of  is determined by evaluating its         sequence procedure tests the hypotheses in these families in
+risk function R(1)() through the following hypothesis tests               reverse order. Specifically, for F (1), the m hypotheses are
+for each i  :                                                             tested sequentially in the order Hm(1), Hm(1)-1, . . . , H1(1). Sim-
+                                                                          ilarly, for Fi(2), the hypotheses are tested sequentially in the
+Hi(1) : R(1)(i) > 1        vs.      H    (1)  :  R(1)(i)    1.            order Hi(2,)m, Hi(2,)m-1, . . . , Hi(2,)1. Building on these considera-
+                                         i                                tions, we propose the following procedure for simultaneously
+                                                                          testing F (1) F (2), ensuring control of the global FWER at the
+Given  = i  , the value of  is selected in the second                     pre-specified level :
+stage by using the corresponding risk function R(2)(i, ).
+For each j  , the following hypothesis tests are per-                     Procedure:
+
+formed:                                                                     1. Test F (1) using the Bonferroni procedure:
+                                                                                Apply the Bonferroni procedure to the p-values pi(1) to
+Hi(2,)j : R(2)(i, j ) > 2  vs.      H    (2)  :  R(2)(i, j )    2.              simultaneously test F (1) at level . Let R(1) denote the
+                                         i,j
+                                                                                index set of the rejected hypotheses:
+Let F (1) = Hi(1) : i = 1, . . . , m denote the collection of all
+                                                                                              R(1) = i  [m] : pi(1)  /m .
+hypotheses tested in the first stage. Given  = i  , let
+Fi(2) = Hi(2,)j : j = 1, . . . , m denote the collection of all hy-         2. Test Fi(2) using the fixed-sequence procedure:
+                                                                                For each i  R(1), use the fixed-sequence procedure on
+potheses tested in the second stage for a fixed i. Finally,                     the p-values pi(2,)j to simultaneously test Fi(2) at level /m.
+             m    Fi(2)                                                         Let R(i2) denote the index set of the rejected hypotheses:
+let F (2) =  i=1         represent  the  complete  collection   of  all
+                                                                                    Ri(2) = j  [m] : pi(2,)j  /m j  [j, m] .
+hypotheses tested in the second stage. To conduct hypothe-
+
+sis testing across both stages, we aim to control the global
+
+family-wise error rate (FWER), defined as the probability of
+
+making at least one Type I error across the two families F (1)
+
+and F (2). For each individual hypothesis Hi(1)  F (1) in the               3. Determine the final set of rejected hypothesis pairs:
+first stage and Hi(2,)j  F (2) in the second stage, we use the                  The set R of tuning parameter pairs that correspond to
+                                                                                the rejected pairs of hypotheses Hi(1), Hi(2,)j is:
+Hoeffding-Bentkus inequality to compute p-values p(i1) and
+pi(2,)j, as introduced in [Angelopoulos et al., 2021a]. These                              R = (i, j ) : i  R(1), j  Ri(2) .
+p-values are valid under their respective null hypotheses and
+                                                                          The procedure described above can be viewed as a special
+are defined as follows:                                                   case of the sequential graphical approach for multiple test-
+                                                                          ing [Bretz et al., 2009; Angelopoulos et al., 2021a]. Con-
+pi(1) = min(exp{-nh(Rn(1)(i)  1, 1)},                                     sequently, it strongly controls the global FWER at the pre-
+             eP(Bin(n, 1)  nRn(1)(i))),                                   specified level . We note that some other alternative global
+
+pi(2,)j = min(exp{-nh(Rn(2)(i, j )  2, 2)},
+
+                  eP(Bin(n, 2)  nRn(2)(i, j))).
+
+                                                                    9106
+                               Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+FWER-controlling procedures can be applied; a few exam-                       With the above definitions, we are ready to state our results
+ples are provided in the appendix. However, determining op-                for expected risk control.
+timal procedure for a specific setting remains an open prob-
+lem. In the following, we present the expected risk control                Theorem 2. For any t  [0, 1], tuning parameter pair
+guarantee for general FWER-controlling procedure.                          (^(1)(t), ^(2)(t)) achieves first-stage risk control at level 1
+                                                                           with a finite-sample guarantee and achieves second-stage risk
+Theorem 1. Let R denote the collection of tuning parame-                   control at level 2 asymptotically, i.e.,
+ter pairs returned from a FWER controlling algorithm testing
+F (1)  F (2) at level . Then, we have                                                     ER(1)(^(1)(t))  1, and
+                                                                                          lim sup ER(2)(^(1)(t), ^(2)(t))  2.
+ P (, )  R : R(1)()  1, R(2)(, )  2  1 - .
+                                                                                                   n
+Therefore, we have
+                                                                           Since  and  are finite sets, we further have the following
+               E sup R(1)()  1 + , and                                     corollary.
+
+                          (,)R                                             Corollary 1. Uniform risk control for both stages can be
+                                                                           achieved in the set
+               E sup R(2)(, )  2 + .
+                                                                           R = (, )   ×  :  = ^(1)(t),   ^0(2)(), t  [0, 1] ,
+                          (,)R
+                                                                           i.e.,
+A few comments are in order regarding the comparison with
+multiple risks in [Angelopoulos et al., 2021a]. The authors                               E sup R(1)()  1, and
+therein discuss a similar setting involving multiple risk func-
+tions. Specifically, consider the case where the sets of tuning                                      (,)R
+parameters have size m, i.e., || = || = m. Their procedure
+uses the set of all parameter pairs {(, ) :   ,   }, as                                    lim sup E sup R(2)(, )  2.
+input for running FWER controlling algorithm. In contrast,
+our approach leverages the sequential nature of the problem                                         n (,)R
+and the monotonicity of the risk functions, which reduces the
+computational burden and enhances overall effectiveness.                   Finite-sample second-stage risk control
+                                                                           To ensure finite-sample guarantee for the second stage, a data-
+3.2 Expected Risk Control                                                  splitting approach can be employed. Let calibration data be
+                                                                           divided into two non-overlapping parts with index sets I1 and
+In this section, we describe methods that leverage conformal               I2. Let 1, 2  (1/(1 + |I1|), 1]. Define
+
+risk control framework. To proceed, we consider 1, 2 
+     1
+(  n+1  ,  1]  and  introduce  a  few  additional  notations.  For the
+
+purpose of risk control in the first stage, define:                        ~0(1) = inf    :       L(i1)()  (|I1| + 1)1 - 1 .
+
+                                        n                                                    iI1
+
+   ^0(1) = inf    : L(i1)()  (n + 1)1 - 1 .                                To proceed, we need to impose the following additional as-
+                                                                           sumption to ensure finite-sample risk control in the second
+                                      i=1                                  stage:
+
+Similarly, to ensure the feasibility of risk control in the second
+stage, define:
+
+                                        n                                  Assumption 1. There exists a known constant 0  1 such
+                                                                           that L(i2)(0, 1)  2 for i  [n + 1].
+   ^(02) = inf    : L(i2)(, 1)  (n + 1)2 - 1 .
+                                                                           The above Assumption 1 enables feasibility of finite-sample
+                                      i=1                                  second-stage risk control. Next, for     [0, 1] define
+
+Lastly, for any fixed   , we define:
+
+                                             n                             ~0(2)() = inf    : L(i2)(, )  (|I2| + 1)2 - 1 .
+
+ ^0(2)() = inf    : Li(2)(, )  (n + 1)2 - 1 .                                                                      iI2
+
+                                           i=1                             We define ~0(2)() = 1 when the set is empty. For t  [0, 1],
+                                                                           we then define:
+                                                                      (3)
+When the set in equation (3) is empty, we set ^0(2)() = 1. To
+ensure risk control in both stages, we set the value of  as a
+linear combination of ^0(1)  ^(02) and 1:
+
+               ^(1)(t) :=  t(^0(1)  ^(02)) + (1 - t)    .                  ~(1)(t) :=  t(~0(1)  0) + (1 - t)                            ,  and
+
+                                                                                                                                                (4)
+
+Here ^(1)(t) is defined to be the ceiling of t(^(01)^(02))+(1-t),          ~(2)(t) = ~0(2)(~(1)(t)).
+restricted to values in , and t  [0, 1] is a tuning parameter.
+                                                                           Theorem 3. For any t  [0, 1], tuning parameter pair
+This formulation ensures that ^(1)(t)  ^0(1)  ^(02) for any t.             (~(1)(t), ~(2)(t)) achieves finite-sample first-stage and second-
+Using ^(1)(t), we determine the value of  by defining                      stage risk control at level 1, 2, respectively, i.e.,
+
+                    ^(2)(t) := ^0(2) ^(1)(t) .                                ER(1)(~(1)(t))  1 and ER(2)(~(1)(t), ~(2)(t))  2.
+
+                                                               9107
+                    Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+Note that for any t  [0, 1], we have ER(2)(~(1)(t), ~(2)(t))      4.2 Loss Function for Ranking Stage
+2. However, there is no guarantee that
+                                                                  Similarly, in the ranking stage, we first define the prediction
+                E sup R(2)(~(1)(t), ~(2)(t))  2,                  set C^(2)(Xi; , ) as:
+
+                          t[0,1]                                  C^(2)(Xi; , ) = {di,j : Mrank(qi, di,j )  1-}C^(1)(Xi; ).
+                                                                                                                                        (6)
+as no monotonic relationship exists. Therefore, to obtain a
+finite-sample uniform risk control in the second stage, we de-    In contexts like information retrieval, search engines, and
+fine                                                              recommendation systems, nDCG [Ja¨rvelin and Keka¨la¨inen,
+                                                                  2000] is widely used to evaluate the ranking quality of
+¯(2) = inf    :       Li(2)(~(1)(1), )  (|I2| + 1)2 - 1           algorithms or systems. Motivated by the intuition from
+                                                                  nDCG that a ranked list can be evaluated by rewarding
+                 iI2                                              relevance while considering ranking positions, we slightly
+                                                                  modify the definition of nDCG to suit our setting, and define:
+Corollary 2. Uniform risk control for both stages can be
+achieved in the set                                                                               = |Zi| 1 . {di,(j)C^(2)(Xi;,)}
+                                                                                                                log(j + 1)
+R = (, )   ×  :  = ~(1)(t),   ¯(2), t  [0, 1] ,                   DCGmod    C^(2)(Xi; , ), Zi
+                                                                                                      j=1
+
+i.e.,                                                             Notably, when C^(2)(Xi; , ) contains all the r0-relevant doc-
+                                                                  uments, DCGmod attains its maximum value. To normalize
+E sup R(1)()  1 and E sup R(2)(, )  2.                            the DCGmod, we define the modified Ideal Discounted Cu-
+                                                                  mulative Gain (iDCGmod) for query qi as:
+(,)R                             (,)R
+
+We remark that our data-splitting approach, which ensures                                         |Zi |                    1
+a uniform finite-sample risk control guarantee, can be re-
+garded as a special case of the method proposed in Section                  iDCGmod (Zi) =                            .
+4.3 of [Angelopoulos et al., 2024].                                                                      log(j + 1)
+                                                                                                  j=1
+
+                                                                  Correspondingly, we define the modified Normalized Dis-
+                                                                  counted Cumulative Gain (nDCGmod) as
+
+4 Application to Ranked Retrieval                                 nDCGmod   C^(2)(Xi; , ), Zi     =      ( ) DCGmod C^(2)(Xi;,),Zi
+                                                                                                               . iDCGmod (Zi )
+In this section, we apply our proposed methods to ranked re-
+trieval problem. We begin by introducing the loss functions       The loss function for the ranking stage is then defined as
+defined for each stage.
+                                                                          Li(2)(, ) = 1 - nDCGmod(C^(2)(Xi; , ), Zi). (7)
+4.1 Loss Function for Retrieval Stage
+                                                                  The proposed loss function in equation (7) addresses the rank-
+As defined in the Section 2, Yi is the set of relevant documents  ing order within the ground truth set Zi. When selecting
+with respect to the query qi, i.e., the set of documents with     an appropriate  that satisfies risk control guarantee, greater
+ground truth relevance scores greater than 0. To represent        weight is assigned to documents in Zi with higher ranking
+the set of documents fetched by Mretrieval used in the retrieval  positions, ensuring that the most relevant documents are pri-
+stage, we define the retrieved document set C^(1)(Xi; ) for the   oritized for inclusion in the prediction set. Note that, given 
+retrieval stage as:                                               specified in the first stage, the ranking loss function is non-
+                                                                  increasing, right-continuous in , and bounded within [0, 1].
+       C^(1)(Xi; ) = {di,j : Mretrieval(qi, di,j )  1 - },        Our goal is to determine  to control the ranking loss at spec-
+                                                                  ified level 2.
+
+where   [0, 1] and Mretrieval(qi, di,j) denotes the model         4.3 Parameter Pair Selection via Empirical Set
+score for the query-document pair (qi, di,j), as computed by            Size Minimization
+
+the retrieval model Mretrieval. Note that a good retrieved doc-   Given a collection of tuning parameter pairs that achieve risk
+ument set C^(1)(Xi; ) associated with the query qi should aim     control at both stages, we determine the tuning parameter pair
+                                                                  (^, ^) through optimization with a objective function L:
+to cover as many relevant documents in Yi as possible. To
+measure the miscoverage of Yi by C^(1)(Xi; ), we define re-                 (^, ^) = argmin(,)R L (, ; {Xi}in=1) .            (8)
+
+trieval loss as:
+
+       L(i1)()   =  1  -  |Yi    C^(1)(Xi; )| .             (5)   In many applications (recommendation in mobile devices
+                                  |Yi|
+                                                                  etc.), it is desirable to produce a smaller prediction set in the
+
+Note that the loss function defined in equation (5) is non-       second stage. Therefore, in this paper, we consider objective
+increasing, right-continuous in , and bounded within [0, 1].
+This form of loss function quantifies the missed fraction of      function
+relevant documents retrieved by model Mretrieval. By choos-
+ing an appropriate , we aim to control the risk at level 1.                                    1  n
+                                                                                               n
+                                                                  L (, ; {Xi}ni=1)  =                    |C^(2)(Xi; , )}|.
+
+                                                                                                  i=1
+
+                                                            9108
+                    Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+We comment that, the choice of the loss function should be
+
+driven by the specific problem at hand. For instance, in sce-                                         vs. 2
+
+narios where the objective is to reduce computational cost            1.000
+
+during the ranking stage, a smaller prediction set size in the        0.995
+
+retrieval stage reduces the number of documents evaluated by
+
+the computationally intensive ranking model. To address this,         0.990
+                                                                      0.985
+the  term  1  n     |C^(1)(Xi; )|  can  be  incorporated  into  the   0.980                                                tCRC
+           n  i=1                                                     0.975                                                tCRC-s
+loss function L, thereby systematically mitigating the com-                                                                LTT
+
+putational burden.
+
+4.4 Experiments                                                       0.970
+
+We address the ranked retrieval problem using three ap-               0.965
+proaches: the learn-then-test framework (LTT), two-stage
+conformal risk control (tCRC), and two-stage conformal risk                           0.06 0.08 0.10 0.12 0.14 0.16 0.18 0.20
+control with data splitting (tCRC-s1). The tuning parame-                                                                2
+ter pairs (^, ^) for these methods are determined by equa-
+tion (8). Accordingly, these selected tuning parameter pairs                                          vs. 2
+ensure expected risk control guarantees, as established in
+Theorem 1, Corollary 1, and Corollary 2, respectively. Our            1.000                                                tCRC
+experiments are conducted on two datasets: MSLR-Web, and              0.995                                                tCRC-s
+Yahoo LTRC. For each dataset and experiment, we split the                                                                  LTT
+data into a calibration set and a test set, and then apply dif-
+ferent methods to the data. The calibration set is used to de-        0.990
+termine the tuning parameter pair, while the test set is used
+for evaluation. Using the test data and the tuning parameter          0.985
+pair computed from the calibration data, we compute the fol-
+lowing quantities for evaluation: empirical risks in two stages       0.980
+(Risk (1) represents empirical risk in the first stage, Risk (2)
+represents empirical risk in the second stage), average predic-                               0.06 0.08 0.10 0.12 0.14 0.16 0.18 0.20
+tion set size in the second stage, average recall for documents                                                                  2
+with a relevance level greater than 2, average recall for docu-
+ments with a relevance level equal to 1, and average precision                                   Risk (1) vs. 2
+for documents with relevance level greater than 1. Then, we
+replicate each experiment 10 times and report their averages.                   0.10
+
+   In Table 1, we summarize results for the dataset MSLR.                       0.08
+From the table, we observe that both Recall ( 2) and Re-
+call (1) exhibit relatively high values, indicating that the pre-     Risk (1)  0.06                                       tCRC
+diction sets effectively cover a substantial proportion of rel-
+evant documents. Additionally, Recall ( 2) consistently                                                                    tCRC-s
+achieves higher values than Recall (1). This confirms that
+our proposed ranking loss effectively prioritizes documents                     0.04                                       LTT
+with higher relevance levels, resulting in prediction sets that
+are more likely to include highly relevant documents. In                        0.02
+the table, we vary the risk levels and consider (1, 2) 
+{(0.1, 0.1), (0.01, 0.1), (0.1, 0.2)}. Notably, LTT exhibits the                0.00
+lowest Risk (1) and Risk (2) values, indicating that LTT is the
+most conservative approach. This can also be explained by                             0.06 0.08 0.10 0.12 0.14 0.16 0.18 0.20
+the fact that the size of the feasible set R for LTT is, on aver-                                                        2
+age, the smallest. Conversely, we observe that tCRC achieves
+the smallest prediction set size after tuning parameter selec-                        Risk (2) vs. 2
+tion via equation (8), attributed to its larger feasible set R.
+Notably, compared with tCRC-s, tCRC maintains a larger set                      0.20
+size in the second stage but achieves a smaller Recall ( 2).
+While this seems counterintuitive, it can be explained by that                                  tCRC
+fact that tCRC-s has a larger risk in the first stage. This is
+                                                                                0.18  tCRC-s
+
+                                                                                0.16  LTT
+
+                                                                      Risk (2)  0.14
+
+                                                                                0.12
+
+                                                                                0.10
+
+                                                                                0.08
+
+                                                                                0.06
+
+                                                                                0.04
+
+                                                                                      0.06 0.08 0.10 0.12 0.14 0.16 0.18 0.20
+                                                                                                                         2
+
+    1While the required information 0 for tCRC-s is unknown in        Figure 2: (^, ^) and Risk under fixed 1 and varying 2
+practice, we use the calibration data with index set I1 to obtain an
+estimate.
+
+                                                                9109
+Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+ (1, 2)      Method  Risk (1)  Risk (2)                           Set size  Recall ( 2)  Recall (1)  Precision
+(0.1, 0.1)
+(0.01, 0.1)   tCRC   0.0069    0.0982                              67.86       0.9537     0.8550      0.7504
+(0.1, 0.2)   tCRC-s  0.0986    0.0969                              77.41       0.9279     0.8790      0.6673
+                     0.0003    0.0772                              70.25       0.9642     0.8857      0.7463
+               LTT
+                     0.0058    0.0994                              68.08       0.9532     0.8533      0.7511
+              tCRC   0.0078    0.0967                              68.44       0.9537     0.8577      0.7503
+             tCRC-s  0.0002    0.0765                              70.66       0.9646     0.8864      0.7467
+
+               LTT   0.0051    0.2006                              57.50       0.9084     0.7017      0.7578
+                     0.0972    0.1971                              58.28       0.8825     0.7300      0.7575
+              tCRC   0.0046    0.1718                              60.22       0.9221     0.7440      0.7578
+             tCRC-s
+
+               LTT
+
+                     Table 1: Summary table for dataset MSLR
+
+ (1, 2)      Method  Risk (1)  Risk (2)                           Set size  Recall ( 2)  Recall (1)  Precision
+(0.1, 0.1)
+(0.01, 0.1)   tCRC   0.0053    0.1001                              27.50       0.9458     0.8157      0.9414
+(0.1, 0.2)   tCRC-s  0.0985    0.0974                              28.80       0.9246     0.8577      0.9069
+                     0.0052    0.0787                              28.40       0.9572     0.8556      0.9383
+               LTT
+                     0.0025    0.0984                              27.46       0.9466     0.8187      0.9414
+              tCRC   0.0078    0.0966                              27.56       0.9464     0.8245      0.9405
+             tCRC-s  0.0019    0.0748                              28.43       0.9599     0.8610      0.9381
+
+               LTT   0.0144    0.2014                              23.36       0.8885     0.6325      0.9480
+                     0.0966    0.1991                              23.60       0.8698     0.6682      0.9477
+              tCRC   0.0047    0.1722                              24.49       0.9070     0.6823      0.9472
+             tCRC-s
+
+               LTT
+
+                     Table 2: Summary table for dataset Yahoo
+
+achieved by using a smaller ^, which results in fewer doc-        through experiments on two large-scale, widely used datasets:
+uments with higher relevance levels being retrieved in the        MSLR-Web and Yahoo LTRC. Below, we discuss several ex-
+first stage, ultimately impacting the performance in the sec-     tensions of the current framework.
+ond stage. When 1 is reduced from 0.1 to 0.01, the metrics
+of tCRC and LTT exhibit limited variation, whereas tCRC-          Non-monotone risk function When risk function is non-
+s demonstrates greater sensitivity to this change. This in-
+creased sensitivity can be attributed to the construction of the  monotone, the following monotonization procedure can be
+feasible set by tCRC-s. Additionally, when 2 is increased
+from 0.1 to 0.2, we observe that Risk (2) slightly exceeds the    applied. At the first stage, the loss function is modified as
+target risk level of 0.2. This deviation can be explained by
+approximation error and the asymptotic validity of tCRC, as       follows:  L~(i1)() = sup Li(1)().
+established in Corollary 1.
+                                                                                              [,1]
+   Figure 2 illustrates (^, ^) and the corresponding risks
+over two stages, with 1 = 0.1 and 2 varying in the                At the second stage, we define the modified loss function as
+set 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2. Further visual-
+izations are included in the appendix. All three methods ef-                L~i(2)(, ) = sup Li(2)(, ).
+fectively manage risk within the desired levels. Notably, as
+2 varies, tCRC achieves the smallest prediction set size in                                        [,1],
+the second stage, LTT attains the highest recall rate, and both                                     [ ,1]
+tCRC and LTT demonstrate superior precision. In practice,
+we recommend using LTT or tCRC. When the sample size              With these modifications to the loss functions, the results
+is small, tCRC-s may suffer from lower sample efficiency,         from the previous sections can be directly applied.
+compounded by the challenge of the unknown parameter 0.
+Lastly, we present similar results for the Yahoo dataset in Ta-   Multiple-stages We extend the problem to the scenario
+ble 2, with the corresponding figures deferred to the appendix.   where there are K > 2 stages. Let   RK denote the
+                                                                  parameter of interest. At the k-th stage, the loss function
+5 Conclusion & Discussion                                         for sample i is denoted as L(ik)(1:k), where 1:k is shorthand
+                                                                  for (1, . . . , k). The sequential nature of the problem deter-
+In this paper, we study expected risk control under a two-        mines that loss function at stage k only involves parameters
+stage setup. We propose methods aimed at simultaneously           1:k. The goal is to determine parameter set  that satisfies
+controlling risk, and establish theoretical guarantees for these
+methods. The effectiveness of our approach is validated                       P k  [K], Li(k)(1:k)  k,  1 - ,
+
+                                                                  or alternatively,
+
+                                                                                 ELi(k)(1:k)  k for all k  [K].
+
+                                                                  When loss functions at different stages are monotonic in each
+                                                                  parameter i with i  [K], one can develop analogous ap-
+                                                                  proaches to achieve risk control with high probability and ex-
+                                                                  pected risk control.
+
+                                         9110
+Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence (IJCAI-25)
+
+Contribution Statement                                           [Freund et al., 2003] Y. Freund, R. Iyer, R. E. Schapire, and
+                                                                    Y. Singer. An efficient boosting algorithm for combining
+Yunpeng Xu and Mufang Ying contributed equally in this              preferences. In Journal of Machine Learning Research,
+work.                                                               2003.
+
+References                                                       [Guo et al., 2016] Jiafeng Guo, Yixing Fan, Qingyao Ai, and
+                                                                    W. Bruce Croft. A deep relevance matching model for
+[Angelopoulos and Bates, 2021] Anastasios N. Angelopou-             ad-hoc retrieval. In Proceedings of the 39th International
+   los and Stephen Bates. A gentle introduction to conformal        ACM SIGIR conference, 2016.
+   prediction and distribution-free uncertainty quantification.
+   arXiv:2107.07511, 2021.                                       [Guo et al., 2023] Ruocheng Guo, Jean-Franc¸ois Ton, Yang
+                                                                    Liu, and Hang Li. Inference-time stochastic ranking with
+[Angelopoulos et al., 2021a] Anastasios N Angelopoulos,             risk control. arXiv e-prints, pages arXiv­2306, 2023.
+   Stephen Bates, Emmanuel J Cande`s, Michael I Jordan,
+   and Lihua Lei. Learn then test: Calibrating predic-           [Ja¨rvelin and Keka¨la¨inen, 2000] Kalervo Ja¨rvelin and Jaana
+   tive algorithms to achieve risk control. arXiv preprint          Keka¨la¨inen. IR evaluation methods for retrieving highly
+   arXiv:2110.01052, 2021.                                          relevant documents. Proceedings of the 23rd international
+                                                                    ACM SIGIR conference, 2000.
+[Angelopoulos et al., 2021b] Anastasios N. Angelopoulos,
+   Stephen Bates, Emmanuel J. Cande`s, Michael I. Jordan,        [Khattab et al., 2020] Omar Khattab, Mohammad Ham-
+   and Lihua Lei. Learn then test: Calibrating predic-              moud, and Tamer Elsayed. Finding the best of both
+   tive algorithms to achieve risk control. arXiv preprint          worlds: Faster and more robust top-k document retrieval.
+   arXiv:2110.01052, 2021.                                          Proceedings of the 43rd International ACM SIGIR Confer-
+                                                                    ence, 2020.
+[Angelopoulos et al., 2023] A.N. Angelopoulos, K. Krauth,
+   S. Bates, Y. Wang, and M.I. Jordan. Recommendation sys-       [Lei et al., 2015] Jing Lei, Alessandro Rinaldo, and Larry
+   tems with distribution-free reliability guarantees. In Sym-      Wasserman. A conformal prediction approach to explore
+   posium on Conformal and Probabilistic Prediction with            functional data. Annals of Mathematics and Artificial In-
+   Applications (COPA), 2023, 2023.                                 telligence, 2015.
+
+[Angelopoulos et al., 2024] Anastasios N Angelopoulos,           [Liu, 2009] Tie-Yan Liu. Learning to rank for information
+   Stephen Bates, Adam Fisch, Lihua Lei, and Tal Schuster.          retrieval. Proceedings of the 33rd international ACM SI-
+   Conformal risk control. ICLR, 2024.                              GIR conference, 2009.
+
+[Baeza-Yates and Ribeiro-Neto, 1999] R. Baeza-Yates and          [Papadopoulos et al., 2002] Harris Papadopoulos, Kostas
+   B. Ribeiro-Neto. Modern Information Retrieval. ACM               Proedrou, Volodya Vovk, and Alex Gammerman. Induc-
+   Press / Addison-Wesley, 1999.                                    tive confidence machines for regression. In ECML, 2002.
+
+[Bretz et al., 2009] Frank Bretz, Willi Maurer, Werner Bran-     [Severyn and Moschitti, 2015] Aliaksei Severyn and
+   nath, and Martin Posch. A graphical approach to se-              Alessandro Moschitti. Learning to rank short text pairs
+   quentially rejective multiple test procedures. Statistics in     with convolutional deep neural networks. In Proceedings
+   medicine, 28(4):586­604, 2009.                                   of the 38th International ACM SIGIR Conference, 2015.
+
+[Burges et al., 2005] C. J. Burges, T. Shaked, E. Renshaw,       [Stephen and K., 1976] Robertson. Stephen and Jones. K.,
+   A. Lazier, M. Deeds, N. Hamilton, and G. Hullender.              Sparck. Relevance weighting of search terms. journal of
+   Learning to rank using gradient descent. In Proceedings          the association for information science and technology.
+   of the 22nd international conference on Machine learning,        27(3):129-146. doi: 10.1002/ASI.4630270302, 1976.
+   2005.
+                                                                 [Vovk et al., 1999] Vladimir Vovk, Alex Gammerman, and
+[Burges et al., 2006] Christopher J.C. Burges, Robert               Craig Saunders. Machine-learning applications of algo-
+   Ragno, and Quoc Viet Le. Learning to rank with nons-             rithmic randomness. Sixteenth International Conference
+   mooth cost functions. In Proceedings of NIPS conference,         on Machine Learning (ICML-1999), 1999.
+   2006, 2006.
+                                                                 [Vovk et al., 2005] Vladimir Vovk, Alexander Gammerman,
+[Cao et al., 2007] Zhe Cao, Tao Qin, Tie-Yan Liu, Ming-             and Glenn Shafer. Algorithmic learning in a random
+   Feng Tsai, and Hang Li. Learning to rank: From pairwise          world, volume 29. Springer, 2005.
+   approach to listwise approach. In MSR-TR-2007-40, 2007.
+                                                                 [Wang and Joachims, 2023] Lequn Wang and Thorsten
+[Chu and Ghahramani, 2005] W. Chu and Z. Ghahramani.                Joachims. Uncertainty quantification for fairness in
+   Preference learning with gaussian processes. In Proceed-         two-stage recommender systems. In Proceedings of the
+   ings of the 22nd international conference on Machine             Sixteenth ACM International Conference on Web Search
+   learning, 2005.                                                  and Data Mining, pages 940­948, 2023.
+
+[Crammer and Singer, 2001] Koby Crammer and Yoram                [Yin and et al, 2016] Dawei Yin and et al. Ranking relevance
+   Singer. Pranking with ranking. In Proceedings of NIPS            in Yahoo search. Proceedings of the ACM SIGKDD Con-
+   conference, 2001.                                                ference, 2016.
+
+9111
+

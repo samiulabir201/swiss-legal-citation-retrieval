@@ -1,0 +1,329 @@
+                                        UQLegalAI@COLIEE2025: Advancing Legal Case Retrieval with
+                                               Large Language Models and Graph Neural Networks
+
+                                               Yanran Tang                   Ruihong Qiu                                                    Zi Huang
+
+                                           yanran.tang@uq.edu.au              r.qiu@uq.edu.au                                         helen.huang@uq.edu.au
+                                        The University of Queensland  The University of Queensland                                 The University of Queensland
+
+                                              Brisbane, Australia           Brisbane, Australia                                          Brisbane, Australia
+
+arXiv:2505.20743v1 [cs.IR] 27 May 2025  Abstract                                                                                   Competition on Legal Information Extraction and Entailment (COL-
+                                                                                                                                   IEE) [10] is held annually to encourage the competition participants
+                                        Legal case retrieval plays a pivotal role in the legal domain by                           to develop highly accurate legal case retrieval models. There are
+                                        facilitating the efficient identification of relevant cases, supporting                    five task in COLIEE 2025, where Task 1 and Task 2 are case law
+                                        legal professionals and researchers to propose legal arguments and                         tasks, Task 3 and Task 4 are statute law tasks and Task 5 is a pilot
+                                        make informed decision-making. To improve retrieval accuracy,                              task that focuses on judgment of civil cases.
+                                        the Competition on Legal Information Extraction and Entailment
+                                        (COLIEE) is held annually, offering updated benchmark datasets for                            In COLIEE 2025, Task 1 is a legal case retrieval task of case law
+                                        evaluation. This paper presents a detailed description of CaseLink,                        system, aimed at returning `noticed cases' from a large case collec-
+                                        the method employed by UQLegalAI, the second highest team in                               tion for a given query case. Specifically, a case called `noticed' to a
+                                        Task 1 of COLIEE 2025. The CaseLink model utilises inductive                               query case means the case is referenced by the query case. The pro-
+                                        graph learning and Global Case Graphs to capture the intrinsic                             vided cases of Task 1 are all from the Federal Court of Canada. As
+                                        case connectivity to improve the accuracy of legal case retrieval.                         legal case retrieval is a basic and essential task in COLIEE, previous
+                                        Specifically, a large language model specialized in text embedding                         teams have proposed high-accuracy retrieval models. In COLIEE
+                                        is employed to transform legal texts into embeddings, which serve                          2024, TQM [5] team achieves the first place in Task 1 by exploring
+                                        as the feature representations of the nodes in the constructed case                        various lexical and semantic retrieval models. THUIR [6] team de-
+                                        graph. A new contrastive objective, incorporating a regularization                         velops a structure-aware pre-trained language model called SAILER
+                                        on the degree of case nodes, is proposed to leverage the information                       to improve the model understanding ability of legal cases, which
+                                        within the case reference relationship for model optimization. The                         ranks the first in COLIEE 2023. While UA [11] team leverages a
+                                        main codebase used in our method is based on an open-sourced                               transformer-based model for generating paragraph embeddings
+                                        repo of CaseLink [18]: https://github.com/yanran-tang/CaseLink.                            and a gradient boosting classifier to decide a case is noticed or not,
+                                                                                                                                   which ranks the first in COLIEE 2022.
+                                        CCS Concepts
+                                                                                                                                      In this paper, our novel CaseLink [18] model utilised in COLIEE
+                                        · Information systems  Specialized information retrieval.                                  2025 Task 1 is proposed to further enhance the retrieval accuracy
+                                                                                                                                   by leveraging case connectivity relations and graph-based model.
+                                        Keywords                                                                                   Firstly, the training set and test set are transferred into two Global
+                                                                                                                                   Case Graphs (GCG) by exploiting the Case-Case and Case-Charge
+                                        Information Retrieval, Legal Case Retrieval, Graph Neural Networks                         and Charge-Charge relationships of cases and charges. With the
+                                                                                                                                   constructed graph, a large language model specialized in text em-
+                                        ACM Reference Format:                                                                      bedding is utilized to convert legal texts into embeddings as the
+                                        Yanran Tang, Ruihong Qiu, and Zi Huang. 2025. UQLegalAI@COLIEE2025:                        node features of GCG. To leverage the connected relationships in
+                                        Advancing Legal Case Retrieval with Large Language Models and Graph                        GCG, a graph neural network module is used to generate the case
+                                        Neural Networks. In Proceedings of COLIEE 2025 workshop, June 20, 2025,                    representation. A contrastive loss and a degree regularisation are
+                                        Chicago, USA. ACM, New York, NY, USA, 5 pages.                                             designed to train the CaseLink model. Our team, UQLegalAI, ranked
+                                                                                                                                   as the second highest team in Task 1 with a F1 score of 0.2962.
+                                        1 Introduction
+                                                                                                                                   2 Related Work
+                                        In legal domain, a precedent refers to a judicial decision that serve
+                                        as an example or authority when giving judgment to future similar                          Legal case retrieval aims to retrieve a set of relevant cases for a query
+                                        cases, which ensures fairness, consistency and predictability of judg-                     case within a large legal case dataset. The recent legal case retrieval
+                                        ments in legal system. However, identifying relevant precedents                            can be roughly divided into lexical models, semantic models and
+                                        within large legal databases is a time-consuming task, significantly                       graph-based models. The traditional lexical models like TF-IDF [2],
+                                        reducing the work efficiency of legal practitioners. Therefore, the                        BM25 [12] and LMIR [9] utilise term frequency to calculate the case
+                                                                                                                                   similarity score. While the semantic models such as BERT-PLI [13]
+                                        Permission to make digital or hard copies of all or part of this work for personal or      and PromptCase [15] are both using language model to generate
+                                        classroom use is granted without fee provided that copies are not made or distributed      case embedding.
+                                        for profit or commercial advantage and that copies bear this notice and the full citation
+                                        on the first page. Copyrights for third-party components of this work must be honored.        Unlike lexical and semantic models, graph-based models leverage
+                                        For all other uses, contact the owner/author(s).                                           graph structures and Graph Neural Networks (GNNs) to enhance
+                                        COLIEE 2025, Chicago, USA                                                                  the performance of legal case retrieval. For example, CaseGNN[17]
+                                        © 2025 Copyright held by the owner/author(s).
+COLIEE 2025, June 20, 2025, Chicago, USA                                                                                                   Tang et al.
+
+                Table 1: Statistics of Task 1 dataset.                                1                 1       1  2
+                                                                                            1 3                       3
+               COLIEE 2025 Task 1            train test                                       2            1 3
+                                                                                                             2
+                     Language                    English                               2
+                      # Query                1678 400                                                   2       4
+                   # Candidates              7350 2159                                  Case Pool
+              # Avg. relevant cases         4.1007 4.3975                                                  Global Case Graph
+              Avg. length (# token)         28865 31250
+             Largest length (# token)       650534 681027
+
+and CaseGNN++[16] exploit the relations of legal elements of a                        Figure 1: An example of a Global Case Graph is shown, where
+case to construct a fact graph and a legal issue graph for each case
+as well as use GNN to generate case graph representations. SLR                        green nodes represent the two query cases 1 and 2, white
+[7] and CFGL-LCR [22] integrate external knowledge graphs with                        nodes denote candidate cases 1  3 and orange nodes cor-
+GNNs to improve retrieval performance. In contrast to these graph-                    respond to legal charges 1  4. The solid lines indicate the
+based models, the CaseLink [18] model utilised in this paper fully                    edges: Case-Case edges are shown in blue, Case-Charge edges
+exploits the connectivity relationships among cases of a large legal
+dataset to enhance case retrieval effectiveness.                                      in red, and Charge-Charge edges in yellow.
+
+3 Preliminary                                                                         4 Method
+
+3.1 Task Definition                                                                   4.1 Global Case Graph
+
+Task 1 of COLIEE 2025 is a legal case retrieval task that focuses                     In this paper, the construction method of the Global Case Graph
+                                                                                      (GCG) is adopted from our previous work CaseLink [18]. Specifi-
+on case law. Given a query case   D, and a set of  cases                              cally, GCG is represented as  = (V, E), where V and E denote
+                                                                                      the set of nodes and the set of edges, respectively. The node set
+D = {1, 2, ...,  }, the task of legal case retrieval is to extract                    V comprises both case nodes ,  as well as charge nodes . The
+a set of relevant cases D = {|  D   (, )}. The                                        edge set E encompasses three types of edges: Case-Case edges,
+                                                                                      Case-Charge edges, and Charge-Charge edges. An example of GCG
+        ( ,  )  indicates   that            relevant  case  to  the         case      is shown in Figure 1.
+                                     is  a                           query
+
+. In case law, the above relevant cases refer to the precedents,
+
+which are the prior cases referenced by the query case.                               4.1.1 Nodes. In GCG, the case nodes refer to the cases in the D,
+
+3.2 Dataset                                                                           which includes both the query cases  and candidate cases . The
+
+The cases in the Task 1 dataset are sourced entirely from the Federal                 charge nodes are derived from a list specified in the Federal Courts
+Court of Canada. The statistics for the Task 1 dataset are presented                  Act and Rules of Canada1, presented as C = {1, 2, ...,  }.
+in Table 1. These statistics reveal that the number of queries and
+candidates in the training set are approximately three times greater                  4.1.2 Edges. To effectively utilise intrinsic case connectivity rela-
+than that in the test set. Additionally, the average number of rele-
+vant cases per query in both the training and test sets are close to                  tions, three edge connection strategies are exploited in GCG:
+four, suggesting that the level of difficulty for both sets is compa-
+rable. Furthermore, the average token count per case for both the                     · Case-Case Edge. The construction of GCG aims to establish edges
+training and test sets is approximately 30,000. Notably, the longest
+case contains up to 680,000 tokens, highlighting the challenges                       between cases that employ intrinsic connectivity. Therefore, the
+associated with processing and comprehending long cases.
+                                                                                      high similarity cases measured by BM25 [12] will be linked as
+
+                                                                                      neighbour nodes. The adjacency matrix of Case-Case edges A 
+                                                                                      R× is denoted as:
+
+                                                                                      1 forTopK(BM25(,   |,    D)),
+                                                                                      A = 0 forOthers,                                               (4)
+
+3.3 Evaluation metric                                                                 where  and   are two cases in D. TopK retrieves the top  most
+                                                                                      similar cases from a given list of BM25 case similarity scores.
+In COLIEE 2025 Task 1, the micro-average of precision, recall, and                    · Charge-Charge Edge. In legal system, natural relationships ex-
+F-measure are utilised as the evaluation metic as follows:                            ist among different legal charges. Therefore, connecting similar
+                                                                                      charges can effectively enhance case representation learning. The
+Precision =  the number of correctly retrieved cases for all queries                  Charge-Charge edges symmetric adjacency matrix A  R×,
+                                                                                      comprising  charges is defined as:
+                                                                                   ,
+
+                the number of retrieved cases for all queries
+
+                                                                            (1)
+
+           the  number  of  correctly    retrieved    cases  for  all  queries                  1  for  Sim(x , x  |,    V) > ,                      (5)
+                                                                                ,     A  = 0       for                            Others,
+Recall  =
+                the number of relevant cases for all queries
+                                                                                      where Sim is the similairty calculation fuction such as cosine simi-
+                                                                            (2)       larity,   V,    V are two charge nodes with the node features
+
+                F-measure   =  2  × Precision × Recall                      (3)
+                                                           .
+                                                                                      1 https://www.fct- cf.gc.ca/en/pages/law- and- practice/acts- and- rules/federal- court/
+                                  Precision + Recall
+UQLegalAI@COLIEE2025: Advancing Legal Case Retrieval with Large Language Models and Graph Neural Networks  COLIEE 2025, June 20, 2025, Chicago, USA
+
+1       1  2                 1                                        4.2.1 Graph Neural Network. With the constructed GCG and the
+              3                                                       encoded initial graph features, a GNN model is leveraged to gener-
+   1 3                  GNN         1 3           InfoNCE             ate the case representation as:
+     2                                2           DegReg
+                                                                                                           H = GNN (X, A),               (9)
+2                             2
+        4
+
+   GCG                                                                where X is the feature matrix consists of the node features x, H 
+                                                                      R× are the representations of cases in GCG, h  R is the case
+   Figure 2: The overall framework of CaseLink [18].                  representation of case  and  is the model parameter of GNN.
+
+                                                                      GNN can be any graph neural network models, such as GCN [4],
+
+                                                                      GAT [20] or GraphSAGE [1].
+
+x  R , x  R . The number of Charge-Charge edges is regu-              4.2.2 InfoNCE Objective. A widely adopted approach for train-
+lated by a similarity score threshold .                               ing the GNN model in legal case retrieval is to utilize contrastive
+· Case-Charge Edge. A Case-Charge edge is established when a          learning based on the InfoNCE objective [19]:
+
+charge name appears in the case, which shows the high correlation                                          Sim(h,h+ )/
+                                                                               =  -log
+between the charge and case. The adjacency matrix of Case-Charge      InfoNCE           Sim(h,h+ )/                Sim(h,h - )/       ,  (10)
+edges A  R× is designed as:
+                                                                                                           +      =1                
+
+                     1  for   appears in  ,             (6)           where a relevant case + and  irrelevant cases  - are sampled for
+           A  = 0       for              Others,                      a given query case  with  denoting the temperature parameter.
+                                                                      Cosine similarity is chosen as the Sim function here. The positive
+where  is the text of charge ,  is the text of case .                 samples correspond to the ground-truth labels, and the easy nega-
+· Overall Adjacency Matrix. To directly combine the Case-Case         tive samples are randomly sampled from training set. Specifically,
+                                                                      the hard negative samples are randomly selected from the negative
+edges, Case-Charge edges, and Charge-Charge edges, the GCG            cases of Top-K BM25 [12] ranking list.
+overall adjacency matrix A  R(+) × (+) is undirected and
+                                                                      4.2.3 Degree Regularisation. To implement degree regularisation
+unweighted, which is denoted as:                                      for the candidate nodes, the pseudo-adjacency matrix is defined
+                                                                      based on the updated node features after GNN computation as:
+                 A = A       A                          (7)
+                               ,
+                             A A
+
+where A denotes the transpose of the adjacency matrix.                                                     A^   = cos(h, h ),            (11)
+
+             
+
+4.1.3 Embedding Initialisation with Large Language Models. Given      where h and h are the updated features of case node  and  in
+the high quality of text embedding encoded by large language mod-     the case pool D. The matrix A^  R× indicates a fully connected
+els in recent text embedding benchmark such as Multilingual Text      situation. And the degree regularisation is conducted on this A^ only
+Embedding Benchmark (MTEB) [8], LLM is employed to encode the
+nodes into embedding features for GCG in this paper. The encoding     for candidate cases:
+process is denoted as:
+                                                                                                            
+
+                                                                                                           DegReg =  (A^   ),            (12)
+
+                        x = LLM(),                                                                         =1 =1
+
+                                                        (8)
+
+where  is the text of a case or a charge, x  R is the generated text  where  is candidate number.
+embedding as the node feature in GCG. LLM can be any LLM that
+encodes the texts into embeddings. In this paper, the top-ranked      4.2.4 Overall Objective. The overall objective is designed as:
+open-source model for legal retrieval task in MTEB, e5-mistral-7b-
+instruct [21], is chosen to be the LLM text encoder.                                                        = InfoNCE +  · DegReg,       (13)
+
+                                                                      where  is the coefficient of degree regularisation.
+
+4.2 CaseLink                                                          4.3 Inference
+
+The CaseLink module is adopted from our previous work [18],           During testing on Dtest, the similarity score  (, ) is calculated as:
+which demonstrated strong performance on the legal case retrieval
+task. During training, the training queries, candidate cases, and                                           (, ) = Sim(h, h ),           (14)
+legal charges are integrated into a GCG. A graph neural network
+(GNN) module is then applied to update the node features within       where h and h are the representations of query  and candidate 
+the GCG. The updated features of the query and candidate nodes        generated by CaseLink. Final top 5 ranking candidates are retrieved.
+are subsequently used in two training objectives: contrastive learn-
+ing via the InfoNCE loss and the degree regularization (DegReg)       4.4 Post-processing
+objective, to optimize the CaseLink model. The overall framework
+of CaseLink is demonstrated in Figure 2.                              After the calculation of similarity score, the following post-processing
+                                                                      strategies are conducted for improving retrieval accuracy.
+COLIEE 2025, June 20, 2025, Chicago, USA                                                                                                                             Tang et al.
+
+           Table 2: Top 10 runs of Task 1.                                   Compared with the highest performance, our method has a lower
+                                                                          Recall score. This can be due to the selection of more candidates in
+Team       Submission                           Precision Recall F1       ranking.
+
+   JNLP                   jnlpr&fe2.txt         0.3042  0.3735  0.3353    6 Conclusion
+   JNLP                   jnlpr&fe1.txt         0.2945  0.3667  0.3267
+UQLegalAI                uqlegalair3.txt        0.2908  0.3019  0.2962    This paper presents the approach of Team UQLegalAI for Task 1 of
+UQLegalAI                uqlegalair2.txt        0.2903  0.3013  0.2957    the COLIEE 2025 competition. To leverage the intrinsic connectiv-
+UQLegalAI                uqlegalair1.txt        0.2886  0.2996  0.2940    ity relationships between legal cases, a method called CaseLink is
+ AIIR Lab            task1.aiirmpmist5.txt      0.2040  0.2319  0.2171    leveraged. Within the CaseLink framework, a Global Case Graph
+                prerank_dense_bge-rerank_                                 construction module is introduced to build a case graph compris-
+  NOWJ         bge_ft_llm2vec_major_vote.txt    0.1670  0.2445 0.1984     ing case-case edges, case-charge edges, and charge-charge edges
+                    task1.aiircombmnz.txt                                 for each case. Node features within the GCG are encoded by a
+ AIIR Lab            task1.aiirmpmist3.txt      0.2317  0.1580 0.1879     high-quality text embedding large language model. A graph neural
+ AIIR Lab  prerank_dense_bge-rerank_bge_ft.txt  0.2308  0.1575 0.1872     network module is then employed to generate informative case
+  NOWJ                                          0.1605  0.1825 0.1708     representations. The CaseLink model is trained with an InfoNCE
+                                                                          contrastive objective combined with a novel degree regularization
+4.4.1 Two-stage Ranking. To harness the strengths of statistical          term. The final ranking results for Task 1 demonstrate the effective-
+methods, the candidate lists are initially reduced to ten cases using     ness and strong performance of the proposed CaseLink approach.
+the BM25 retrieval algorithm. Considering that the average number         In future work, developing more powerful models is still needed
+of relevant cases in the training set is 4.1, the number of final         for enhancing the accuracy of legal case retrieval.
+retrieved cases per query is fixed at five during the testing phase,
+based on the calculated CaseLink similarity scores.                       References
+
+4.4.2 Year Filtering. It is known that precedents is the prior judicial    [1] William L. Hamilton, Zhitao Ying, and Jure Leskovec. 2017. Inductive Represen-
+decision that serves as an example for future cases, which means                tation Learning on Large Graphs. In NeurIPS.
+that the cited precedents should happen before the given query
+case. Therefore, given a query, only cases with earlier dates than the     [2] Karen Spärck Jones. 1972. A statistical interpretation of term specificity and its
+query case are considered as candidates, while those with later dates           application in retrieval. Journal of Documentation 28, 1 (1972), 11­21.
+are excluded in this paper. Specifically, the latest date appearing in
+a case is taken as its representative trial date.                          [3] Diederik P. Kingma and Jimmy Ba. 2015. Adam: A Method for Stochastic Opti-
+                                                                                mization. In ICLR.
+5 Experiments and Results
+                                                                           [4] Thomas N. Kipf and Max Welling. 2017. Semi-Supervised Classification with
+5.1 Implementation                                                              Graph Convolutional Networks. In ICLR.
+
+The training batch size is selected from {256, 512, 1024, 1678}. The       [5] Haitao Li, You Chen, Zhekai Ge, Qingyao Ai, Yiqun Liu, Quan Zhou, and Shuai
+default GNN model is GAT [20] with number of layers chosen from                 Huo. 2024. Towards an In-Depth Comprehension of Case Relevance for Better
+{1,2,3}. The dropout [14] rate is selected from {0.1, 0.2, 0.5}. The            Legal Retrieval. In JSAI, Vol. 14741. 212­227.
+default optimiser is Adam [3] with learning rate chosen from {1e-2,
+1e-3, 1e-4} and the weight decay values from {1e-3, 1e-4, 1e-5}. In        [6] Haitao Li, Weihang Su, Changyue Wang, Yueyue Wu, Qingyao Ai, and Yiqun
+contrastive training, each query is associated with one positive                Liu. 2023. THUIR@COLIEE 2023: Incorporating Structural Knowledge into
+sample and one easy negative sample, while the number of hard                   Pre-trained Language Models for Legal Case Retrieval. CoRR abs/2305.06812
+negative samples is selected from {1, 5, 10}. In-batch samples of               (2023).
+other queries are also treated as easy negative samples. For degree
+regularisation, the coefficient  is chosen from {0,5e-4,1e-3,5e-3}.        [7] Yixiao Ma, Yueyue Wu, Qingyao Ai, Yiqun Liu, Yunqiu Shao, Min Zhang, and
+The number of TopK case neighbour node  in Equation 4 is selected               Shaoping Ma. 2023. Incorporating Structural Information into Legal Case Re-
+from {3, 5, 10}. The threshold  in Equation 5 is chosen from {0.85, 0.9,        trieval. ACM Trans. Inf. Syst. (2023).
+0.95}. Due to the 4096 token limit of e5-mistral-7b-instruct model,
+any case exceeding this length is truncated to 4096 tokens.                [8] Niklas Muennighoff, Nouamane Tazi, Loïc Magne, and Nils Reimers. 2022. MTEB:
+                                                                                Massive Text Embedding Benchmark. CoRR abs/2210.07316 (2022).
+5.2 Result
+                                                                           [9] Jay M. Ponte and W. Bruce Croft. 2017. A Language Modeling Approach to
+The final top 10 runs of COLIEE 2025 Task 1 is shown in Table 2.                Information Retrieval. In SIGIR.
+The three runs of Team UQLegalAI are all run by CaseLink model
+with different hyperparameters. The F1 score reaches 0.2962, with         [10] Juliano Rabelo, Randy Goebel, Mi-Young Kim, Yoshinobu Kano, Masaharu Yosh-
+a gap of less than 0.04 compared to the first-place team.                       ioka, and Ken Satoh. 2022. Overview and Discussion of the Competition on Legal
+                                                                                Information Extraction/Entailment (COLIEE) 2021. Rev. Socionetwork Strateg. 16,
+   In addition to the overall performance, our method exhibits a                1 (2022), 111­133.
+stable situation. The result is stable that the variance of Precision,
+Recall and F1 is small. The gap is less than ±0.003 for our method.       [11] Juliano Rabelo, Mi-Young Kim, and Randy Goebel. 2022. Semantic-Based Classi-
+While for other methods, such as JNLP's submission, the variance                fication of Relevant Case Law. In JURISIN.
+is around ±0.01.
+                                                                          [12] Stephen E. Robertson and Steve Walker. 1994. Some Simple Effective Approxi-
+                                                                                mations to the 2-Poisson Model for Probabilistic Weighted Retrieval. In SIGIR.
+
+                                                                          [13] Yunqiu Shao, Jiaxin Mao, Yiqun Liu, Weizhi Ma, Ken Satoh, Min Zhang, and
+                                                                                Shaoping Ma. 2020. BERT-PLI: Modeling Paragraph-Level Interactions for Legal
+                                                                                Case Retrieval. In IJCAI.
+
+                                                                          [14] Nitish Srivastava, Geoffrey E. Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan
+                                                                                Salakhutdinov. 2014. Dropout: a simple way to prevent neural networks from
+                                                                                overfitting. J. Mach. Learn. Res. (2014).
+
+                                                                          [15] Yanran Tang, Ruihong Qiu, and Xue Li. 2023. Prompt-based Effective Input
+                                                                                Reformulation for Legal Case Retrieval. CoRR abs/2309.02962 (2023).
+
+                                                                          [16] Yanran Tang, Ruihong Qiu, Yilun Liu, Xue Li, and Zi Huang. 2024. CaseGNN++:
+                                                                                Graph Contrastive Learning for Legal Case Retrieval with Graph Augmentation.
+                                                                                CoRR abs/2405.11791 (2024).
+
+                                                                          [17] Yanran Tang, Ruihong Qiu, Yilun Liu, Xue Li, and Zi Huang. 2024. CaseGNN:
+                                                                                Graph Neural Networks for Legal Case Retrieval with Text-Attributed Graphs.
+                                                                                In ECIR.
+
+                                                                          [18] Yanran Tang, Ruihong Qiu, Hongzhi Yin, Xue Li, and Zi Huang. 2024. CaseLink:
+                                                                                Inductive Graph Learning for Legal Case Retrieval. In SIGIR.
+UQLegalAI@COLIEE2025: Advancing Legal Case Retrieval with Large Language Models and Graph Neural Networks  COLIEE 2025, June 20, 2025, Chicago, USA
+
+[19] Aäron van den Oord, Yazhe Li, and Oriol Vinyals. 2018. Representation Learning        ACL.
+      with Contrastive Predictive Coding. CoRR abs/1807.03748 (2018).                [22] Kun Zhang, Chong Chen, Yuanzhuo Wang, Qi Tian, and Long Bai. 2023. CFGL-
+
+[20] Petar Velickovic, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro          LCR: A Counterfactual Graph Learning Framework for Legal Case Retrieval. In
+      Liò, and Yoshua Bengio. 2018. Graph Attention Networks. In ICLR.                     SIGKDD.
+
+[21] Liang Wang, Nan Yang, Xiaolong Huang, Linjun Yang, Rangan Majumder, and
+      Furu Wei. 2024. Improving Text Embeddings with Large Language Models. In
+

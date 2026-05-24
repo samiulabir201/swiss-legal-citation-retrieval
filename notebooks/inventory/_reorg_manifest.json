@@ -1,0 +1,654 @@
+{
+  "generated": "2026-05-15 13:00",
+  "subfolders": {
+    "A": "01_current_direction_cascade_rerank_precision",
+    "B": "02_v75_multiquery_canonical_pool",
+    "C": "03_anchor_funnel_evolution_v4_to_v74",
+    "D": "04_pre_v75_pipeline_iterations",
+    "E": "05_embedding_and_retrieval_base",
+    "F": "06_high_scoring_reference",
+    "G": "07_law_de_enrichment",
+    "H": "08_court_llm_descriptor_extraction",
+    "I": "09_court_citation_concept_enrichment",
+    "J": "10_authority_card_enrichment",
+    "K": "11_early_experiments_exp_A",
+    "L": "12_early_funnel_pre_v7",
+    "M": "13_misc_kaggle_and_utilities"
+  },
+  "kept": [
+    {
+      "family": "swiss_citation_hybrid_rerank_final_output",
+      "subfolder": "01_current_direction_cascade_rerank_precision",
+      "canonical": "rerank_hybrid_3model_shootout_with_outputs",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final_output.ipynb",
+      "cells_with_output": 10,
+      "output_chars": 27871,
+      "mtime": "2026-05-15 11:46",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_hybrid_rerank_final",
+      "subfolder": "01_current_direction_cascade_rerank_precision",
+      "canonical": "rerank_hybrid_3model_shootout",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final.ipynb",
+      "cells_with_output": 6,
+      "output_chars": 19611,
+      "mtime": "2026-05-15 08:34",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1_poc",
+      "subfolder": "01_current_direction_cascade_rerank_precision",
+      "canonical": "cascade_legalmalr_v1_poc",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-14 15:27",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_legalmalr_cascade_v1_optimized",
+      "subfolder": "01_current_direction_cascade_rerank_precision",
+      "canonical": "cascade_legalmalr_v1_optimized",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_optimized (2).ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-14 15:05",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_rerank_only_diagnostic",
+      "subfolder": "01_current_direction_cascade_rerank_precision",
+      "canonical": "rerank_only_diagnostic_F3_no_rerank",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_rerank_only_diagnostic.ipynb",
+      "cells_with_output": 6,
+      "output_chars": 10344,
+      "mtime": "2026-05-13 18:11",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_precision_v1",
+      "subfolder": "01_current_direction_cascade_rerank_precision",
+      "canonical": "precision_v1_final",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_precision_v1_(3).ipynb",
+      "cells_with_output": 8,
+      "output_chars": 7590,
+      "mtime": "2026-05-13 08:25",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000",
+      "subfolder": "02_v75_multiquery_canonical_pool",
+      "canonical": "pool_v75_multiquery_recall_0.89_at_k50k_CANONICAL",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+      "cells_with_output": 21,
+      "output_chars": 49972,
+      "mtime": "2026-05-13 18:55",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_v7_5_multiquery",
+      "subfolder": "02_v75_multiquery_canonical_pool",
+      "canonical": "pool_v75_multiquery_iteration_11",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery (11).ipynb",
+      "cells_with_output": 24,
+      "output_chars": 53633,
+      "mtime": "2026-05-12 23:41",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7_part4_output",
+      "subfolder": "03_anchor_funnel_evolution_v4_to_v74",
+      "canonical": "anchor_funnel_v7_part4_with_outputs",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7__part4_output.ipynb",
+      "cells_with_output": 21,
+      "output_chars": 60004,
+      "mtime": "2026-05-11 13:30",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7_4",
+      "subfolder": "03_anchor_funnel_evolution_v4_to_v74",
+      "canonical": "anchor_funnel_v7_4_val001",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7_4 (4).ipynb",
+      "cells_with_output": 21,
+      "output_chars": 57487,
+      "mtime": "2026-05-11 12:37",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001_v7",
+      "subfolder": "03_anchor_funnel_evolution_v4_to_v74",
+      "canonical": "anchor_funnel_v7_val001",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7 (2).ipynb",
+      "cells_with_output": 21,
+      "output_chars": 75966,
+      "mtime": "2026-05-10 21:48",
+      "losers": []
+    },
+    {
+      "family": "0.7716_scored_notebook",
+      "subfolder": "06_high_scoring_reference",
+      "canonical": "reference_F1_0.7716_scored",
+      "source": "C:\\Users\\samiul\\Downloads\\0.7716_scored_notebook.ipynb",
+      "cells_with_output": 4,
+      "output_chars": 176,
+      "mtime": "2026-04-29 20:38",
+      "losers": []
+    },
+    {
+      "family": "enrich_laws_de_qwen3_8b_kaggle",
+      "subfolder": "07_law_de_enrichment",
+      "canonical": "enrich_laws_de_qwen3_8b_kaggle",
+      "source": "E:\\swiss_citation_extraction\\law_json_llm_output\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+      "cells_with_output": 8,
+      "output_chars": 44382,
+      "mtime": "2026-05-06 20:59",
+      "losers": [
+        {
+          "path": "C:\\Users\\samiul\\Downloads\\enrich_laws_de_qwen3_8b_kaggle (3).ipynb",
+          "cells_w_out": 7,
+          "out_chars": 6463,
+          "mtime": "2026-05-06 17:35"
+        },
+        {
+          "path": "E:\\swiss_citation_extraction\\research\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+          "cells_w_out": 0,
+          "out_chars": 0,
+          "mtime": "2026-05-06 01:00"
+        }
+      ]
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized",
+      "subfolder": "08_court_llm_descriptor_extraction",
+      "canonical": "court_llm_descriptor_blackwell_optimized_v4",
+      "source": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized_(4).ipynb",
+      "cells_with_output": 8,
+      "output_chars": 44115,
+      "mtime": "2026-05-04 13:42",
+      "losers": []
+    },
+    {
+      "family": "court_llm_descriptor_extractor_blackwell_optimized_3",
+      "subfolder": "08_court_llm_descriptor_extraction",
+      "canonical": "court_llm_descriptor_blackwell_optimized_363k_run",
+      "source": "E:\\swiss_citation_extraction\\outputs_from_363k_run\\court_llm_descriptor_extractor_blackwell_optimized__3__(1).ipynb",
+      "cells_with_output": 8,
+      "output_chars": 46464,
+      "mtime": "2026-05-05 01:39",
+      "losers": [
+        {
+          "path": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized__3_ (1).ipynb",
+          "cells_w_out": 8,
+          "out_chars": 43666,
+          "mtime": "2026-05-04 21:00"
+        }
+      ]
+    },
+    {
+      "family": "court_llm_descriptor_extractor_colab_10k_optimized",
+      "subfolder": "08_court_llm_descriptor_extraction",
+      "canonical": "court_llm_descriptor_10k_optimized",
+      "source": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_10k_optimized (1).ipynb",
+      "cells_with_output": 7,
+      "output_chars": 44238,
+      "mtime": "2026-05-03 14:58",
+      "losers": []
+    },
+    {
+      "family": "court_llm_descriptor_extractor_colab_qwen3_8b_awq",
+      "subfolder": "08_court_llm_descriptor_extraction",
+      "canonical": "court_llm_descriptor_qwen3_8b_awq",
+      "source": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+      "cells_with_output": 7,
+      "output_chars": 65035,
+      "mtime": "2026-05-03 14:09",
+      "losers": []
+    },
+    {
+      "family": "court_llm_descriptor_extractor_kaggle",
+      "subfolder": "08_court_llm_descriptor_extraction",
+      "canonical": "court_llm_descriptor_kaggle",
+      "source": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_kaggle.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-03 13:17",
+      "losers": []
+    },
+    {
+      "family": "court_citation_concept_enrichment_minimal_llm",
+      "subfolder": "09_court_citation_concept_enrichment",
+      "canonical": "court_concept_enrichment_minimal_llm",
+      "source": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_minimal_llm.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-03 13:00",
+      "losers": []
+    },
+    {
+      "family": "court_citation_concept_enrichment_robust_v5_t4_fixed",
+      "subfolder": "09_court_citation_concept_enrichment",
+      "canonical": "court_concept_enrichment_robust_v5_t4",
+      "source": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 21:26",
+      "losers": []
+    },
+    {
+      "family": "court_citation_concept_enrichment_smoke_test_10_v3_local_model",
+      "subfolder": "09_court_citation_concept_enrichment",
+      "canonical": "court_concept_smoke_test_10_v3_local",
+      "source": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 20:57",
+      "losers": []
+    },
+    {
+      "family": "court_citation_enrichment_smoke_test_10",
+      "subfolder": "09_court_citation_concept_enrichment",
+      "canonical": "court_concept_smoke_test_10_base",
+      "source": "C:\\Users\\samiul\\Downloads\\court_citation_enrichment_smoke_test_10.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 20:28",
+      "losers": []
+    },
+    {
+      "family": "kaggle-10-test-for-swiss-law",
+      "subfolder": "13_misc_kaggle_and_utilities",
+      "canonical": "kaggle_10_test_for_swiss_law",
+      "source": "C:\\Users\\samiul\\Downloads\\kaggle-10-test-for-swiss-law (1).ipynb",
+      "cells_with_output": 8,
+      "output_chars": 35211,
+      "mtime": "2026-05-02 21:44",
+      "losers": []
+    },
+    {
+      "family": "enrich_cards_qwen35_vllm_fast_stable_failure_capture",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen35_vllm_fast_stable",
+      "source": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_vllm_fast_stable_failure_capture (1).ipynb",
+      "cells_with_output": 9,
+      "output_chars": 29617,
+      "mtime": "2026-05-02 01:23",
+      "losers": []
+    },
+    {
+      "family": "enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen35_fast_quality_json_optimized",
+      "source": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture (1).ipynb",
+      "cells_with_output": 7,
+      "output_chars": 10971,
+      "mtime": "2026-05-02 00:46",
+      "losers": []
+    },
+    {
+      "family": "enrich_cards_qwen35_colab_fast_quality_json_v2",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen35_fast_quality_json_v2",
+      "source": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_v2_(2) (1).ipynb",
+      "cells_with_output": 5,
+      "output_chars": 12498,
+      "mtime": "2026-05-01 19:27",
+      "losers": []
+    },
+    {
+      "family": "fresh_safe_qwen35_card_enrichment_no_vllm",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen35_safe_no_vllm",
+      "source": "C:\\Users\\samiul\\Downloads\\fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 01:01",
+      "losers": []
+    },
+    {
+      "family": "enrich_cards_qwen35_colab",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen35_colab",
+      "source": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab (1).ipynb",
+      "cells_with_output": 11,
+      "output_chars": 80922,
+      "mtime": "2026-04-30 23:45",
+      "losers": [
+        {
+          "path": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen35_colab.ipynb",
+          "cells_w_out": 0,
+          "out_chars": 0,
+          "mtime": "2026-04-30 19:22"
+        }
+      ]
+    },
+    {
+      "family": "exp_a1_bgem3_statutes",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A1_bgem3_statutes",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A1_bgem3_statutes.ipynb",
+      "cells_with_output": 9,
+      "output_chars": 3831,
+      "mtime": "2026-04-21 18:55",
+      "losers": []
+    },
+    {
+      "family": "exp_a2_hyde_and_enumeration",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A2_hyde_and_enumeration",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A2_hyde_and_enumeration.ipynb",
+      "cells_with_output": 8,
+      "output_chars": 12402,
+      "mtime": "2026-04-21 19:42",
+      "losers": []
+    },
+    {
+      "family": "exp_a3_qwen32b_enumeration",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A3_qwen32b_enumeration",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A3_qwen32b_enumeration.ipynb",
+      "cells_with_output": 11,
+      "output_chars": 4867,
+      "mtime": "2026-04-21 21:13",
+      "losers": []
+    },
+    {
+      "family": "exp_a4_rerank",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A4_rerank",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A4_rerank.ipynb",
+      "cells_with_output": 9,
+      "output_chars": 9854,
+      "mtime": "2026-04-21 21:36",
+      "losers": []
+    },
+    {
+      "family": "exp_a4b_rerank_hyde",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A4b_rerank_hyde",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A4b_rerank_hyde.ipynb",
+      "cells_with_output": 9,
+      "output_chars": 12882,
+      "mtime": "2026-04-21 21:53",
+      "losers": []
+    },
+    {
+      "family": "exp_a5_court_retrieval",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A5_court_retrieval",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A5_court_retrieval.ipynb",
+      "cells_with_output": 15,
+      "output_chars": 15925,
+      "mtime": "2026-04-22 01:11",
+      "losers": []
+    },
+    {
+      "family": "exp_a6_legal_roberta_finetune",
+      "subfolder": "11_early_experiments_exp_A",
+      "canonical": "exp_A6_legal_roberta_finetune",
+      "source": "C:\\Users\\samiul\\Downloads\\exp_A6_legal_roberta_finetune.ipynb",
+      "cells_with_output": 20,
+      "output_chars": 13851,
+      "mtime": "2026-04-22 13:11",
+      "losers": []
+    },
+    {
+      "family": "colab_segment_lattice_funnel_v3",
+      "subfolder": "12_early_funnel_pre_v7",
+      "canonical": "early_segment_lattice_funnel_v3",
+      "source": "C:\\Users\\samiul\\Downloads\\colab_segment_lattice_funnel_v3 (2).ipynb",
+      "cells_with_output": 11,
+      "output_chars": 13697,
+      "mtime": "2026-04-30 15:10",
+      "losers": [
+        {
+          "path": "E:\\swiss_citation_extraction\\research\\colab_segment_lattice_funnel_v3.ipynb",
+          "cells_w_out": 11,
+          "out_chars": 13697,
+          "mtime": "2026-04-30 15:10"
+        }
+      ]
+    },
+    {
+      "family": "colab_recall_preserving_candidate_funnel",
+      "subfolder": "12_early_funnel_pre_v7",
+      "canonical": "early_recall_preserving_funnel",
+      "source": "C:\\Users\\samiul\\Downloads\\colab_recall_preserving_candidate_funnel_(2).ipynb",
+      "cells_with_output": 11,
+      "output_chars": 20677,
+      "mtime": "2026-04-27 02:56",
+      "losers": [
+        {
+          "path": "E:\\swiss_citation_extraction\\research\\colab_recall_preserving_candidate_funnel.ipynb",
+          "cells_w_out": 8,
+          "out_chars": 19100,
+          "mtime": "2026-04-27 01:22"
+        }
+      ]
+    },
+    {
+      "family": "colab_dense_embedding_test",
+      "subfolder": "12_early_funnel_pre_v7",
+      "canonical": "early_dense_embedding_test",
+      "source": "C:\\Users\\samiul\\Downloads\\colab_dense_embedding_test (2).ipynb",
+      "cells_with_output": 17,
+      "output_chars": 12204,
+      "mtime": "2026-04-26 18:16",
+      "losers": [
+        {
+          "path": "E:\\swiss_citation_extraction\\research\\colab_dense_embedding_test.ipynb",
+          "cells_w_out": 14,
+          "out_chars": 8564,
+          "mtime": "2026-04-26 18:08"
+        }
+      ]
+    },
+    {
+      "family": "latest_notebook_fixed_v3",
+      "subfolder": "04_pre_v75_pipeline_iterations",
+      "canonical": "pipeline_iteration_latest_fixed_v3",
+      "source": "C:\\Users\\samiul\\Downloads\\latest__notebook_fixed_v3 (1).ipynb",
+      "cells_with_output": 36,
+      "output_chars": 58922,
+      "mtime": "2026-04-20 21:20",
+      "losers": []
+    },
+    {
+      "family": "swiss_law_pipeline_end_to_end_notebook_no_function_imports",
+      "subfolder": "04_pre_v75_pipeline_iterations",
+      "canonical": "pipeline_end_to_end_no_function_imports",
+      "source": "C:\\Users\\samiul\\Downloads\\swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-04-12 16:31",
+      "losers": []
+    },
+    {
+      "family": "notebook4ae3b3ffc3_stage0_gated",
+      "subfolder": "04_pre_v75_pipeline_iterations",
+      "canonical": "pipeline_stage0_gated_4ae3b3ffc3",
+      "source": "C:\\Users\\samiul\\Downloads\\notebook4ae3b3ffc3_stage0_gated.ipynb",
+      "cells_with_output": 7,
+      "output_chars": 5558,
+      "mtime": "2026-04-12 16:10",
+      "losers": []
+    },
+    {
+      "family": "notebook_no_debug_prints",
+      "subfolder": "04_pre_v75_pipeline_iterations",
+      "canonical": "pipeline_no_debug_prints",
+      "source": "C:\\Users\\samiul\\Downloads\\notebook_no_debug_prints.ipynb",
+      "cells_with_output": 1,
+      "output_chars": 188,
+      "mtime": "2026-04-10 21:03",
+      "losers": []
+    },
+    {
+      "family": "notebook_qwen3_8b_awq_kaggle_local_batchfix",
+      "subfolder": "13_misc_kaggle_and_utilities",
+      "canonical": "kaggle_qwen3_8b_awq_local_batchfix",
+      "source": "C:\\Users\\samiul\\Downloads\\notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+      "cells_with_output": 5,
+      "output_chars": 13089,
+      "mtime": "2026-05-02 05:20",
+      "losers": []
+    },
+    {
+      "family": "qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable",
+      "subfolder": "13_misc_kaggle_and_utilities",
+      "canonical": "kaggle_qwen3_8b_awq_vllm_text_to_json_stable",
+      "source": "C:\\Users\\samiul\\Downloads\\qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 05:48",
+      "losers": []
+    },
+    {
+      "family": "notebookd37248e1eb",
+      "subfolder": "13_misc_kaggle_and_utilities",
+      "canonical": "kaggle_notebook_d37248e1eb",
+      "source": "C:\\Users\\samiul\\Downloads\\notebookd37248e1eb (1).ipynb",
+      "cells_with_output": 2,
+      "output_chars": 1280,
+      "mtime": "2026-05-02 19:55",
+      "losers": []
+    },
+    {
+      "family": "notebook3500ee7363_corrected_kaggle_safe",
+      "subfolder": "13_misc_kaggle_and_utilities",
+      "canonical": "kaggle_safe_notebook_3500ee7363",
+      "source": "C:\\Users\\samiul\\Downloads\\notebook3500ee7363_corrected_kaggle_safe.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 21:07",
+      "losers": []
+    },
+    {
+      "family": "investigate-notebook",
+      "subfolder": "13_misc_kaggle_and_utilities",
+      "canonical": "investigate_misc_notebook",
+      "source": "C:\\Users\\samiul\\Downloads\\investigate-notebook (1).ipynb",
+      "cells_with_output": 2,
+      "output_chars": 146535,
+      "mtime": "2026-04-29 13:11",
+      "losers": []
+    },
+    {
+      "family": "retrieve_unified_corpus_v3",
+      "subfolder": "05_embedding_and_retrieval_base",
+      "canonical": "retrieve_unified_corpus_v3",
+      "source": "E:\\swiss_citation_extraction\\research\\retrieve_unified_corpus_v3.ipynb",
+      "cells_with_output": 12,
+      "output_chars": 10664,
+      "mtime": "2026-05-08 21:11",
+      "losers": []
+    },
+    {
+      "family": "untitled75",
+      "subfolder": "06_high_scoring_reference",
+      "canonical": "reference_F1_0.777_Untitled75",
+      "source": "E:\\swiss_citation_extraction\\research\\Untitled75.ipynb",
+      "cells_with_output": 7,
+      "output_chars": 51448,
+      "mtime": "2026-05-08 12:15",
+      "losers": []
+    },
+    {
+      "family": "investigate_laws_de_token_optimization",
+      "subfolder": "07_law_de_enrichment",
+      "canonical": "investigate_laws_de_token_optimization",
+      "source": "E:\\swiss_citation_extraction\\research\\investigate_laws_de_token_optimization.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-06 14:07",
+      "losers": []
+    },
+    {
+      "family": "enrich_cards_qwen3_8b_kaggle",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen3_8b_kaggle",
+      "source": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_kaggle.ipynb",
+      "cells_with_output": 0,
+      "output_chars": 0,
+      "mtime": "2026-05-02 05:02",
+      "losers": []
+    },
+    {
+      "family": "enrich_cards_qwen3_8b_colab_fast_stable",
+      "subfolder": "10_authority_card_enrichment",
+      "canonical": "auth_cards_enrich_qwen3_8b_colab",
+      "source": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+      "cells_with_output": 9,
+      "output_chars": 29617,
+      "mtime": "2026-05-02 04:31",
+      "losers": []
+    },
+    {
+      "family": "swiss_citation_anchor_funnel_val001",
+      "subfolder": "03_anchor_funnel_evolution_v4_to_v74",
+      "canonical": "anchor_funnel_v1_val001_base",
+      "source": "E:\\swiss_citation_extraction\\swiss_citation_anchor_funnel_val001.ipynb",
+      "cells_with_output": 14,
+      "output_chars": 12614,
+      "mtime": "2026-05-09 20:28",
+      "losers": []
+    }
+  ],
+  "unplanned_families": [],
+  "recovered": [
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\01_current_direction_cascade_rerank_precision\\cascade_legalmalr_v1_base.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-14 14:18"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\01_current_direction_cascade_rerank_precision\\precision_v1_top_gold_from_50k_candidates.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-13 07:51"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v4 (1).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\03_anchor_funnel_evolution_v4_to_v74\\anchor_funnel_v4_val001.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-09 23:24"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v5.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\03_anchor_funnel_evolution_v4_to_v74\\anchor_funnel_v5_val001.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-10 00:52"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v6.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\03_anchor_funnel_evolution_v4_to_v74\\anchor_funnel_v6_val001.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-10 12:59"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\swiss_citation_endgame_colab.ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\04_pre_v75_pipeline_iterations\\endgame_colab_full_pipeline.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-09 16:26"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\embed_unified_corpus_qwen3_8b_blackwell_colab (3).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\05_embedding_and_retrieval_base\\embed_unified_corpus_qwen3_8b_blackwell.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-07 20:37"
+    },
+    {
+      "src": "C:\\Users\\samiul\\Downloads\\retrieve_unified_corpus_qwen3_8b_colab (3).ipynb",
+      "target": "e:\\swiss_citation_extraction\\notebooks\\05_embedding_and_retrieval_base\\retrieve_unified_corpus_qwen3_8b.ipynb",
+      "status": "copied",
+      "mtime": "2026-05-08 01:01"
+    }
+  ],
+  "lost_no_recovery": [
+    "swiss_citation_final_2026",
+    "encode_queries_qwen3_8b_colab",
+    "court_citation_concept_enrichment (0 KB original)"
+  ]
+}

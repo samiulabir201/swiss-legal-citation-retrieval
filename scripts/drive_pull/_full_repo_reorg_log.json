@@ -1,0 +1,862 @@
+{
+  "generated": "2026-05-15 15:46",
+  "actions": [
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\_root_files"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\v7_pool_recall_089_and_per_query"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\v4_anchor_funnel_per_version_summaries"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\v1_anchor_funnel_val001_initial"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__hybrid_rerank_final",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\hybrid_rerank_shootout_cache"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__rerank_only_diagnostic",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\rerank_only_diagnostic_results"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\eval_metrics_and_ablations"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts_legalmalr",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\legalmalr_cascade_stage_a_output"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__cache_legalmalr",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\legalmalr_cascade_per_query_cache"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__configs",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\threshold_and_runtime_configs"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__scripts",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\colab_side_scripts"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__submissions",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\submitted_predictions_csv"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__checkpoints",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\llm_enrichment_jsonl_checkpoints"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\colab_data_insights_mirror"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__artifacts__A6__legal_swiss_finetuned",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\A6_finetuned_legal_swiss_model"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__artifacts__A6__legal_swiss_simcse",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\swiss_law\\A6_simcse_legal_swiss_model"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__omnilex_local_artifacts_qwen3_flatip",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_local_embeddings_qwen3_flatip"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_other_artifacts"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__knowledge_base_optimized_hybrid_retrieval",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_knowledge_base_query_translations"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_cache",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_pipeline_qwen3_reranker_cache"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\retrieval_pipeline_submissions_K_sweep"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\swiss_law_pipeline_source_code"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__abbrev-translations.json",
+      "dst": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\abbrev_translations.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\build_court_authority_cards.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\build_court_authority_cards.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\build_court_retrieval_corpus.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\build_court_retrieval_corpus.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\build_gold_bank_candidates.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\build_gold_bank_candidates.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\build_law_authority_cards.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\build_law_authority_cards.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\build_law_llm_input.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\build_law_llm_input.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\build_unified_retrieval_corpus.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\build_unified_retrieval_corpus.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\_run_build_index.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\build_pipeline\\_run_build_index.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\add_case_level_aliases.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\add_case_level_aliases.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\add_date_stripped_aliases.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\add_date_stripped_aliases.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\add_range_expanded_aliases.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\add_range_expanded_aliases.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\audit_statute_anchor_regex.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\audit_statute_anchor_regex.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\extract_citation_graph.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\extract_citation_graph.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\extract_court_target_cards.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\extract_court_target_cards.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\extract_intra_judgment_backrefs.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\extract_intra_judgment_backrefs.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\extract_retrieval_metadata.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\extract_retrieval_metadata.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\identify_court_enrichment_targets.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\identify_court_enrichment_targets.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\verify_french_italian_aliases.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\citation_extraction\\verify_french_italian_aliases.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\court_enrichment_normalizer.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\court_enrichment_normalizer.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\court_enrichment_profile.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\court_enrichment_profile.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\enrich_cards_qwen3_8b_kaggle.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\enrich_cards_qwen3_8b_kaggle.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\enrich_cards_with_claude_agent_sdk.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\enrich_cards_with_claude_agent_sdk.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\enrich_cards_with_qwen.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\enrich_cards_with_qwen.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\enrich_val001_gold_cards.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\enrich_val001_gold_cards.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\profile_court_enrichment_schema.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\profile_court_enrichment_schema.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\run_law_llm_enrichment.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\enrichment\\run_law_llm_enrichment.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\encode_queries_qwen3_8b.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\retrieval_and_rerank\\encode_queries_qwen3_8b.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\hybrid_retrieve.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\retrieval_and_rerank\\hybrid_retrieve.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\llm_judge_qwen3.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\retrieval_and_rerank\\llm_judge_qwen3.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\rerank_qwen3.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\retrieval_and_rerank\\rerank_qwen3.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\precompute_dossier_cache.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\retrieval_and_rerank\\precompute_dossier_cache.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\segment_lattice_v3.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\retrieval_and_rerank\\segment_lattice_v3.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\eval_retrieval.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\eval_and_audit\\eval_retrieval.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\check_gold_parent_links.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\eval_and_audit\\check_gold_parent_links.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\verify_gold_citation_coverage.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\eval_and_audit\\verify_gold_citation_coverage.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\experiment_court_recall_enriched_1m.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\eval_and_audit\\experiment_court_recall_enriched_1m.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\experiment_court_recall_stress_1m.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\eval_and_audit\\experiment_court_recall_stress_1m.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\experiment_enrichment_recall_stress.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\eval_and_audit\\experiment_enrichment_recall_stress.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\granularity_resolver.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\data_prep\\granularity_resolver.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\prepare_embedding_input.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\data_prep\\prepare_embedding_input.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\split_laws_de.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\data_prep\\split_laws_de.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\repair_law_enrichment_utf8.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\data_prep\\repair_law_enrichment_utf8.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\repair_train_csv_utf8.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\data_prep\\repair_train_csv_utf8.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\merge_court_llm_into_unified.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\merging\\merge_court_llm_into_unified.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\merge_law_llm_into_v1_cards.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\merging\\merge_law_llm_into_v1_cards.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\merge_llm_enrichment_into_v4_cards.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\merging\\merge_llm_enrichment_into_v4_cards.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\_build_endgame_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\_build_endgame_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\_patch_law_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\_patch_law_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\create_qwen3_8b_colab_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\create_qwen3_8b_colab_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\create_recall_funnel_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\create_recall_funnel_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\create_segment_lattice_v3_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\create_segment_lattice_v3_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\create_v7_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\create_v7_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\patch_download_notebook_gold_bank.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\patch_download_notebook_gold_bank.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\patch_notebook_no_leak.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\patch_notebook_no_leak.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\patch_qwen_checkpoint_isolation.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\patch_qwen_checkpoint_isolation.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\patch_qwen_notebook_targeted.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\notebook_builders\\patch_qwen_notebook_targeted.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\scripts\\upload_to_kaggle.py",
+      "dst": "e:\\swiss_citation_extraction\\scripts\\kaggle_upload\\upload_to_kaggle.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\translation_work\\laws_de_full.json",
+      "dst": "e:\\swiss_citation_extraction\\data\\laws_de_full.json"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\translation_work"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\research-run-2026-05-09\\research\\anchor_funnel_val001",
+      "dst": "e:\\swiss_citation_extraction\\research\\_archive_v7_initial_2026-05-09"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\research-run-2026-05-09\\research"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\research-run-2026-05-09"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\research\\New folder"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\research\\_scratch_2026-05-12",
+      "dst": "e:\\swiss_citation_extraction\\research\\scratch_2026-05-12_anti_pattern_gold_text"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\research\\_scratch_2026-05-13",
+      "dst": "e:\\swiss_citation_extraction\\research\\scratch_2026-05-13_pair_extraction"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\research\\anchor_funnel_val001_v7",
+      "dst": "e:\\swiss_citation_extraction\\research\\local_v75_snapshot_mirror"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\research\\hybrid_rerank_final",
+      "dst": "e:\\swiss_citation_extraction\\research\\local_hybrid_rerank_cache_mirror"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\research\\stage_b_experiments",
+      "dst": "e:\\swiss_citation_extraction\\research\\stage_b_diagnostics_and_ceilings"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_extracted.sqlite",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\citation_graph_extracted.sqlite"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_extracted.sqlite.bak_pre_backref",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\citation_graph_extracted.sqlite.bak_pre_backref"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_extracted.sqlite.bak_pre_caselevel",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\citation_graph_extracted.sqlite.bak_pre_caselevel"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\laws_de_links.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\laws_de_links.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\court_considerations_links.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\court_considerations_links.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\laws_de_citations.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\laws_de_citations.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\court_considerations_citations.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\court_considerations_citations.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\laws_de_classified_citations.jsonl",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\laws_de_classified_citations.jsonl"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\court_considerations_classified_citations.jsonl",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_graph_db_and_edges\\court_considerations_classified_citations.jsonl"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\gold_citation_coverage.csv",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\gold_citation_coverage.csv"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\gold_citation_coverage.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\gold_citation_coverage.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\gold_citation_coverage.md",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\gold_citation_coverage.md"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\gold_parent_link_check.csv",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\gold_parent_link_check.csv"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\gold_parent_link_check.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\gold_parent_link_check.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\gold_parent_link_check.md",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\gold_parent_link_check.md"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\train_gold_citations.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\train_gold_citations.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\val_gold_citations.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\gold_analysis_coverage_and_parents\\val_gold_citations.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\citation_pattern_analysis.md",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_patterns_and_priors\\citation_pattern_analysis.md"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\citation_patterns.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_patterns_and_priors\\citation_patterns.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\posture_statute_prior.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_patterns_and_priors\\posture_statute_prior.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\data_insights\\example.json",
+      "dst": "e:\\swiss_citation_extraction\\data_insights\\citation_patterns_and_priors\\example.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell28_body.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell28_body.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell34_body.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell34_body.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell_stage1_rerank.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell_stage1_rerank.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell_stage1b_translation.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell_stage1b_translation.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell_stage2_listwise.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell_stage2_listwise.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell_stage3_pointwise.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell_stage3_pointwise.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_cell_stage4_final.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_bodies_extracted_from_notebook\\_cell_stage4_final.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_add_cascade.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_inserters\\_add_cascade.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_add_hyde.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_inserters\\_add_hyde.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_add_miss_diagnostic.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_inserters\\_add_miss_diagnostic.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_add_multihyde.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_inserters\\_add_multihyde.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_add_prf.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_inserters\\_add_prf.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_add_snapshot_warmboot.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\cell_inserters\\_add_snapshot_warmboot.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\bm25_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\per_channel_fixes\\bm25_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\co_citation_backprop_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\per_channel_fixes\\co_citation_backprop_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\concept_en_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\per_channel_fixes\\concept_en_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\court_statute_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\per_channel_fixes\\court_statute_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\sibling_graph_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\per_channel_fixes\\sibling_graph_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\term_orig_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\per_channel_fixes\\term_orig_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_dump_cells.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_dump_cells.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_dump_config.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_dump_config.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_dump_exact.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_dump_exact.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_inspect_nb.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_inspect_nb.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_investigate.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_investigate.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_investigate_cocit.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_investigate_cocit.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_investigate_court_stat.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_investigate_court_stat.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_verify_fix.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_verify_fix.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_verify_patches.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_verify_patches.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_verify_val001.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\diagnostics_and_dumps\\_verify_val001.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_integrate_all.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_integrate_all.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_lift_topk_50k.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_lift_topk_50k.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_make_multiquery.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_make_multiquery.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_robust_llm_parser.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_robust_llm_parser.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_smoke_matcher.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_smoke_matcher.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_update_markdowns.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_update_markdowns.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_v7_5_apply.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\integrations_and_utilities\\_v7_5_apply.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\_concepts_sample.json",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\input_data_jsons\\_concepts_sample.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\missed_gold_enrichment.json",
+      "dst": "e:\\swiss_citation_extraction\\v7_4_fixes\\input_data_jsons\\missed_gold_enrichment.json"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_setup.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\pipeline_setup_and_load\\_setup.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_load_llm.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\pipeline_setup_and_load\\_load_llm.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_warmboot.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\pipeline_setup_and_load\\_warmboot.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_dossier_compute.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\dossier_compute\\_dossier_compute.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_dossier_helpers.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\dossier_compute\\_dossier_helpers.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_stage_a_prune.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\cascade_stages\\_stage_a_prune.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_stage_b_composite.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\cascade_stages\\_stage_b_composite.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_stage_c_listwise.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\cascade_stages\\_stage_c_listwise.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_stage_d_pointwise.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\cascade_stages\\_stage_d_pointwise.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_stage_e_selection.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\cascade_stages\\_stage_e_selection.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_stage_f_validation.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\cascade_stages\\_stage_f_validation.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_eval_and_save.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\eval_and_notebook_build\\_eval_and_save.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\v7_5_precision\\_build_notebook.py",
+      "dst": "e:\\swiss_citation_extraction\\v7_5_precision\\eval_and_notebook_build\\_build_notebook.py"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\outputs_from_363k_run",
+      "dst": "e:\\swiss_citation_extraction\\llm_enrichment_output_court_363k"
+    },
+    {
+      "action": "moved",
+      "src": "e:\\swiss_citation_extraction\\law_json_llm_output",
+      "dst": "e:\\swiss_citation_extraction\\llm_enrichment_output_law_173k"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\scripts\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\tests\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\v7_4_fixes\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\research\\stage_b_diagnostics_and_ceilings\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\notebooks\\_inventory\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\swiss_law_pipeline_source_code\\agent\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\swiss_law_pipeline_source_code\\retrieval\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\swiss_law_pipeline_source_code\\scoring\\__pycache__"
+    },
+    {
+      "action": "removed",
+      "src": "e:\\swiss_citation_extraction\\drive_sync\\omnilex_competition\\swiss_law_pipeline_source_code\\agent\\prompts\\__pycache__"
+    }
+  ],
+  "total_actions": 173,
+  "moved": 160,
+  "removed": 13,
+  "missing_source": 0,
+  "target_exists_skipped": 0
+}

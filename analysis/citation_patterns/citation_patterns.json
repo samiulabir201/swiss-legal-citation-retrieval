@@ -1,0 +1,225 @@
+{
+  "dataset_summaries": {
+    "court_considerations": {
+      "all_unique_count": 2434429,
+      "dataset": "court_considerations",
+      "edge_count": 4554397,
+      "family_counts": {
+        "court": 3948203,
+        "law": 3002516,
+        "official_reference": 75551,
+        "unknown": 10054
+      },
+      "pattern_counts": {
+        "court_bge": 1107326,
+        "court_case": 2840877,
+        "official_reference": 75551,
+        "statute_article": 2936783,
+        "statute_section": 65733,
+        "unknown": 10054
+      },
+      "reference_unique_count": 534599,
+      "rows": 2476315,
+      "source_file": "data\\court_considerations.csv",
+      "source_unique_count": 1985178
+    },
+    "laws_de": {
+      "all_unique_count": 197801,
+      "dataset": "laws_de",
+      "edge_count": 45165,
+      "family_counts": {
+        "law": 221066,
+        "official_reference": 32
+      },
+      "pattern_counts": {
+        "official_reference": 32,
+        "statute_article": 221040,
+        "statute_section": 26
+      },
+      "reference_unique_count": 32277,
+      "rows": 175933,
+      "source_file": "data\\laws_de.csv",
+      "source_unique_count": 175933
+    }
+  },
+  "examples": {
+    "court_considerations": {
+      "court_bge": [
+        "BGE 100 I 368 E. 3a",
+        "BGE 100 II 1 E. 4",
+        "BGE 100 II 1 E. 4a",
+        "BGE 100 II 105",
+        "BGE 100 II 105 E. 1b",
+        "BGE 100 II 105 E. 1c",
+        "BGE 100 II 105 E. 2",
+        "BGE 100 II 105 E. 3a"
+      ],
+      "court_case": [
+        "10Y.1/2003 05.11.2003 E. 1",
+        "10Y.1/2003 05.11.2003 E. 2",
+        "10Y.1/2003 05.11.2003 E. 3",
+        "10Y.1/2003 05.11.2003 E. 4",
+        "10Y.1/2003 05.11.2003 E. 5",
+        "10Y.1/2003 05.11.2003 E. 6",
+        "10Y.1/2003 05.11.2003 E. 7",
+        "11C_56/2019 E. 3.1"
+      ],
+      "official_reference": [
+        "AS 1012 629",
+        "AS 1012 6291",
+        "AS 1191 1184",
+        "AS 1728 1755",
+        "AS 1851 535",
+        "AS 1908 233",
+        "AS 1911 355",
+        "AS 1918 59"
+      ],
+      "statute_article": [
+        "Art. 0",
+        "Art. 000",
+        "Art. 0118",
+        "Art. 0273 Abs. 1 CC",
+        "Art. 03",
+        "Art. 04",
+        "Art. 04 CGA",
+        "Art. 06"
+      ],
+      "statute_section": [
+        "§ 04.07",
+        "§ 1",
+        "§ 1 ABauV",
+        "§ 1 ATF 125",
+        "§ 1 Abs. 1",
+        "§ 1 Abs. 1 AWG",
+        "§ 1 Abs. 1 AWaV",
+        "§ 1 Abs. 1 AnwT/AG"
+      ],
+      "unknown": [
+        "12T_1/2007 29.05.2007 E.",
+        "12T_1/2016 E.",
+        "12T_2/2017 E.",
+        "12T_3/2015 E.",
+        "1A.1/2000 08.05.2000 E. 1.-",
+        "1A.1/2000 08.05.2000 E. 2.-",
+        "1A.1/2000 08.05.2000 E. 3.-",
+        "1A.1/2000 08.05.2000 E. 4.-"
+      ]
+    },
+    "laws_de": {
+      "official_reference": [
+        "AS 1972 897",
+        "AS 1974 1071",
+        "AS 1977 2394",
+        "AS 1981 562",
+        "AS 1995 1469",
+        "AS 2007 2871",
+        "SR 142.31",
+        "SR 221.302"
+      ],
+      "statute_article": [
+        "Art. 1 112",
+        "Art. 1 131.226",
+        "Art. 1 132.211",
+        "Art. 1 142.311.23",
+        "Art. 1 142.513",
+        "Art. 1 150.2",
+        "Art. 1 151.21",
+        "Art. 1 172.010.422"
+      ],
+      "statute_section": [
+        "§ 1.01",
+        "§ 1.01 Bst. m",
+        "§ 1.03",
+        "§ 1.03 Abs. 1",
+        "§ 1.06",
+        "§ 1.10 Ziff. 1 Bst. w",
+        "§ 1.22",
+        "§ 1.22 Ziff. 3"
+      ]
+    }
+  },
+  "generated_at_utc": "2026-05-08T14:58:09.745059+00:00",
+  "pattern_descriptions": {
+    "court_bge": {
+      "examples": [
+        "BGE 137 IV 122 E. 6.2",
+        "BGE 139 I 2 S. 7"
+      ],
+      "regex_family": "BGE + volume + roman division + first page + optional E./S. pinpoint",
+      "segments": [
+        "reporter",
+        "volume",
+        "division",
+        "page",
+        "pinpoint_unit",
+        "pinpoint"
+      ]
+    },
+    "court_case": {
+      "examples": [
+        "1B_210/2023 E. 4.1",
+        "2P.198/2006 09.05.2007 E. 2",
+        "I 402/02 13.11.2002 E. 4"
+      ],
+      "regex_family": "federal docket + optional date + optional E. consideration",
+      "segments": [
+        "court_chamber",
+        "legal_area_code",
+        "separator_style",
+        "serial_number",
+        "decision_year",
+        "decision_date",
+        "consideration"
+      ]
+    },
+    "official_reference": {
+      "examples": [
+        "SR 455",
+        "BBl 2009 3547",
+        "AS 2011 1199"
+      ],
+      "regex_family": "SR/BBl/AS + numeric publication reference",
+      "segments": [
+        "publication",
+        "number_or_year",
+        "page"
+      ]
+    },
+    "statute_article": {
+      "examples": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 69 Abs. 1bis IVG",
+        "Artikel 10 TSchG",
+        "Art. 30-39 EpG"
+      ],
+      "regex_family": "Art./Artikel + article + optional Abs./lit./Ziff./Satz + law code",
+      "segments": [
+        "article_marker",
+        "article_number",
+        "article_suffix_or_range",
+        "paragraph_marker",
+        "paragraph_number",
+        "subdivision_marker",
+        "subdivision_value",
+        "law_code"
+      ]
+    },
+    "statute_section": {
+      "examples": [
+        "§ 24a Abs. 1 SHG",
+        "§§ 25 ff. PBG/SZ",
+        "§ 1.22"
+      ],
+      "regex_family": "section sign + section number + optional Abs./lit. + code",
+      "segments": [
+        "section_marker",
+        "section_number",
+        "paragraph_marker",
+        "paragraph_number",
+        "subdivision_marker",
+        "subdivision_value",
+        "law_code"
+      ]
+    }
+  }
+}

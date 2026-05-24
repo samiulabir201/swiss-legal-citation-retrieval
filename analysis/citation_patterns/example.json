@@ -1,0 +1,26 @@
+{
+    "english_summary": "The Federal Supreme Court upheld the extension of pretrial detention based on flight risk, noting the accused's strong foreign ties and substantial financial resources.",
+    "legal_topic": "pretrial detention — flight risk",
+    "legal_question": "Whether extension of investigative detention is justified where accused has foreign connections and financial means to flee.",
+    "legal_rule": "Art. 221 para. 1(a) StPO — pretrial detention permissible where concrete flight risk exists",
+    "court_holding": "Extension of pretrial detention affirmed; flight risk adequately established.",
+    "factual_context": "Accused has close foreign ties and significant financial resources enabling flight.",
+    "english_legal_concepts": [
+        "pretrial detention",
+        "flight risk",
+        "proportionality",
+        "investigative detention"
+    ],
+    "search_keywords": [
+        "Untersuchungshaft",
+        "Fluchtgefahr",
+        "pretrial detention",
+        "flight risk"
+    ],
+    "natural_language_queries": [
+        "When can Swiss courts extend pretrial detention for flight risk?",
+        "What financial circumstances justify detention extension in Switzerland?"
+    ],
+    "paragraph_role": "holding",
+    "outcome_signal": "dismissed"
+}

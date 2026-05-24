@@ -1,0 +1,1493 @@
+Efficient Context Selection for Long-Context QA: No Tuning, No Iteration,
+                                     Just Adaptive-k
+
+    Chihiro Taguchi *       Seiji Maekawa                     Nikita Bhutani
+University of Notre Dame     Megagon Labs                      Megagon labs
+                          seiji@megagon.ai                 nikita@megagon.ai
+    ctaguchi@nd.edu
+
+                      Abstract                             dition the generation. While these approaches
+                                                           are sometimes presented as alternatives (Li et al.,
+     Retrieval-augmented generation (RAG) and              2024a; Yu et al., 2024), recent studies highlight
+     long-context language models (LCLMs) both             their complementary nature (Li et al., 2024b).
+     address context limitations of LLMs in open-
+     domain question answering (QA). However, op-             A central bottleneck in both paradigms is deter-
+     timal external context to retrieve remains an         mining how much context to include. Fixed-size
+     open problem: fixing the retrieval size risks         retrieval budgets (e.g., top-k retrieval) are subopti-
+     either wasting tokens or omitting key evidence.       mal, because they either retrieve too little and risk
+     Existing adaptive methods like Self-RAG and           omitting key evidence, or retrieve too much, which
+     SELF-ROUTE rely on iterative LLM prompting            can overwhelm the model, increase latency and
+     and perform well on factoid QA, but struggle          costs, and degrade performance (Yu et al., 2024;
+     with aggregation QA, where the optimal con-           Leng et al., 2024; Jin et al., 2024). As Yang (2024)
+     text size is both unknown and variable. We            observes, the challenge in long-context reasoning
+     present Adaptive-k retrieval, a simple and ef-        lies not only in document length but also in how
+     fective single-pass method that adaptively se-        relevant information is distributed and duplicated
+     lects the number of passages based on the dis-        within the context. Crucially, query type plays a
+     tribution of the similarity scores between the        major role: factoid questions may need only a few
+     query and the candidate passages. It does not         targeted facts, while aggregation queries (Maekawa
+     require model fine-tuning, extra LLM infer-           et al., 2025) often require reasoning based on infor-
+     ences or changes to existing retriever­reader         mation from multiple evidence spans. This variabil-
+     pipelines. On both factoid and aggregation            ity makes fixed-k retrieval suboptimal for complex
+     QA benchmarks, Adaptive-k matches or outper-          tasks.
+     forms fixed-k baselines while using up to 10×
+     fewer tokens than full-context input, yet still          To address this, several hybrid and adaptive re-
+     retrieves 70% of relevant passages. It improves       trieval methods such as Self-RAG (Asai et al.,
+     accuracy across five LCLMs and two embed-             2023), Adaptive-RAG (Jeong et al., 2024), and Dy-
+     ding models, highlighting that dynamically ad-        namic context cutoff (Xie et al., 2025) have been
+     justing context size leads to more efficient and      proposed, which estimate retrieval depth via iter-
+     accurate QA.1                                         ative prompting, each time fetching a fixed num-
+                                                           ber of documents. However, they assume white-
+1 Introduction                                             box access to the LLM: Self-RAG requires fine-
+                                                           tuning the LLM, while dynamic context cutoff de-
+Despite remarkable progress in LLMs, efficiently           pends on access to internal KV cache states. This
+incorporating external knowledge during inference          makes them incompatible with closed-source or
+for long or dynamic contexts remains a key chal-           API-based LLMs. While effective on factoid-style
+lenge. Two major paradigms have emerged to ad-             questions, they also face significant limitations in
+dress this: long-context language models (LCLMs),          terms of scalability, latency, and deployment flex-
+which extend the model's context window to                 ibility. Although SELF-ROUTE (Li et al., 2024b)
+directly ingest more information, and retrieval-           offers a more modular solution, it still relies on a
+augmented generation (RAG), which retrieves rele-          fixed retrieval size and lacks the ability to adapt to
+vant documents from an external corpus to con-             varying information needs across queries and con-
+                                                           text documents. This motivates our core research
+    *Work done during internship at Megagon Labs.
+    1The experimental code is released at https://github.
+com/megagonlabs/adaptive-k-retrieval under the BSD
+3-Clause License.
+
+                                                     20105
+
+Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing, pages 20105­20130
+                         November 4-9, 2025 ©2025 Association for Computational Linguistics
+question: How can we estimate the optimal number              retrieval that dynamically adjusts context size
+of passages to retrieve for a given query and set of          based on similarity distribution statistics.
+context documents, without supervision or iterative
+prompting?                                                 · Adaptive-k achieves higher accuracy than
+                                                              prior methods and up to 99% token reduc-
+   To address this question, we introduce Adaptive-           tion on factoid and aggregation QA against
+k retrieval, a simple yet effective plug-and-play             LCLMs with full context.
+method for dynamically selecting a query- and
+context-specific number of documents in a sin-             · We show that no single fixed-size retrieval
+gle retrieval pass. Our approach relies on analyz-            strategy fits all settings. In contrast, Adaptive-
+ing the distribution of similarity scores between a           k shows robust performance across multiple
+query and candidate documents. By identifying the             LLMs, embedding models and benchmarks.
+largest gap in the sorted similarity distribution, it
+estimates an optimal cutoff point, retrieving the top-  2 Related Work
+k documents before the gap. Unlike prior adaptive
+retrieval methods, Adaptive-k requires no model         RAG and LCLMs are two prominent paradigms for
+fine-tuning, no access to internal components and       equipping LLMs with external knowledge. Recent
+no iterative prompting. It is fully modular, allowing   studies show that LCLMs can match or outperform
+seamless integration with existing retriever­reader     RAG in certain QA tasks (Li et al., 2024a; Yu et al.,
+pipeline and compatibility with black-box LLMs.         2024), yet the two methods are fundamentally com-
+By relying solely on the distributional structure of    plementary.
+similarity scores, Adaptive-k adjusts the retrieval
+size on a per-query basis. This simple yet prin-           Several approaches have been proposed to lever-
+cipled strategy leads to significant reductions in      age both the strengths of RAG and LCLMs with
+input length and inference cost, while maintaining      flexible retrieval strategies. Self-RAG (Asai et al.,
+or even improving the answer quality across both        2023) trains an LLM to generate reflection tokens
+factoid and aggregation-style QA tasks. We com-         that enable retrieval on the fly, so that the LLM can
+pare Adaptive-k retrieval to prior approaches in        determine whether it needs any additional docu-
+Table 1.                                                ment by itself. SELF-ROUTE (Li et al., 2024b) asks
+                                                        an LLM whether it can answer the query with the
+   We evaluate Adaptive-k on both factoid and           retrieved context; if not, the LLM is given the full
+aggregation-style QA tasks across multiple LCLMs        context. Adaptive-RAG (Jeong et al., 2024) uses a
+and embedding models. Our experiments span              workflow that iteratively asks an LLM whether it
+two representative long-context benchmarks: HEL-        can answer the given query with the retrieved con-
+MET (Yen et al., 2025), which includes factoid          text. LC-Boost (Qian et al., 2024) enables short-
+QA tasks with up to 128k-token contexts, and            context LLMs to tackle long-context tasks by first
+HoloBench (Maekawa et al., 2025), which focuses         identifying relevant information, then reasoning
+on aggregation-style queries. Our results show that     over it, without needing extended context windows
+on aggregation-QA, Adaptive-k outperforms SELF-         or fine-tuning.
+ROUTE by up to +9 points in answer accuracy on
+high-information tasks. It consistently maintains          While effective in controlled settings, these
+70% context recall and reduces token usage by           methods often rely on white-box access to the LLM,
+2× to 10× compared to full-context baselines. On        fine-tuning, or multiple LLM inferences. Existing
+factoid QA, Adaptive-k matches or exceeds the           research has highlighted key limitations in RAG
+accuracy of fixed-size retrieval with up to 99% re-     systems, particularly in terms of cost, modularity,
+duction in input tokens, effectively pruning irrele-    and retrieval granularity. However, prior methods
+vant content. These findings highlight the impor-       typically address these issues in isolation, and to
+tance of query-specific context sizing and establish    our knowledge, no single approach has tackled all
+Adaptive-k as a simple, robust, and efficient alterna-  three challenges holistically. Our method is the
+tive to more complex adaptive retrieval strategies.     first to offer a unified solution that is cost-efficient,
+                                                        modular, and capable of adaptive, query-specific
+   In summary, our key contributions are:               retrieval in a single pass.
+
+· We propose Adaptive-k, a simple yet effective Cost. High-quality inference often comes with
+  plug-and-play method for adaptive document high token usage, energy consumption, and latency
+                                                       20106
+                                           Plug-and-Play via API Retrieval Amount Variability Single Retrieval Operation
+
+No RAG (LCLM)                                                                   No Retrieval
+RAG (traditional)
+                                                                                
+
+Self-RAG (Asai et al., 2023)                                                    
+
+Adaptive-RAG (Jeong et al., 2024)                                               
+
+SELF-ROUTE (Li et al., 2024b)                                                   
+
+LC-Boost (Qian et al., 2024)                                                    
+
+Dynamic context cutoff (Xie et al., 2025)                                       
+
+Adaptive-k RAG (ours)                                                           
+
+Table 1: The comparison of previously proposed approaches as enhanced RAG. Plug-and-Play via API refers to
+whether the approach can be easily plugged in to various LLM pipelines. Retrieval Amount Variability refers to
+whether the system can flexibly change the retrieval amount depending on different queries and context. Single
+Retrieval Operation refers to whether the retrieval is performed in a single step or in multiple steps.
+
+(Li et al., 2024b; Qian et al., 2024), underscoring computed to quantify relevance, commonly using
+
+the need for more cost-effective alternatives.           cosine similarity:
+
+Modularity. Modularity is crucial for real-world         s  =  fsim(q, C)    =       Cq
+deployment (Wang et al., 2024), but many existing                               ||q|| · ||C||rows
+methods require fine-tuning or training the LLM
+itself. This tight coupling reduces compatibility           RAG typically retrieves a fixed number of top-k
+with API-based or closed-source models, limiting         documents (or tokens) based on the practitioner's
+practical applicability.
+                                                         choice. This fixed retrieval size is simple and mod-
+Retrieval granularity. Aggregation-type queries
+often require comprehensive evidence and holistic        ular but may result in inefficient token usage, either
+understanding. For example, answering "Which
+colleges in California have over 10,000 students?"       retrieving irrelevant documents or missing critical
+demands access to the full set of relevant entries.
+Fixed-size or iterative retrieval methods struggle       information, especially when the amount of rel-
+with such cases, as they cannot dynamically adjust
+retrieval depth based on query complexity.               evant context varies depending on the provided
+
+3 Method                                                 context documents and the query type.
+
+This section details our approach to adaptive re-        3.2 Toward efficient adaptive retrieval
+trieval, grounded in the analysis of similarity score
+patterns to determine retrieval sizes adaptively         Design motivation and principles. While
+based on the query and the context. We first review      vanilla RAG offers modularity and straightforward
+the standard RAG retrieval process, then present         integration, its fixed retrieval size limits perfor-
+our methodology to identify the optimal threshold        mance and efficiency in scenarios where the quan-
+in similarity distributions to efficiently select rele-  tity of relevant context varies unpredictably such
+vant documents.                                          as in aggregation QA in the HoloBench benchmark
+                                                         (Maekawa et al., 2025). To address these limita-
+3.1 Retrieval in vanilla RAG                             tions, we aim to design an adaptive retrieval mecha-
+                                                         nism that: (1) operates independently of the under-
+RAG consists of two steps: retrieval and genera-         lying inference model and requires no additional
+tion. Given a query q and N context documents            training or fine-tuning (Plug-and-Play), (2) flex-
+C = {ci}1N , the retriever module identifies top-k       ibly controls the retrieval amount for each query,
+semantically similar context documents C. Mod-           avoiding both wasting tokens and omitting key ev-
+ern RAG approaches convert the query and the             idence (Retrieval Amount Variability), and (3)
+context documents in natural language into the           operates in a single pass without requiring iterative
+query embedding q  Rd and context embeddings             LLM calls (Single Retrieval Operation).
+C  RN×d. Similarity scores s  RN are then
+                                                         Preliminary analysis. To ground our design in
+                                                         empirical evidence, we conduct an in-depth analy-
+                                                         sis of the distributional patterns of cosine similarity
+                                                         scores between queries and candidate documents,
+                                                         which, crucially, are inference model-agnostic sig-
+                                                         nals. This preliminary analysis reveals distinct dis-
+
+                                                  20107
+                                                           Algorithm 1 Adaptive k Estimation via Largest
+                                                           Similarity Gap
+
+                                                           Require: q, C, Embedder(·), Similarity(·)
+                                                           Ensure: Estimated k such that the largest similar-
+                                                           ity drop occurs before the k-th item
+
+                                                           q  Embedder(q)
+
+                                                           C  Embedder(C)                Precomputed
+
+                                                           s  Similarity(q, C)
+
+                                                           Sort s in descending order
+
+                                                           g  array()                   For storing the gap
+
+                                                           for i = 0 to |s| - 2 do
+                                                           Append s[i] - s[i + 1] to g
+
+                                                           end for
+                                                           k  arg max(g)  Index at the largest gap
+
+                                                           return k
+
+                                                           3.3 Proposed method
+
+Figure 1: Example distributions of sorted cosine similar-  Building on these observations, we formalize an
+ities from the long-context version of HotpotQA (Yang      algorithm that adaptively estimates the retrieval
+et al., 2018) included in HELMET (Yen et al., 2025)        threshold k by identifying the position of the steep-
+with 1,000 context documents (top) and HoloBench           est drop in the similarity score distribution. The
+(Maekawa et al., 2025) with 10% relevant information       method proceeds as follows: Compute the cosine
+amount (bottom). BAAI's bge-large-en-v1.5 is used as       similarities s of the query q and context documents
+the embedding model.                                       C. Sort the scores in descending order. Compute
+                                                           their first discrete differences g and choose the
+tributional characteristics that inform our adaptive       index k where the similarity drop is the largest.
+retrieval strategy.                                        Figure 2 depicts this process within the RAG work-
+                                                           flow. Under the assumption that the embeddings of
+   As shown in Figure 1, for factoid QA tasks such         documents are precomputed, the time complexity
+as HotpotQA, the sorted similarity scores typically        of this algorithm is O(n log n). The algorithm is
+exhibit a pronounced gap separating a cluster of           described in Algorithm 1.
+highly relevant documents from the rest, suggest-
+ing a natural threshold for retrieval. In contrast,           In practice, while determining the threshold k
+aggregation tasks (e.g., HoloBench) show more ir-          based on the largest similarity gap is effective, a
+regular patterns, with gaps dispersed throughout           naïve implementation might miss relevant docu-
+the distribution ­ reflecting the variable spread of       ments located immediately beyond the identified
+relevant information. In the bottom example in             threshold. To address this, we incorporate a small
+Figure 1, the 100k-token context is generated such         fixed buffer, retrieving an additional B documents
+that 10% of it is information relevant to the query.       after the k-th document. In our experiments, we set
+Indeed, the large gaps are observed around the top         B = 5. Furthermore, as depicted in Figure 1, the
+5% to 20% context, aligning with our expectations.         largest gap may occasionally manifest among the
+                                                           least relevant documents, leading to the retrieval
+   These insights lead to the hypothesis that the          of an excessively large portion of the context. To
+largest gap in sorted similarity scores corresponds        avoid this and align with our focus on retrieval from
+to the boundary between relevant and irrelevant            extremely long contexts, we restrict the search for
+documents, thus providing a data-driven criterion          the largest gap to the top 90% of documents sorted
+for adaptive retrieval size selection.                     by their similarity scores.
+
+                                                           4 Experimental setup
+
+                                                           In our experiments, we aim to answer the following
+                                                           research questions:
+
+20108
+         Query                                                      Query embedding                                        Prompt
+
+What are the names of colleges that have                                                Similarity distribution     What are the names of colleges that have
+more than 10,000 students and are located                                                                           more than 10,000 students and are located
+in California?                                                                              Retrieve this           in California?
+
+                                                                    fsim                                            The University of California, Los Angeles
+                                                                                                                    (UCLA) has a student population exceeding
+Context                                                                                                             45,000, making it one of the largest univer-
+                                                                                                                    sities in California.
+The University of California, Los Angeles
+                                                                                                                    In California, public universities such as
+(UCLA) has a student population exceeding                 Embedder                      Largest gap                 San Diego State University and California
+                                                                                         threshold k                State University, Fullerton each enroll more
+45,000, making it one of the largest univer-  relevant
+                                                                                                                  ... than 30,000 students annually.
+sities in California.
+                                                                                                                                  LLM
+Amherst College and Williams College,         irrelevant
+located in Massachusetts, have fewer than                                                                        Here are some colleges and uni-
+2,500 students each.                                                                                             versities in California with more
+                                                                                                                 than 10,000 students enrolled: ...
+In California, public universities such as
+
+San Diego State University and California
+
+State University, Fullerton each enroll more                               ...
+
+... than 30,000 students annually.            relevant              Context embeddings
+
+Figure 2: The proposed method in the RAG workflow. The method chooses the threshold k for retrieval based on a
+large gap in the sorted similarity score distribution.
+
+· How does the proposed adaptive-k method                                 4.2 Models
+  compare to other modular retrieval approaches
+  on aggregation tasks with varying amounts of                            Retriever. We test our method on small, medium,
+  relevant context?                                                       and large embedding models: Meta's contriver-
+                                                                          msmarco2 (Izacard et al., 2021) with 109M params,
+· How does performance of Adaptive-k vary                                 BAAI's bge-en-large-v1.53 (Xiao et al., 2023) with
+  across factoid QA and aggregation QA tasks?                             335M params, and Alibaba NLP's gte-Qwen2-
+                                                                          1.5B-instruct4 (Li et al., 2023) with 1.78B params.
+
+· How does the performance gain from                                      Reader. We use five closed and open mod-
+  Adaptive-k retrieval vary across LLMs?                                  els: GPT-4o-mini, GPT-4o (OpenAI et al., 2024),
+                                                                          Gemini-2.5-Flash (Team et al., 2024), Llama4-
+· How do different embedding models influence                             Scout, and Llama4-Maverick (Touvron et al., 2023).
+  the performance of Adaptive-k?                                          The model details are provided in Appendix A.2.
+
+To answer these questions, we employ the experi-                          4.3 Compared methods
+mental settings detailed below.
+                                                                          We compare the proposed adaptive-k method
+4.1 Dataset                                                               against zero-shot LLMs (without context), LLMs
+                                                                          with full context, and SELF-ROUTE (Li et al.,
+For testing on factoid QA tasks, we use Hot-                              2024b), which is another modular retrieval method
+potQA (Yang et al., 2018), Natural Questions (NQ)                         with a single retrieval step. In SELF-ROUTE, fixed
+(Kwiatkowski et al., 2019), and TriviaQA (Joshi                           top 5k tokens are retrieved for the first inference
+et al., 2017), as curated by HELMET (Yen et al.,                          step. We also show the results of the fixed-n re-
+2025) for long-context benchmarking with 128k                             trieval method with varying numbers of tokens n
+input tokens. Due to the high computational cost                          as performance references. Specifically, we run
+of long-context inference, we evaluate on a subset                        experiments with n  {1000, 5000, 10000, 25000,
+of 100 examples per dataset.                                              50000} and regard the best-performing setting as
+                                                                          the oracle. In this way, we can compare the perfor-
+   For aggregation tasks, we employ HoloBench                             mance of adaptive-k against the best possible score
+(Maekawa et al., 2025), which provides 90 evalua-                         of the fixed retrieval method.
+tion samples. HoloBench allows control over both
+total context size and the amount of information                              2https://huggingface.co/facebook/
+relevant to the query. We fix the total context to                        contriever-msmarco
+100k tokens and evaluate under varying levels of
+relevant information, with info_amount = {5000,                               3https://huggingface.co/BAAI/bge-large-en-v1.
+10000, 25000, 50000} tokens.                                              5
+
+                                                                              4https://huggingface.co/Alibaba-NLP/
+                                                                          gte-Qwen2-1.5B-instruct
+
+                                                                    20109
+    (a) info_amount = 10000.                                (b) info_amount = 25000.                                   (c) info_amount = 50000.
+
+                                                  100k                                                    100k                                                       100k
+
+40           80k                                        40         80k                                          40                                                                          80k
+
+Score        60k                                                   60k                                                                                                                      60k
+                                                          # Input Tokens
+20           40k                                        20         40k                                          20                                                                          40k
+                                                                   Score
+                                                                                                                             # Input Tokens
+
+                                                                                                                                      Score
+                                                                                                                                                                                                # Input Tokens
+
+             20k                                                   20k                                                                                                                      20k
+
+0            0                                          0          0                                            0                                                                           0
+
+fixed-25k (oracle)
+                full-context
+
+                          adapStiEvLeF--kR(OouUrTsE)
+                                                                   fixed-25k (oracle)
+
+                                                                                   full-context
+                                                                                             adapStiEvLeF--kR(OouUrTsE)
+                                                                                                                                      fixed-50k (oracle)
+
+                                                                                                                                                      full-context
+                                                                                                                                                                adapStiEvLeF--kR(OouUrTsE)
+
+Figure 3: The results with different amounts of relevant information in the HoloBench tasks. The best-performing
+fixed-n setting is chosen as the oracle. is for performance improvement, and for the number of input tokens.
+
+4.4 Metrics                                                                                                     info5k info10k info25k info50k
+
+To evaluate the retrieval performance, context recall              SELF-ROUTE                                   65.79  45.04  30.42  21.54
+(Ru et al., 2024) is computed, which represents how                Adaptive-k                                   75.74  68.54  66.16  67.43
+much of the relevant context documents were able                   fixed-1k                                     12.05
+to be retrieved. For the evaluation of generation per-             fixed-5k                                     51.92   6.53   2.77   1.47
+formance, we use substring exact match (SubEM)                     fixed-10k                                    66.68  31.77  14.06   7.54
+for HotpotQA, NQ, and TriviaQA, and LLM-as-a-                      fixed-25k                                    78.48  59.10  28.80  15.39
+judge for HoloBench, following the metrics used                    fixed-50k                                    86.79  78.18  68.13  39.55
+in their original implementation in HELMET (Yen                                                                        87.34  86.88  76.90
+et al., 2025) and HoloBench, respectively. LLM-
+as-a-judge evaluates whether the generated answer           Table 2: A comparison of the context recall scores
+contains a correct mention of the gold answer, as-          across different relevant information amounts in the
+signing a score of 1 if it finds a correct mention, 0.5     HoloBench tasks. The query and contexts are embed-
+for a partially correct mention, and 0 otherwise. For       ded by bge-large-en-v1.5. The scores compared are
+the judge model, GPT-4o-mini is used. To evaluate           SELF-ROUTE and Adaptive-k, as well as the results of
+the inference cost, we count the number of input            fixed-n token retrieval as references.
+and output tokens, assuming that the financial cost
+on the user's end and energy consumption depends            text is high. Also, our method flexibly increases
+on the amount of tokens (Husom et al., 2024).               the amount of retrieved context chunks when there
+                                                            is a higher amount of relevant information in the
+5 Results                                                   entire context. In contrast, SELF-ROUTE tends to
+                                                            underestimate the amount of relevant context and
+This section provides the results of the experiments        jump to a conclusion that the LLM can answer the
+with a focus on different task types, reader models,        query with the 5k-token context retrieved in the
+and embedding models. For the full results, see             first round, leading to lower performance in a high
+Appendix A.3.                                               amount of relevant information.
+
+5.1 Aggregation-type QA                                        This contrast is also reflected in the context recall
+                                                            scores. As shown in Table 2, Adaptive-k consis-
+Figure 3 shows GPT-4o's results in the HoloBench            tently achieves a context recall score of approxi-
+tasks where each task is designed to contain differ-        mately 70 across varying levels of relevant infor-
+ent amounts of relevant information (info_amount:           mation, indicating that it retrieves approximately
+10k, 25k, 50k tokens) in the context. It can be             70% of truly relevant chunks regardless of their
+observed that our Adaptive-k method constantly              proportion in the full context. The contrast is even
+outperforms SELF-ROUTE. The performance im-                 more pronounced when compared to context recall
+provements of Adaptive-k are particularly notable           of SELF-ROUTE, with Adaptive-k achieving more
+when the amount of relevant information in the con-         than three times higher context recall.
+
+                                                            20110
+100                                                                  105                                          Method      Contriever BGE GTE
+
+                                                                     104                           HotpotQA       SELF-ROUTE  77.50 90.83 25.83
+80Score                                                                                            NQ             adaptive-k  49.17 70.83 5.50
+                                                                                   # Input Tokens  TriviaQA
+                                                                          103                                     SELF-ROUTE  51.19 51.90 20.67
+60                                                                                                                adaptive-k  26.28 27.20 2.85
+
+                                                                          102                                     SELF-ROUTE  41.49 46.52 10.20
+40                                                                                                                adaptive-k  25.02 31.21 3.00
+
+zero-shot                                                                                          HoloBench-5k   SELF-ROUTE  60.57 65.79 65.18
+              fixed-1k                                                                             HoloBench-10k  adaptive-k  72.11 75.74 82.20
+                          full-context                                                             HoloBench-25k  SELF-ROUTE  41.83 45.04 45.87
+                                       SELF-ROUTE                                                  HoloBench-50k  adaptive-k  70.85 68.54 78.99
+                                                  adaptive-k (ours)                                               SELF-ROUTE  29.67 30.42 31.02
+                                                                                                                  adaptive-k  68.67 66.16 76.47
+Figure 4: A performance comparison of our proposed                                                                SELF-ROUTE  21.27 21.54 21.90
+method (Adaptive-k) in the factoid QA tasks against                                                               adaptive-k  67.16 67.43 72.54
+existing methods. The embedding model is bge-large-
+en-v1.5, and the reader model is GPT-4o. is for the                                                Table 3: A comparison of the context recall scores
+SubEM scores, and for the number of input tokens.                                                  across tasks between Contriever (contriever-msmarco),
+5.2 Factoid-type QA                                                                                BGE (bge-large-en-v1.5), and GTE (gte-Qwen2-1.5B-
+                                                                                                   instruct).
+
+Figure 4 shows the comparison of Adaptive-k                                                        5.4 Embedding bottleneck
+against the zero-shot setting, fixed 1k-token re-
+trieval, full context, and SELF-ROUTE. All meth-                                                   We observed that the effectiveness of our adaptive
+ods are implemented using GPT-4o. Our method                                                       method is sensitive to the choice of embedding
+achieves a 99% reduction in input cost compared                                                    model. As shown in Table 3, the embeddings by
+to the full context input, and a 90% reduction                                                     bge-large-en-v1.5, gte-Qwen2-1.5B-instruct, and
+compared to SELF-ROUTE. Since users generally                                                      contriever-msmarco have different strengths de-
+lack prior knowledge of the optimal retrieval size,                                                pending on the task. In factoid QA tasks, BGE
+Adaptive-k successfully reduces the cost while im-                                                 embeddings consistently yield higher context re-
+proving the generation quality compared to zero-                                                   call than GTE, whereas GTE performs better on
+shot question answering.                                                                           HoloBench. The underlying cause remains unclear,
+                                                                                                   but we identify a few potential factors: (1) Context
+5.3 Comparison across LLMs                                                                         chunk length: the factoid QA tasks in HELMET
+                                                                                                   generally have a longer context chunk length (up
+Since our methods only modify the retriever mod-                                                   to 100 tokens) than HoloBench (40 tokens); (2)
+ule, the retrieved documents to be fed into an                                                     Chunking scheme (Zhong et al., 2025): while the
+LLM's prompt remain the same across different                                                      context chunks in HoloBench contain well-formed
+LLMs. However, we observe that its effectiveness                                                   natural-language sentences, those in the factoid
+varies notably by model. Figure 5 shows the aver-                                                  QA tasks often contain mid-sentence breaks; (3)
+age score improvements and input token counts                                                      Training scheme: differences in pretraining corpora
+across different relevant information settings in                                                  and formatting may lead to divergent performance
+HoloBench. Larger high-performance LLMs such                                                       across embedding models. Overall, choosing the
+as GPT-4o (Figure 5b), Gemini-2.5-Flash (Fig-                                                      right embedding model is critical for ensuring RAG
+ure 5c), and Llama4-Maverick (Figure 5e) show                                                      effectiveness. For general use, we recommend bge-
+substantial gains from Adaptive-k retrieval com-                                                   large-en-v1.5 for Adaptive-k due to its strong and
+pared to SELF-ROUTE. In contrast, smaller LLMs                                                     consistent performance across settings.
+such as GPT-4o-mini (Figure 5a) and Llama4-
+Scout (Figure 5d) exhibit more modest improve-                                                     5.5 Limitation of fixed retrieval
+ments. Nonetheless, even for smaller models,
+Adaptive-k effectively reduces context length while                                                While fixed-n retrieval occasionally outperforms
+maintaining performance close to the full-context                                                  Adaptive-k method, it requires prior knowledge of
+and oracle fixed-n baselines.                                                                      the optimal n, which is difficult to estimate in prac-
+                                                                                                   tice. Our results show that the best-performing n
+
+                                                                                                   20111
+    (a) GPT-4o-mini.                                           (b) GPT-4o.                                   (c) Gemini-2.5-Flash.
+
+60                    100k  60                                                           100k            60                                                                                 100k
+
+                      80k                                                                80k                                                                                                80k
+
+40Score               60k   40                                                           60k             40                                                                                 60k
+                                                          # Input Tokens
+20                    40k   20                                                           40k             20                                                                                 40k
+                                                                   Score
+                                                                                                                             # Input Tokens
+
+                                                                                                                                      Score
+                                                                                                                                                                                                # Input Tokens
+
+                      20k                                                                20k                                                                                                20k
+
+0                     0     0                                                            0               0                                                                                  0
+
+fixed-25k (oracle)
+                full-context
+
+                          adapStiEvLeF--kR(OouUrTsE)
+                                                                   fixed-25k (oracle)
+
+                                                                                   full-context
+                                                                                             adapStiEvLeF--kR(OouUrTsE)
+                                                                                                                                      fixed-50k (oracle)
+
+                                                                                                                                                      full-context
+                                                                                                                                                                adapStiEvLeF--kR(OouUrTsE)
+
+        (d) Llama4-Scout.                                                                (e) Llama4-Maverick.
+
+    60                                                   100k                        60                                                    100k
+
+                                                         80k                                                                               80k
+
+    40Score                                              60k                         40Score                                               60k
+                                                              # Input Tokens                                                                   # Input Tokens
+                                                     40k                                                                              40k
+    20                                                                               20
+
+                                                     20k                                                                              20k
+
+    0                                                    0                           0                                                     0
+
+    fixed-5k (oracle)                                                                fixed-50k (oracle)
+                   full-context                                                                      full-context
+
+                             adapStiEvLeF--kR(OouUrTsE)                                                        adapStiEvLeF--kR(OouUrTsE)
+
+Figure 5: A performance comparison across the different reader models in the HoloBench task. The emnbedding
+model is bge-large-en-v1.5. is for performance improvement, and for the number of input tokens.
+
+varies across task types, query types, embedding                                     fixed-1k            Contriever                           BGE                 GTE
+models, reader models, and the distribution of rel-                                  fixed-5k              2351.96                         2289.33             2265.12
+evant information. In contrast, Adaptive-k is able                                   fixed-10k             2236.31                         2186.08             2154.81
+to dynamically adjust the retrieval amount based                                     fixed-25k             2095.38                         2056.89             2017.09
+on the query and context chunks, eliminating the                                     fixed-50k (oracle)    1680.93                         1660.64             1599.99
+need for manual tuning. This not only removes the                                    Adaptive-k              992.47                         985.39              898.34
+burden and risk of heuristically selecting an n but                                  SELF-ROUTE            1133.28                         1248.99             1001.00
+also provides a more robust and generalizable so-                                                          2236.31                         2186.09             2154.81
+lution across a wide range of scenarios, especially
+in cases where the relevant context size is highly                            Table 4: Diff-k values in the HoloBench task with an
+variable or unknown a priori.                                                 information amount of 50k for the three embedding
+                                                                              models.
+
+   In addition, Tables 4 and 5 demonstrate that the                           The diff-k values for Adaptive-k are substantially
+Adaptive-k method effectively estimates the thresh-                           lower than those of the SELF-ROUTE baseline and
+old of relevant contexts across different relevant                            closely match those of the fixed 50k-token retrieval,
+context sizes. These tables report the average ab-                            which is treated as an oracle. Similarly, the diff-k
+solute difference between the estimated threshold                             values for Adaptive-k in the HotpotQA task (Ta-
+(k) and the true k-value, referred to as diff-k hence-                        ble 5) consistently approximate the oracle retrieval
+forth, across various datasets and embeddings. The                            results, indicating that the method reliably deter-
+true k-value is defined as the index of the last rel-                         mines the optimal retrieval amount.
+evant context chunk in the list of context chunk
+embeddings sorted by similarity; in other words,                              6 Conclusion
+diff-k is the smallest value of k that achieves 100%
+recall. Table 4 presents the diff-k values for the                            We presented a simple yet effective and efficient
+HoloBench task with 50k tokens of relevant context.                           plug-and-play method, adaptive-k, that dynami-
+
+                                                                              20112
+fixed-1k (oracle)  Contriever    BGE     GTE             tasks, it has several limitations that warrant discus-
+fixed-5k               162.52   88.86  631.90            sion.
+fixed-10k              154.68   97.89  598.70
+fixed-25k              156.29  116.35  558.69               First, the method is not directly applicable to
+fixed-50k              191.14  185.70  452.32            tasks such as summarization, where the objective
+Adaptive-k             297.41  320.50  307.12            is to process the entire input holistically rather than
+SELF-ROUTE             161.14   89.40  632.28            retrieve a subset of relevant context. In such cases,
+                       154.68   97.89  598.70            aggressive filtering may omit important informa-
+                                                         tion that contributes to the overall summary. In
+Table 5: Diff-k values in HotpotQA for the three em-     addition, an embedding model is not able to iden-
+bedding models. Given the low retrieval performance      tify the relevant context documents with a general
+with the GTE embeddings in the factoid-type QA tasks     summarization-type query. For instance, when the
+in Table 3, the results of GTE embeddings in this table  query for a summarization task is a general state-
+are not informative.                                     ment like "The summary of this book is:"
+                                                         (an example from BENCH Sum (Zhang et al.,
+cally selects the number of context chunks to re-        2024)), the high-similarity context chunks do not
+trieve in a single step, based on the similarity dis-    necessarily reflect the importance to the answer be-
+tribution between the query and context chunks.          cause the query does not quite contain semantically
+Unlike existing adaptive retrieval methods that re-      significant information.
+quires iterative inference steps, our method only
+requires a single matrix calculation to estimate the        Second, our method is designed for natural lan-
+retrieval threshold, achieving a fast and flexible       guage inputs and assumes meaningful semantic
+retrieval module. This method is particularly ef-        similarity between queries and context chunks. It
+fective for aggregation-type QA tasks, where the         does not generalize well to non-natural-language
+optimal number of context chunks varies across           tasks, such as those involving structured key-value
+examples and cannot be predetermined by a fixed-         formats (e.g., JSON), where semantic embeddings
+token retrieval strategy. Results on HoloBench           may not capture relevance effectively.
+demonstrate that Adaptive-k flexibly adjusts re-
+trieval size to align with the amount of relevant           Third, the approach is sensitive to surface-level
+information in the context. In factoid QA tasks,         variations in text. For example, typographical er-
+where relevant information is sparse, our method         rors in the query or context can negatively affect
+aggressively prunes the context while still outper-      embedding quality and distort similarity scores,
+forming zero-shot QA in answer quality. Com-             leading to suboptimal retrieval decisions. If the
+pared to SELF-ROUTE, our method consistently             queries are expected to be noisy with non-standard
+achieves superior performance in aggregation-type        spellings or grammar, adding a query standard-
+QA tasks, while drastically reducing the input size      ization module (Chan et al., 2024) on top of our
+and maintaining higher context recall.                   adaptive-k method would be helpful.
+
+   Our adaptive-k retrieval is a plug-and-play,             Lastly, the method may be vulnerable to adver-
+single-pass alternative to fixed-size retrieval, yet     sarial or malicious inputs (Wallace et al., 2019).
+several directions remain. First, because the            A specially crafted context chunk could receive
+method is orthogonal to most RAG pipelines, pair-        an artificially high or low similarity score, thereby
+ing it with techniques such as query-expansion,          introducing a large gap in the similarity distribu-
+iterative reranking, or generative feedback loops        tion and misleading the algorithm into selecting
+could further improve accuracy and latency. Sec-         an incorrect retrieval threshold (Su et al., 2024).
+ond, embedding models excel on different query           Mitigating such risks would require additional ro-
+and corpus traits; a runtime system that selects or      bustness checks or adversarial training techniques,
+ensembles embeddings per query may unlock extra          which are beyond the scope of this work.
+gains in recall and robustness.
+                                                         Ethical considerations
+Limitations
+                                                         One of the key advantages of our proposed adap-
+While our proposed method shows promising re-            tive retrieval method is its potential to reduce the
+sults in adaptive retrieval for question answering       environmental impact of LLM inference. By dis-
+                                                         carding irrelevant context chunks and only retriev-
+                                                         ing a minimal yet sufficient subset of documents,
+
+                                               20113
+our approach significantly reduces the number of              Chi-Min Chan, Chunpu Xu, Ruibin Yuan, Hongyin Luo,
+input tokens processed. In our experiments, our                  Wei Xue, Yike Guo, and Jie Fu. 2024. Rq-rag: Learn-
+proposed method discarded nearly 99% of the in-                  ing to refine queries for retrieval augmented genera-
+put tokens in factoid QA tasks, and substantially                tion. Preprint, arXiv:2404.00610.
+reduced input size in aggregation QA tasks while
+maintaining high context recall.                              Erik Johannes Husom, Arda Goknil, Lwin Khin Shar,
+                                                                 and Sagar Sen. 2024. The price of prompting: Pro-
+   This reduction translates into lower computa-                 filing energy use in large language models inference.
+tional overhead, leading to more energy-efficient                Preprint, arXiv:2407.16893.
+inference. As a result, our method contributes to
+decreasing the carbon footprint associated with de-           Gautier Izacard, Mathilde Caron, Lucas Hosseini, Se-
+ploying LLMs at scale. With the growing trend of                 bastian Riedel, Piotr Bojanowski, Armand Joulin,
+longer context windows, flexibly filtering out irrele-           and Edouard Grave. 2021. Unsupervised dense infor-
+vant context is necessary to ensure energy-efficient             mation retrieval with contrastive learning.
+inference.
+                                                              Soyeong Jeong, Jinheon Baek, Sukmin Cho, Sung Ju
+   While efficiency is a central goal, we empha-                 Hwang, and Jong C. Park. 2024. Adaptive-rag:
+size that any optimization must not compromise                   Learning to adapt retrieval-augmented large lan-
+fairness or content coverage. Our method is de-                  guage models through question complexity. Preprint,
+signed to be model-agnostic and does not introduce               arXiv:2403.14403.
+or amplify biases beyond those present in the sim-
+ilarity scoring mechanism, e.g., cosine similarity            Bowen Jin, Jinsung Yoon, Jiawei Han, and Sercan O.
+over embedding spaces. However, care should be                   Arik. 2024. Long-context llms meet rag: Over-
+taken when applying this method in high-stakes                   coming challenges for long inputs in rag. Preprint,
+domains, e.g., medical or legal QA, where discard-               arXiv:2410.05983.
+ing seemingly low-similarity context could result
+in the omission of critical information. Further re-          Mandar Joshi, Eunsol Choi, Daniel Weld, and Luke
+search is needed to quantify such risks and guide                Zettlemoyer. 2017. TriviaQA: A large scale distantly
+responsible deployment.                                          supervised challenge dataset for reading comprehen-
+                                                                 sion. In Proceedings of the 55th Annual Meeting of
+   The datasets used in this paper, HELMET and                   the Association for Computational Linguistics (Vol-
+HoloBench, were originally released under the MIT                ume 1: Long Papers), pages 1601­1611, Vancouver,
+License and the BSD 3-Clause License, respec-                    Canada. Association for Computational Linguistics.
+tively, and our use of them complies with the terms
+of those licenses. While the datasets often contain           Tom Kwiatkowski, Jennimaria Palomaki, Olivia Red-
+named entities, including personal names, we en-                 field, Michael Collins, Ankur Parikh, Chris Alberti,
+sured that no uniquely identifiable names appear in              Danielle Epstein, Illia Polosukhin, Jacob Devlin, Ken-
+the paper or the released code.                                  ton Lee, Kristina Toutanova, Llion Jones, Matthew
+                                                                 Kelcey, Ming-Wei Chang, Andrew M. Dai, Jakob
+   While we used AI assitants such as ChatGPT                    Uszkoreit, Quoc Le, and Slav Petrov. 2019. Natu-
+and Copilot to assist in coding and revising this                ral questions: A benchmark for question answering
+paper, we carefully reviewed and edited all content              research. Transactions of the Association for Compu-
+to ensure it meets our standards and aligns with our             tational Linguistics, 7:452­466.
+research goals.
+                                                              Quinn Leng, Jacob Portes, Sam Havens, Matei Za-
+                                                                 haria, and Michael Carbin. 2024. Long context rag
+                                                                 performance of large language models. Preprint,
+                                                                 arXiv:2411.03538.
+
+                                                              Xinze Li, Yixin Cao, Yubo Ma, and Aixin Sun. 2024a.
+                                                                 Long context vs. rag for llms: An evaluation and
+                                                                 revisits. Preprint, arXiv:2501.01880.
+
+Acknowledgments                                               Zehan Li, Xin Zhang, Yanzhao Zhang, Dingkun Long,
+                                                                 Pengjun Xie, and Meishan Zhang. 2023. Towards
+We thank Hayate Iso and Pouya Pezeshkpour for                    general text embeddings with multi-stage contrastive
+their constructive feedback on this study.                       learning. arXiv preprint arXiv:2308.03281.
+
+References                                                    Zhuowan Li, Cheng Li, Mingyang Zhang, Qiaozhu Mei,
+                                                                 and Michael Bendersky. 2024b. Retrieval augmented
+Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and              generation or long-context LLMs? a comprehensive
+   Hannaneh Hajishirzi. 2023. Self-rag: Learning to              study and hybrid approach. In Proceedings of the
+   retrieve, generate, and critique through self-reflection.     2024 Conference on Empirical Methods in Natural
+   Preprint, arXiv:2310.11511.                                   Language Processing: Industry Track, pages 881­
+                                                                 893, Miami, Florida, US. Association for Computa-
+                                                                 tional Linguistics.
+
+20114
+Seiji Maekawa, Hayate Iso, and Nikita Bhutani. 2025.         Huang. 2024. Searching for best practices in
+   Holistic reasoning with long-context lms: A bench-        retrieval-augmented generation. In Proceedings of
+   mark for database operations on massive textual data.     the 2024 Conference on Empirical Methods in Natu-
+   Preprint, arXiv:2410.11996.                               ral Language Processing, pages 17716­17736, Mi-
+                                                             ami, Florida, USA. Association for Computational
+OpenAI, :, Aaron Hurst, Adam Lerer, Adam P. Goucher,         Linguistics.
+   Adam Perelman, Aditya Ramesh, Aidan Clark,             Shitao Xiao, Zheng Liu, Peitian Zhang, and Niklas
+   AJ Ostrow, Akila Welihinda, Alan Hayes, Alec              Muennighoff. 2023. C-pack: Packaged resources
+   Radford, Aleksander Madry, Alex Baker-Whitcomb,           to advance general chinese embedding. Preprint,
+   Alex Beutel, Alex Borzunov, Alex Carney, Alex             arXiv:2309.07597.
+   Chow, Alex Kirillov, and 401 others. 2024. Gpt-4o      Roy Xie, Junlin Wang, Paul Rosu, Chunyuan Deng,
+   system card. Preprint, arXiv:2410.21276.                  Bolun Sun, Zihao Lin, and Bhuwan Dhingra. 2025.
+                                                             Knowing when to stop: Dynamic context cutoff for
+Hongjin Qian, Zheng Liu, Peitian Zhang, Kelong Mao,          large language models. Preprint, arXiv:2502.01025.
+   Yujia Zhou, Xu Chen, and Zhicheng Dou. 2024.           Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Bengio,
+   Are long-llms a necessity for long-context tasks?         William Cohen, Ruslan Salakhutdinov, and Christo-
+   Preprint, arXiv:2405.15318.                               pher D. Manning. 2018. HotpotQA: A dataset for
+                                                             diverse, explainable multi-hop question answering.
+Dongyu Ru, Lin Qiu, Xiangkun Hu, Tianhang Zhang,             In Proceedings of the 2018 Conference on Empiri-
+   Peng Shi, Shuaichen Chang, Cheng Jiayang, Cunxi-          cal Methods in Natural Language Processing, pages
+   ang Wang, Shichao Sun, Huanyu Li, Zizhao Zhang,           2369­2380, Brussels, Belgium. Association for Com-
+   Binjie Wang, Jiarong Jiang, Tong He, Zhiguo Wang,         putational Linguistics.
+   Pengfei Liu, Yue Zhang, and Zheng Zhang. 2024.         Zi Yang. 2024. Retrieval or holistic understanding?
+   Ragchecker: A fine-grained framework for diag-            dolce: Differentiate our long context evaluation tasks.
+   nosing retrieval-augmented generation. Preprint,          Preprint, arXiv:2409.06338.
+   arXiv:2408.08067.                                      Howard Yen, Tianyu Gao, Minmin Hou, Ke Ding,
+                                                             Daniel Fleischer, Peter Izsak, Moshe Wasserblat, and
+Jinyan Su, Jin Peng Zhou, Zhengxin Zhang, Preslav            Danqi Chen. 2025. Helmet: How to evaluate long-
+   Nakov, and Claire Cardie. 2024. Towards more              context language models effectively and thoroughly.
+   robust retrieval-augmented generation: Evaluating         Preprint, arXiv:2410.02694.
+   rag under adversarial poisoning attacks. Preprint,     Tan Yu, Anbang Xu, and Rama Akkiraju. 2024. In
+   arXiv:2412.16708.                                         defense of rag in the era of long-context language
+                                                             models. Preprint, arXiv:2409.01666.
+Gemini Team, Rohan Anil, Sebastian Borgeaud, Jean-        Xinrong Zhang, Yingfa Chen, Shengding Hu, Zi-
+   Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan          hang Xu, Junhao Chen, Moo Khai Hao, Xu Han,
+   Schalkwyk, Andrew M. Dai, Anja Hauth, Katie               Zhen Leng Thai, Shuo Wang, Zhiyuan Liu, and
+   Millican, David Silver, Melvin Johnson, Ioannis           Maosong Sun. 2024. bench: Extending long
+   Antonoglou, Julian Schrittwieser, Amelia Glaese,          context evaluation beyond 100k tokens. Preprint,
+   Jilin Chen, Emily Pitler, Timothy Lillicrap, Angeliki     arXiv:2402.13718.
+   Lazaridou, and 1331 others. 2024. Gemini: A fam-       Zijie Zhong, Hanwen Liu, Xiaoya Cui, Xiaofan Zhang,
+   ily of highly capable multimodal models. Preprint,        and Zengchang Qin. 2025. Mix-of-granularity:
+   arXiv:2312.11805.                                         Optimize the chunking granularity for retrieval-
+                                                             augmented generation. Preprint, arXiv:2406.00456.
+Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier
+   Martinet, Marie-Anne Lachaux, Timothée Lacroix,
+   Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal
+   Azhar, Aurelien Rodriguez, Armand Joulin, Edouard
+   Grave, and Guillaume Lample. 2023. Llama: Open
+   and efficient foundation language models. Preprint,
+   arXiv:2302.13971.
+
+Eric Wallace, Shi Feng, Nikhil Kandpal, Matt Gard-
+   ner, and Sameer Singh. 2019. Universal adversarial
+   triggers for attacking and analyzing NLP. In Proceed-
+   ings of the 2019 Conference on Empirical Methods
+   in Natural Language Processing and the 9th Inter-
+   national Joint Conference on Natural Language Pro-
+   cessing (EMNLP-IJCNLP), pages 2153­2162, Hong
+   Kong, China. Association for Computational Linguis-
+   tics.
+
+Xiaohua Wang, Zhenghua Wang, Xuan Gao, Feiran
+   Zhang, Yixin Wu, Zhibo Xu, Tianyuan Shi,
+   Zhengyuan Wang, Shizheng Li, Qi Qian, Ruicheng
+   Yin, Changze Lv, Xiaoqing Zheng, and Xuanjing
+                                                           20115
+A Appendix
+
+A.1 Prompt templates
+
+A.1.1 Prompt template for the factoid QA tasks
+
+     Your task is to answer the question provided. To help you answer accurately, some relevant
+     context documents have been retrieved. After reviewing them, you'll be asked the same question
+     again. Please respond succinctly.
+
+     **Input:**
+     - **Question:**
+     ```
+     {question}
+     ```
+     - **Context:**
+     ```
+     {context}
+     ```
+     - **Question:**
+     ```
+     {question}
+     ```
+
+     **Response:**
+     - **Answer:**
+
+A.1.2 Prompt template for the HoloBench tasks
+
+     You'll be given a set of sentences to read through carefully. Once you've reviewed them, I'll
+     ask you a question related to the information in those sentences. Your job is to think
+     critically about the details, analyze the sentences in relation to the question, and then
+     provide your answer. If the information clearly supports a partial answer, provide that.
+     However, if the evidence is unclear or insufficient, it is okay to respond with "No answer."
+
+     **Input:**
+     - **Sentences:**
+     ```
+     {context}
+     ```
+     - **Question:**
+     ```
+     {question}
+     ```
+     **Response:**
+     - **Reasoning:**
+
+        - [Describe how you thought through the sentences and how they helped you reach your
+            conclusion. If the evidence is unclear or insufficient to provide a reliable answer,
+            explain why. Your reasoning should not exceed 10,000 words.]
+
+     - **Answer:** [Provide an answer only if it is clearly supported by the information in the
+            sentences. If the evidence is unclear or insufficient, respond with "No answer."]
+
+                                                           20116
+A.1.3 Prompt template for LLM-as-a-Judge
+
+     You will be given a question along with a response generated by an assistant and the
+     corresponding ground truth data. Your task is to assess the response based on its accuracy
+     and completeness in comparison to the ground truth. For each entry in the ground truth,
+     determine whether the information provided by the assistant is an "Exact Match," a "Partial
+     Match," or a "No Match."
+
+     #### **Evaluation Criteria:**
+
+     - **Exact Match**: The assistant's response precisely matches the ground truth in both
+            content and detail.
+
+     - **Partial Match**: The assistant's response includes some correct information but is either
+            incomplete, incorrectly ordered, or contains inaccuracies.
+
+     - **No Match**: The assistant's response does not accurately reflect the ground truth or is
+            missing entirely.
+
+     #### **Special Cases:**
+
+     **Ground Truth is None**:
+     - If the ground truth is `None` (represented as an empty list `[]`):
+
+        - **Exact Match**: If the assistant's response indicates that there is no information or
+            content.
+
+        - **No Match**: If the assistant's response provides any information when the ground truth
+            is `None`.
+
+     #### **Output Format:**
+
+     - The output should be a list of objects where each object contains:
+        - An `"id"` that matches the `id` of the corresponding ground truth entry.
+        - A `"label"` indicating whether the assistant's response is an `"Exact Match"`, `"Partial
+            Match"`, or `"No Match"`.
+
+     - The number of output objects should match the number of entries in the ground truth.
+
+     ---
+
+     ### **Examples:**
+     {in_context_examples}
+
+     ====== Your task starts here ======
+
+     **Question:**
+     ```
+     {question}
+     ```
+
+     **Assistant's Response:**
+     ```
+     {pred}
+     ```
+
+     **Ground Truth:**
+     ```
+     {gold}
+     ```
+
+     **Output Format:**
+     ```
+     {output_format}
+     ```
+
+                                                           20117
+A.2 Detailed experimental setup
+
+We set temperature and top-p parameters to 0.0 and 1.0, respectively, for all our experiments. For
+Gemini-2.5-Flash, we set its thinking budget to 0. Table 6 lists the models used in our experiments.
+
+Model              Size  Context   Model name / snapshot                                              License
+
+GPT-4o               --      128k  gpt-4o-2024-08-06                                        OpenAI Service Terms3
+GPT-4o-mini          --      128k  gpt-4o-mini-2024-07-18                                    OpenAI Service Terms
+Gemini-2.5-Flash     --            gemini-2.5-flash-preview-04-17                 Gemini API Additional Terms of Service4
+Llama-4-Maverick  400B         1M  meta-llama/Llama-4-Maverick-17B-128E-Instruct  Llama 4 Community License Agreement5
+Llama-4-Scout     109B         1M  meta-llama/Llama-4-Scout-17B-16E-Instruct      Llama 4 Community License Agreement
+                             10M
+
+Table 6: A list of the LLMs used in the experiments. An em-dash (--) means that the model size is not publicly
+disclosed.
+
+3https://openai.com/policies/services-agreement/ [Accessed: May 12, 2025]
+4https://ai.google.dev/gemini-api/terms [Accessed: May 12, 2025]
+5https://www.llama.com/llama4/license/ [Accessed: May 12, 2025]
+
+                                                        20118
+A.3 Full results
+A.3.1 Factoid QA tasks (BGE embeddings)
+
+Task      Method        Score  Context recall   Reduction (%)                           nin              nout
+HotpotQA  zeroshot         39     0.00 ± 0.00   100.00 ± 0.00               63.03 ± 6.98      15.56 ± 9.92
+NQ        fixed-1k         60                                            852.30 ± 57.33      20.53 ± 13.61
+TriviaQA  fixed-5k         66  69.33 ± 30.77      99.33 ± 0.09        3983.81 ± 219.82       20.87 ± 14.45
+Average   fixed-10k        66  84.50 ± 26.93      96.46 ± 0.29        7911.32 ± 440.28       21.85 ± 14.35
+          fixed-25k        67  88.50 ± 23.05      92.89 ± 0.55     19763.59 ± 1109.32        22.36 ± 14.48
+          fixed-50k        66  92.50 ± 20.15      82.19 ± 1.32     39597.66 ± 2224.65        24.00 ± 15.87
+          full-context     45  95.33 ± 14.23      64.46 ± 2.45    109666.92 ± 5537.59        16.49 ± 18.35
+          SELF-ROUTE       61  100.00 ± 0.00                      28008.57 ± 45573.55        17.31 ± 17.84
+          adaptive-k       63  90.83 ± 22.77       0.00 ± 0.00          954.33 ± 206.78      20.46 ± 14.43
+          zeroshot         49  70.83 ± 31.01    75.25 ± 40.17               53.37 ± 2.29     23.36 ± 15.22
+          fixed-1k         54                     99.24 ± 0.17           806.77 ± 70.12      28.50 ± 18.53
+          fixed-5k         59     0.00 ± 0.00   100.00 ± 0.00         3837.48 ± 333.10       31.33 ± 21.80
+          fixed-10k        58  26.45 ± 30.50      99.36 ± 0.09        7632.00 ± 655.62       32.11 ± 23.94
+          fixed-25k        62  42.45 ± 36.68      96.66 ± 0.28     19051.28 ± 1574.22        33.91 ± 26.90
+          fixed-50k        59  50.35 ± 35.94      93.27 ± 0.52     38102.93 ± 2989.91        37.39 ± 29.33
+          full-context     41  62.78 ± 32.87      83.10 ± 1.25    110607.54 ± 4711.16        23.10 ± 27.28
+          SELF-ROUTE       55  68.89 ± 29.96      66.16 ± 2.45    25839.53 ± 44249.67        23.60 ± 20.09
+          adaptive-k       54  100.00 ± 0.00                            927.69 ± 283.52      28.83 ± 18.99
+          zeroshot         83  52.72 ± 36.37       0.00 ± 0.00              60.09 ± 7.79
+          fixed-1k         94  27.20 ± 31.58    77.33 ± 38.86            833.75 ± 67.42         7.85 ± 6.27
+          fixed-5k         93                                         3913.01 ± 260.44        11.86 ± 9.07
+          fixed-10k        92     0.00 ± 0.00     99.25 ± 0.25        7772.18 ± 488.60        11.73 ± 9.41
+          fixed-25k        93  31.21 ± 36.58    100.00 ± 0.00      19384.51 ± 1164.94        12.64 ± 11.19
+          fixed-50k        94  42.10 ± 39.93                       38819.58 ± 2326.33        13.64 ± 11.10
+          full-context     61  49.90 ± 40.11      99.34 ± 0.10    110733.69 ± 3419.97        15.72 ± 11.95
+          SELF-ROUTE       90  54.74 ± 40.26      96.53 ± 0.26    17112.00 ± 35900.97        11.95 ± 13.89
+          adaptive-k       92  61.66 ± 37.83      93.03 ± 0.49          918.86 ± 240.86
+          zeroshot             100.00 ± 0.00      82.59 ± 1.14                                  8.69 ± 8.41
+          fixed-1k      57.00  48.19 ± 39.84      65.21 ± 2.27                       58.83    11.69 ± 9.15
+          fixed-5k      69.33  31.21 ± 36.58                                       830.94
+          fixed-10k     72.67                      0.00 ± 0.00                    3911.43              15.59
+          fixed-25k     72.00             0.00  84.95 ± 31.53                     7771.83              20.30
+          fixed-50k     74.00            42.33    99.26 ± 0.23                  19399.79               21.31
+          full-context  73.00            56.35                                  38840.06               22.20
+          SELF-ROUTE    49.00            62.92              0.00               110336.05               23.30
+          adaptive-k    68.67            70.00            99.34                 23653.37               25.70
+                        69.67            75.29            96.55                    933.63              17.18
+                                       100.00             93.07                                        16.53
+                                         63.91            82.63                                        20.33
+                                         43.08            65.28
+                                                            0.00
+                                                          79.18
+                                                          99.25
+
+          Table 7: Full GPT-4o-mini's results in the factoid QA tasks.
+
+                                         20119
+Task      Method        Score  Context recall   Reduction (%)                           nin              nout
+HotpotQA  zeroshot         50     0.00 ± 0.00   100.00 ± 0.00               63.03 ± 6.98     19.31 ± 16.53
+NQ        fixed-1k         61                                            852.30 ± 57.33      27.72 ± 18.35
+TriviaQA  fixed-5k         70  69.33 ± 30.77      99.33 ± 0.09        3983.81 ± 219.82       27.25 ± 17.25
+Average   fixed-10k        76  84.50 ± 26.93      96.46 ± 0.29        7911.32 ± 440.28       29.16 ± 18.31
+          fixed-25k        74  88.50 ± 23.05      92.89 ± 0.55     19763.59 ± 1109.32        28.66 ± 20.86
+          fixed-50k        73  92.50 ± 20.15      82.19 ± 1.32     39597.66 ± 2224.65        27.89 ± 20.22
+          full-context     48  95.33 ± 14.23      64.46 ± 2.45    109666.92 ± 5537.59        18.91 ± 20.30
+          SELF-ROUTE       66  100.00 ± 0.00                      23663.11 ± 42241.38        22.49 ± 20.04
+          adaptive-k       63  84.50 ± 26.93       0.00 ± 0.00          954.33 ± 206.78      28.24 ± 19.56
+          zeroshot         57  70.83 ± 31.01      96.46 ± 0.29              53.37 ± 2.29     27.38 ± 24.23
+          fixed-1k         59                     99.24 ± 0.17           806.77 ± 70.12      33.62 ± 26.13
+          fixed-5k         64     0.00 ± 0.00   100.00 ± 0.00         3837.48 ± 333.10       37.37 ± 30.24
+          fixed-10k        64  26.45 ± 30.50      99.36 ± 0.09        7632.00 ± 655.62       38.41 ± 32.61
+          fixed-25k        64  42.45 ± 36.68      96.66 ± 0.28     19051.28 ± 1574.22        38.48 ± 33.35
+          fixed-50k        63  50.35 ± 35.94      93.27 ± 0.52     38102.93 ± 2989.91        39.76 ± 33.99
+          full-context     41  62.78 ± 32.87      83.10 ± 1.25    110607.54 ± 4711.16        24.74 ± 33.79
+          SELF-ROUTE       61  68.89 ± 29.96      66.16 ± 2.45    24713.66 ± 43308.30        33.64 ± 34.15
+          adaptive-k       61  100.00 ± 0.00                            927.69 ± 283.52      34.85 ± 27.40
+          zeroshot         91  42.45 ± 36.68       0.00 ± 0.00              60.09 ± 7.79
+          fixed-1k         96  27.20 ± 31.58      96.66 ± 0.28           833.75 ± 67.42         8.33 ± 7.16
+          fixed-5k         95                     99.25 ± 0.25        3913.01 ± 260.44       16.10 ± 11.89
+          fixed-10k        94     0.00 ± 0.00   100.00 ± 0.00         7772.18 ± 488.60       16.01 ± 11.49
+          fixed-25k        93  31.21 ± 36.58      99.34 ± 0.10     19384.51 ± 1164.94
+          fixed-50k        93  42.10 ± 39.93      96.53 ± 0.26     38819.58 ± 2326.33         15.55 ± 9.91
+          full-context     62  49.90 ± 40.11      93.03 ± 0.49    110733.69 ± 3419.97         15.96 ± 9.81
+          SELF-ROUTE       92  54.74 ± 40.26      82.59 ± 1.14    13900.19 ± 31870.44        16.31 ± 10.62
+          adaptive-k       96  61.66 ± 37.83      65.21 ± 2.27          918.86 ± 240.86      12.94 ± 12.48
+          zeroshot             100.00 ± 0.00                                                 11.39 ± 10.31
+          fixed-1k      66.00  42.10 ± 39.93       0.00 ± 0.00                       58.83   16.10 ± 12.07
+          fixed-5k      72.00  31.21 ± 36.58      96.53 ± 0.26                     830.94
+          fixed-10k     76.33                     99.26 ± 0.23                    3911.43              18.34
+          fixed-25k     78.00             0.00                                    7771.83              25.81
+          fixed-50k     77.00            42.33              0.00                19399.79               26.88
+          full-context  76.33            56.35            99.34                 38840.06               27.71
+          SELF-ROUTE    50.33            62.92            96.55                110336.05               27.70
+          adaptive-k    73.00            70.00            93.07                 20758.99               27.99
+                        73.33            75.29            82.63                    933.63              18.86
+                                       100.00             65.28                                        22.51
+                                         56.35              0.00                                       26.40
+                                         43.08            96.55
+                                                          99.25
+
+          Table 8: Full GPT-4o's results in the factoid QA tasks.
+
+                               20120
+Task      Method        Score  Context recall   Reduction (%)                           nin                 nout
+HotpotQA  zeroshot         46     0.00 ± 0.00   100.00 ± 0.00               57.25 ± 7.72           3.00 ± 1.62
+NQ        fixed-1k         54                     99.33 ± 0.09           883.55 ± 67.88         15.24 ± 23.19
+TriviaQA  fixed-5k         63  69.33 ± 30.77      96.46 ± 0.29        4170.89 ± 274.70          12.92 ± 19.22
+Average   fixed-10k        66  84.50 ± 26.93                          8295.62 ± 548.91          12.62 ± 17.17
+          fixed-25k        66  88.50 ± 23.05      92.89 ± 0.55     20727.06 ± 1379.61           15.09 ± 20.48
+          fixed-50k        72  92.50 ± 20.15      82.19 ± 1.32     41530.89 ± 2780.34           16.97 ± 22.12
+          full-context     71  95.33 ± 14.23      64.46 ± 2.45    115121.31 ± 5964.79           17.60 ± 19.32
+          SELF-ROUTE       68  100.00 ± 0.00       0.00 ± 0.00    36820.47 ± 52663.73           13.95 ± 19.00
+          adaptive-k       55  95.33 ± 17.42    69.45 ± 43.53           990.43 ± 216.72         15.29 ± 24.47
+          zeroshot         47  70.83 ± 31.01      99.24 ± 0.17              46.30 ± 2.46           4.67 ± 3.92
+          fixed-1k         44                   100.00 ± 0.00            826.53 ± 80.39         26.14 ± 33.25
+          fixed-5k         59     0.00 ± 0.00     99.36 ± 0.09        3959.77 ± 351.93          31.82 ± 32.77
+          fixed-10k        59  26.45 ± 30.50      96.66 ± 0.28        7891.38 ± 704.11       115.35 ± 816.66
+          fixed-25k        62  42.45 ± 36.68      93.27 ± 0.52     19730.89 ± 1697.34           34.87 ± 53.13
+          fixed-50k        61  50.35 ± 35.94      83.10 ± 1.25     39505.22 ± 3266.78           35.23 ± 47.76
+          full-context     64  62.78 ± 32.87      66.16 ± 2.45    115142.91 ± 5115.01           28.15 ± 22.01
+          SELF-ROUTE       60  68.89 ± 29.96       0.00 ± 0.00    30547.34 ± 48902.74           27.40 ± 30.96
+          adaptive-k       47  100.00 ± 0.00    74.41 ± 40.87           951.38 ± 295.47         29.04 ± 32.84
+          zeroshot         93  54.71 ± 36.63      99.25 ± 0.25              54.36 ± 8.36           2.55 ± 1.48
+          fixed-1k         87  27.20 ± 31.58    100.00 ± 0.00            859.44 ± 78.27          8.99 ± 16.82
+          fixed-5k         93                     99.34 ± 0.10        4073.06 ± 317.10           8.74 ± 15.25
+          fixed-10k        92     0.00 ± 0.00     96.53 ± 0.26        8097.22 ± 589.74           9.30 ± 14.94
+          fixed-25k        93  31.21 ± 36.58      93.03 ± 0.49     20213.64 ± 1424.47            8.41 ± 11.68
+          fixed-50k        92  42.10 ± 39.93      82.59 ± 1.14     40490.49 ± 2852.03           11.95 ± 14.79
+          full-context     95  49.90 ± 40.11      65.21 ± 2.27    115669.41 ± 4229.98            10.48 ± 8.73
+          SELF-ROUTE       94  54.74 ± 40.26       0.00 ± 0.00    17948.59 ± 37786.95            7.39 ± 10.84
+          adaptive-k       86  61.66 ± 37.83    84.95 ± 31.53           947.50 ± 244.93          7.53 ± 13.74
+          zeroshot             100.00 ± 0.00      99.26 ± 0.23
+          fixed-1k      62.00  49.19 ± 39.24                                         52.64                 3.41
+          fixed-5k      61.67  31.21 ± 36.58                0.00                   856.51                 16.79
+          fixed-10k     71.67                             99.34                   4067.91                 17.83
+          fixed-25k     72.33             0.00            96.55                   8094.74                 45.76
+          fixed-50k     73.67            42.33            93.07                 20223.86                  19.46
+          full-context  75.00            56.35            82.63                 40508.87                  21.38
+          SELF-ROUTE    76.67            62.92            65.28                115311.21                  18.74
+          adaptive-k    74.00            70.00                                  28438.80                  16.25
+                        62.67            75.29              0.00                   963.10                 17.29
+                                       100.00             76.27
+                                         66.41            99.25
+                                         43.08
+
+          Table 9: Full Gemini-2.5-Flash's results in the factoid QA tasks.
+
+                                                20121
+Task      Method        Score  Context recall   Reduction (%)                           nin                  nout
+HotpotQA  zeroshot         38     0.00 ± 0.00   100.00 ± 0.00               61.17 ± 7.05     226.87 ± 1635.13
+NQ        fixed-1k         65                                            850.33 ± 59.50
+TriviaQA  fixed-5k         65  69.33 ± 30.77      99.33 ± 0.09        4006.32 ± 227.71           59.78 ± 97.50
+Average   fixed-10k        68  84.50 ± 26.93      96.46 ± 0.29        7963.66 ± 456.87           41.23 ± 63.66
+          fixed-25k        68  88.50 ± 23.05      92.89 ± 0.55     19912.13 ± 1152.36            38.49 ± 60.86
+          fixed-50k        67  92.50 ± 20.15      82.19 ± 1.32     39898.83 ± 2310.69            33.14 ± 50.95
+          full-context     67  95.33 ± 14.23      64.46 ± 2.45    110457.05 ± 5390.30            36.25 ± 56.47
+          SELF-ROUTE       73  100.00 ± 0.00       0.00 ± 0.00    17292.33 ± 36140.60            36.77 ± 65.52
+          adaptive-k       63  89.50 ± 23.53    84.89 ± 31.51           952.64 ± 206.19          60.39 ± 78.22
+          zeroshot         58  70.83 ± 31.01      99.24 ± 0.17              51.54 ± 2.41         53.92 ± 87.49
+          fixed-1k         62                   100.00 ± 0.00            802.11 ± 71.62          62.84 ± 53.57
+          fixed-5k         66     0.00 ± 0.00     99.36 ± 0.09        3847.40 ± 341.79           60.35 ± 48.38
+          fixed-10k        64  26.45 ± 30.50      96.66 ± 0.28        7660.11 ± 675.79           73.75 ± 67.45
+          fixed-25k        66  42.45 ± 36.68      93.27 ± 0.52     19136.92 ± 1631.03            76.13 ± 61.56
+          fixed-50k        68  50.35 ± 35.94      83.10 ± 1.25     38284.28 ± 3103.43            85.91 ± 81.62
+          full-context     68  62.78 ± 32.87      66.16 ± 2.45    111154.46 ± 4416.57        288.08 ± 1664.19
+          SELF-ROUTE       66  68.89 ± 29.96       0.00 ± 0.00    17228.44 ± 36372.48         113.88 ± 202.07
+          adaptive-k       61  100.00 ± 0.00    85.06 ± 31.57           923.58 ± 286.51       142.10 ± 316.76
+          zeroshot         85  48.21 ± 36.70      99.25 ± 0.25              58.29 ± 7.89         67.89 ± 59.55
+          fixed-1k         98  27.20 ± 31.58    100.00 ± 0.00            830.54 ± 66.35          20.12 ± 39.32
+          fixed-5k         98                     99.34 ± 0.10        3928.14 ± 261.91           24.97 ± 54.24
+          fixed-10k        97     0.00 ± 0.00     96.53 ± 0.26        7808.89 ± 495.48           24.80 ± 63.48
+          fixed-25k        96  31.21 ± 36.58      93.03 ± 0.49     19486.58 ± 1189.90            18.29 ± 42.28
+          fixed-50k        95  42.10 ± 39.93      82.59 ± 1.14     39032.69 ± 2399.86            19.47 ± 51.48
+          full-context     96  49.90 ± 40.11      65.21 ± 2.27    111322.11 ± 3373.09            12.60 ± 22.71
+          SELF-ROUTE       97  54.74 ± 40.26       0.00 ± 0.00    11742.38 ± 28544.35            23.69 ± 52.77
+          adaptive-k       98  61.66 ± 37.83    89.78 ± 24.76           915.89 ± 238.98          34.38 ± 63.98
+          zeroshot             100.00 ± 0.00      99.26 ± 0.23                                   30.32 ± 73.20
+          fixed-1k      60.33  47.69 ± 40.13                                         57.00
+          fixed-5k      75.00  31.21 ± 36.58                0.00                   827.66                 103.28
+          fixed-10k     76.33                             99.34                   3927.29                  48.37
+          fixed-25k     76.33             0.00            96.55                   7810.89                  46.59
+          fixed-50k     76.67            42.33            93.07                 19511.88                   44.30
+          full-context  76.67            56.35            82.63                 39071.93                   46.17
+          SELF-ROUTE    77.00            62.92            65.28                110977.87                  112.31
+          adaptive-k    78.67            70.00                                  15421.05                   58.11
+                        74.00            75.29              0.00                   930.70                  78.96
+                                       100.00             86.57                                            50.71
+                                         61.80            99.25
+                                         43.08
+
+          Table 10: Full Llama4-Scout's results in the factoid QA tasks.
+
+                                                20122
+Task      Method        Score  Context recall   Reduction (%)                           nin                 nout
+HotpotQA  zeroshot         52     0.00 ± 0.00   100.00 ± 0.00               61.17 ± 7.05      99.43 ± 110.61
+NQ        fixed-1k         71                     99.33 ± 0.09           850.33 ± 59.50      110.04 ± 141.75
+TriviaQA  fixed-5k         78  69.33 ± 30.77      96.46 ± 0.29        4006.32 ± 227.71
+Average   fixed-10k        74  84.50 ± 26.93                          7963.66 ± 456.87          68.99 ± 88.75
+          fixed-25k        71  88.50 ± 23.05      92.89 ± 0.55     19912.13 ± 1152.36           44.12 ± 63.11
+          fixed-50k        72  92.50 ± 20.15      82.19 ± 1.32     39898.83 ± 2310.69           43.30 ± 55.48
+          full-context     75  95.33 ± 14.23      64.46 ± 2.45    110457.05 ± 5390.30           45.51 ± 66.82
+          SELF-ROUTE       79  100.00 ± 0.00       0.00 ± 0.00     8383.42 ± 21450.47           41.18 ± 54.88
+          adaptive-k       71  86.00 ± 26.35    92.61 ± 19.00           952.64 ± 206.19       90.55 ± 120.15
+          zeroshot         53  70.83 ± 31.01      99.24 ± 0.17              51.54 ± 2.41     112.62 ± 146.43
+          fixed-1k         63                   100.00 ± 0.00            802.11 ± 71.62         54.22 ± 54.55
+          fixed-5k         65     0.00 ± 0.00     99.36 ± 0.09        3847.40 ± 341.79          68.16 ± 58.41
+          fixed-10k        67  26.45 ± 30.50      96.66 ± 0.28        7660.11 ± 675.79          75.36 ± 69.75
+          fixed-25k        64  42.45 ± 36.68      93.27 ± 0.52     19136.92 ± 1631.03           75.90 ± 79.63
+          fixed-50k        64  50.35 ± 35.94      83.10 ± 1.25     38284.28 ± 3103.43           69.41 ± 69.85
+          full-context     67  62.78 ± 32.87      66.16 ± 2.45    111154.46 ± 4416.57           71.23 ± 77.03
+          SELF-ROUTE       65  68.89 ± 29.96       0.00 ± 0.00    10536.57 ± 26530.78           66.25 ± 66.57
+          adaptive-k       62  100.00 ± 0.00    90.86 ± 23.07           923.58 ± 286.51         69.87 ± 75.65
+          zeroshot         91  45.95 ± 37.23      99.25 ± 0.25              58.29 ± 7.89        75.56 ± 73.03
+          fixed-1k         96  27.20 ± 31.58    100.00 ± 0.00            830.54 ± 66.35         25.52 ± 54.17
+          fixed-5k         98                     99.34 ± 0.10        3928.14 ± 261.91          39.52 ± 57.18
+          fixed-10k        98     0.00 ± 0.00     96.53 ± 0.26        7808.89 ± 495.48          31.02 ± 48.63
+          fixed-25k        96  31.21 ± 36.58      93.03 ± 0.49     19486.58 ± 1189.90           21.72 ± 32.93
+          fixed-50k        96  42.10 ± 39.93      82.59 ± 1.14     39032.69 ± 2399.86           22.79 ± 46.88
+          full-context     96  49.90 ± 40.11      65.21 ± 2.27    111322.11 ± 3373.09           15.46 ± 34.71
+          SELF-ROUTE       98  54.74 ± 40.26       0.00 ± 0.00     7440.28 ± 19973.57           19.58 ± 34.15
+          adaptive-k       96  61.66 ± 37.83    93.64 ± 16.55           915.89 ± 238.98         37.87 ± 63.00
+          zeroshot             100.00 ± 0.00      99.26 ± 0.23                                  49.73 ± 70.11
+          fixed-1k      65.33  44.60 ± 40.03                                         57.00
+          fixed-5k      76.67  31.21 ± 36.58                0.00                   827.66                 59.72
+          fixed-10k     80.33                             99.34                   3927.29                 72.57
+          fixed-25k     79.67             0.00            96.55                   7810.89                 58.46
+          fixed-50k     77.00            42.33            93.07                 19511.88                  47.25
+          full-context  77.33            56.35            82.63                 39071.93                  45.17
+          SELF-ROUTE    79.33            62.92            65.28                110977.87                  44.07
+          adaptive-k    80.67            70.00                                    8786.76                 42.34
+                        76.33            75.29              0.00                   930.70                 66.10
+                                       100.00             92.37                                           79.30
+                                         58.85            99.25
+                                         43.08
+
+          Table 11: Full Llama4-Maverick's results in the factoid QA tasks.
+
+                                                20123
+A.3.2 HoloBench (BGE embeddings)
+
+Info amount  Method        Score  Context recall   Reduction (%)            nin       nout
+info5k       zeroshot      10.00     0.00 ± 0.00   100.00 ± 0.00         58.13      43.34
+info10k      fixed-1k      28.19   12.05 ± 6.42                       1000.07     325.14
+info25k      fixed-5k      38.74                     99.18 ± 0.43     4194.01     923.67
+info50k      fixed-10k     43.50  51.92 ± 29.82      95.85 ± 1.86     8011.64     801.81
+Average      fixed-25k     39.81  66.68 ± 30.73      91.80 ± 2.92    19574.94    1489.67
+             fixed-50k     37.67  78.48 ± 26.96      79.59 ± 4.56    39224.80    2342.40
+             full-context  37.76  86.79 ± 20.88      57.76 ± 5.92    85882.50    3147.27
+             SELF-ROUTE    31.32  100.00 ± 0.00       0.00 ± 0.00    23044.97    1523.99
+             adaptive-k    40.86  69.46 ± 27.62    74.68 ± 40.18     24625.02    2220.94
+             zeroshot             75.74 ± 30.48    74.07 ± 25.68         58.13      45.28
+             fixed-1k       6.22                   100.00 ± 0.00      1003.83     322.87
+             fixed-5k      22.55     0.00 ± 0.00     99.19 ± 0.40     4228.71     987.09
+             fixed-10k     34.06     6.53 ± 3.11     95.84 ± 1.90     8235.02    1712.06
+             fixed-25k     34.85  31.77 ± 14.86      91.74 ± 3.47    19838.92    1716.79
+             fixed-50k     36.44  59.10 ± 27.14      79.55 ± 5.42    39437.42    2910.81
+             full-context  29.98  78.18 ± 26.55      57.88 ± 6.41    86139.74    4370.90
+             SELF-ROUTE    26.59  87.34 ± 20.51       0.00 ± 0.00    19627.93    2228.59
+             adaptive-k    28.56  100.00 ± 0.00    77.76 ± 37.78     20233.99    2338.73
+             zeroshot      33.16  48.18 ± 27.16    79.22 ± 21.59         58.13      43.17
+             fixed-1k             68.54 ± 32.55    100.00 ± 0.00        999.62    331.77
+             fixed-5k       4.22     0.00 ± 0.00     99.21 ± 0.32     4215.72     670.87
+             fixed-10k     16.67     2.77 ± 1.15     95.96 ± 1.56     8269.06    1554.73
+             fixed-25k     25.76   14.06 ± 5.50      91.86 ± 3.09    20475.06    2249.00
+             fixed-50k     28.61   28.80 ± 9.87      79.60 ± 7.10    40152.73    3203.13
+             full-context  32.63  68.13 ± 22.77      58.46 ± 8.58    86751.63    3767.70
+             SELF-ROUTE    30.89  86.88 ± 20.14       0.00 ± 0.00    22726.84    1090.31
+             adaptive-k    29.53  100.00 ± 0.00    74.68 ± 40.17     25778.38    2818.23
+             zeroshot      27.01  34.19 ± 35.59    73.86 ± 23.04         58.13      43.59
+             fixed-1k      25.68  66.16 ± 36.90    100.00 ± 0.00      1006.91     310.46
+             fixed-5k                0.00 ± 0.00     99.22 ± 0.23     4235.36     511.71
+             fixed-10k      5.28     1.47 ± 0.55     96.02 ± 1.12     8288.68    1556.82
+             fixed-25k     11.73     7.54 ± 2.52     92.01 ± 2.13    20622.82    2609.31
+             fixed-50k     20.88   15.39 ± 4.25      79.75 ± 5.38    41264.63    2885.44
+             full-context  21.53   39.55 ± 8.89      58.85 ± 9.99    87936.41    3051.19
+             SELF-ROUTE    25.29  76.90 ± 16.82       0.00 ± 0.00    21444.74     945.72
+             adaptive-k    30.18  100.00 ± 0.00    76.86 ± 38.66     39654.20    2781.81
+             zeroshot      27.98  26.38 ± 37.06    60.73 ± 25.94         58.13      43.84
+             fixed-1k      19.57  67.43 ± 38.13                       1002.61     322.56
+             fixed-5k      22.93                               0.00   4218.45     773.33
+             fixed-10k                       0.00            99.20    8201.10    1406.36
+             fixed-25k      6.43             5.70            95.92   20127.94    2016.19
+             fixed-50k     19.78            26.32            91.85   40019.90    2835.45
+             full-context  29.86            42.49            79.62   86677.57    3584.26
+             SELF-ROUTE    32.12            66.09            58.24   21711.12    1447.15
+             adaptive-k    33.54            84.48              0.00  27572.90    2539.93
+                           32.18          100.00             76.00
+                           30.47            44.55            71.97
+                           26.61            69.47
+                           30.66
+
+             Table 12: Full GPT-4o-mini's results in the HoloBench tasks.
+
+                                  20124
+Info amount  Method        Score  Context recall   Reduction (%)            nin       nout
+info5k       zeroshot       7.22     0.00 ± 0.00   100.00 ± 0.00         58.13      65.21
+info10k      fixed-1k              12.05 ± 6.42                       1000.07     289.39
+info25k      fixed-5k      26.14                     99.18 ± 0.43     4194.01     913.32
+info50k      fixed-10k     42.32  51.92 ± 29.82      95.85 ± 1.86     8011.64    1334.67
+Average      fixed-25k     49.79  66.68 ± 30.73      91.80 ± 2.92    19574.94    2087.61
+             fixed-50k     46.27  78.48 ± 26.96      79.59 ± 4.56    39224.80    3188.69
+             full-context  43.82  86.79 ± 20.88      57.76 ± 5.92    73652.50    3680.13
+             SELF-ROUTE    48.30  100.00 ± 0.00       0.00 ± 0.00    17260.98    1139.29
+             adaptive-k    41.86  65.79 ± 27.76    76.70 ± 38.60     24625.02    1362.71
+             zeroshot      48.60  75.74 ± 30.48    74.07 ± 25.68         58.13      64.00
+             fixed-1k                              100.00 ± 0.00      1003.83     298.53
+             fixed-5k       5.11     0.00 ± 0.00     99.19 ± 0.40     4228.71    1001.83
+             fixed-10k     21.83     6.53 ± 3.11     95.84 ± 1.90     8235.02    2589.58
+             fixed-25k     32.45  31.77 ± 14.86      91.74 ± 3.47    19838.92    3527.68
+             fixed-50k     36.48  59.10 ± 27.14      79.55 ± 5.42    39437.42    4061.82
+             full-context  39.65  78.18 ± 26.55      57.88 ± 6.41    75768.00    4767.44
+             SELF-ROUTE    38.55  87.34 ± 20.51       0.00 ± 0.00    17208.18    1146.12
+             adaptive-k    41.75  100.00 ± 0.00    79.96 ± 36.00     20233.99    2252.20
+             zeroshot      32.37  45.04 ± 25.18    79.22 ± 21.59         58.13      65.69
+             fixed-1k      37.06  68.54 ± 32.55    100.00 ± 0.00        999.62    282.18
+             fixed-5k                0.00 ± 0.00     99.21 ± 0.32     4215.72    1350.80
+             fixed-10k      3.54     2.77 ± 1.15     95.96 ± 1.56     8269.06    2520.64
+             fixed-25k     16.51   14.06 ± 5.50      91.86 ± 3.09    20475.06    3406.40
+             fixed-50k     27.52   28.80 ± 9.87      79.60 ± 7.10    40152.73    4366.80
+             full-context  29.10  68.13 ± 22.77      58.46 ± 8.58    75787.37    4802.50
+             SELF-ROUTE    40.25  86.88 ± 20.14       0.00 ± 0.00    18525.29    1759.81
+             adaptive-k    34.18  100.00 ± 0.00    77.87 ± 37.82     25778.38    4017.11
+             zeroshot      42.24  30.42 ± 32.70    73.86 ± 23.04         58.13      62.30
+             fixed-1k      25.71  66.16 ± 36.90    100.00 ± 0.00      1006.91     274.89
+             fixed-5k      33.46     0.00 ± 0.00     99.22 ± 0.23     4235.36     735.80
+             fixed-10k               1.47 ± 0.55     96.02 ± 1.12     8288.68    1595.42
+             fixed-25k      5.19     7.54 ± 2.52     92.01 ± 2.13    20622.82    4269.89
+             fixed-50k     11.59   15.39 ± 4.25      79.75 ± 5.38    41264.63    4244.67
+             full-context  20.62   39.55 ± 8.89      58.85 ± 9.99    87936.41    3051.19
+             SELF-ROUTE    23.15  76.90 ± 16.82       0.00 ± 0.00    15426.00     917.82
+             adaptive-k    28.11  100.00 ± 0.00    80.09 ± 36.03     39654.20    4374.22
+             zeroshot      34.58  21.54 ± 31.97    60.73 ± 25.94         58.13      64.30
+             fixed-1k      27.40  67.43 ± 38.13                       1002.61     286.25
+             fixed-5k      19.28                               0.00   4218.45    1000.44
+             fixed-10k     30.10             0.00            99.20    8201.10    2010.08
+             fixed-25k                       5.70            95.92   20127.94    3322.89
+             fixed-50k      5.26            26.32            91.85   40019.90    3965.49
+             full-context  19.02            42.49            79.62   78286.07    4075.32
+             SELF-ROUTE    30.73            66.09            58.24   17105.11    1240.76
+             adaptive-k    34.63            84.48              0.00  27572.90    3001.56
+                           38.57          100.00             78.65
+                           37.78            40.70            71.97
+                           39.92            69.47
+                           29.80
+                           37.30
+
+             Table 13: Full GPT-4o's results in the HoloBench tasks.
+
+                                  20125
+Info amount  Method        Score  Context recall   Reduction (%)            nin       nout
+info5k       zeroshot      10.19     0.00 ± 0.00   100.00 ± 0.00         52.64    644.08
+info10k      fixed-1k      27.78   12.05 ± 6.42                       1091.11     478.93
+info25k      fixed-5k      49.11                     99.18 ± 0.43     4610.40    1470.04
+info50k      fixed-10k     54.52  51.92 ± 29.82      95.85 ± 1.86     8760.92    2743.83
+Average      fixed-25k     55.31  66.68 ± 30.73      91.80 ± 2.92    21300.94    3422.06
+             fixed-50k     56.37  78.48 ± 26.96      79.59 ± 4.56    42764.79    3995.68
+             full-context  63.27  86.79 ± 20.88      57.76 ± 5.92    94227.37    4584.58
+             SELF-ROUTE    47.56  100.00 ± 0.00       0.00 ± 0.00    11559.12    1894.97
+             adaptive-k    55.68  57.27 ± 31.23    88.38 ± 25.87     26762.53    2776.24
+             zeroshot             75.74 ± 30.48    74.07 ± 25.68         52.64    572.52
+             fixed-1k       8.33                   100.00 ± 0.00      1099.17     469.12
+             fixed-5k      21.09     0.00 ± 0.00     99.19 ± 0.40     4683.90    2107.79
+             fixed-10k     34.94     6.53 ± 3.11     95.84 ± 1.90     9105.06    2855.68
+             fixed-25k     50.51  31.77 ± 14.86      91.74 ± 3.47    21717.67    4696.43
+             fixed-50k     55.24  59.10 ± 27.14      79.55 ± 5.42    43101.23    6040.41
+             full-context  54.06  78.18 ± 26.55      57.88 ± 6.41    94626.73    6381.93
+             SELF-ROUTE    53.65  87.34 ± 20.51       0.00 ± 0.00    10196.77    2031.94
+             adaptive-k    35.72  100.00 ± 0.00    89.40 ± 24.10     22081.99    3637.80
+             zeroshot      56.26  36.72 ± 22.19    79.22 ± 21.59         52.64    657.34
+             fixed-1k             68.54 ± 32.55    100.00 ± 0.00      1098.33     455.64
+             fixed-5k       6.28     0.00 ± 0.00     99.21 ± 0.32     4699.37    1695.57
+             fixed-10k     15.42     2.77 ± 1.15     95.96 ± 1.56     9230.02    3053.66
+             fixed-25k     31.18   14.06 ± 5.50      91.86 ± 3.09    22790.66    6461.89
+             fixed-50k     37.86   28.80 ± 9.87      79.60 ± 7.10    44317.83    7982.89
+             full-context  42.87  68.13 ± 22.77      58.46 ± 8.58    95716.53    9289.30
+             SELF-ROUTE    44.54  86.88 ± 20.14       0.00 ± 0.00    11120.20    2086.64
+             adaptive-k    42.19  100.00 ± 0.00    89.55 ± 24.11     28207.51    5901.29
+             zeroshot      28.12  20.06 ± 22.11    73.86 ± 23.04         52.64    735.01
+             fixed-1k      43.76  66.16 ± 36.90    100.00 ± 0.00      1108.12     445.62
+             fixed-5k                0.00 ± 0.00     99.22 ± 0.23     4730.58    1836.44
+             fixed-10k      6.95     1.47 ± 0.55     96.02 ± 1.12     9277.87    2990.94
+             fixed-25k      9.77     7.54 ± 2.52     92.01 ± 2.13    23092.23    6596.67
+             fixed-50k     22.66   15.39 ± 4.25      79.75 ± 5.38    46101.70    8373.53
+             full-context  30.00   39.55 ± 8.89      58.85 ± 9.99    97597.56    8792.94
+             SELF-ROUTE    33.71  76.90 ± 16.82       0.00 ± 0.00     8923.41    1610.90
+             adaptive-k    35.68  100.00 ± 0.00    91.76 ± 19.93     43888.98    7643.86
+             zeroshot      45.44  11.75 ± 19.29    60.73 ± 25.94         52.64    652.24
+             fixed-1k      22.37  67.43 ± 38.13                       1099.18     462.33
+             fixed-5k      31.72                               0.00   4681.06    1777.46
+             fixed-10k      7.94             0.00            99.20    9093.47    2911.03
+             fixed-25k     18.51             5.70            95.92   22225.38    5294.26
+             fixed-50k     34.47            26.32            91.85   44071.39    6598.13
+             full-context  43.22            42.49            79.62   95542.05    7262.19
+             SELF-ROUTE    46.78            66.09            58.24   10449.88    1906.11
+             adaptive-k    47.66            84.48              0.00  30235.25    4989.80
+                           51.14          100.00             89.78
+                           33.44            31.45            71.97
+                           46.85            69.47
+
+Table 14: Full Gemini-2.5-Flash's results in the HoloBench tasks.
+
+                                  20126
+Info amount  Method        Score  Context recall   Reduction (%)            nin       nout
+info5k       zeroshot       9.49     0.00 ± 0.00   100.00 ± 0.00         56.18    266.46
+info10k      fixed-1k              12.05 ± 6.42                         994.79    450.14
+info25k      fixed-5k      29.52                     99.18 ± 0.43     4195.84     650.72
+info50k      fixed-10k     40.38  51.92 ± 29.82      95.85 ± 1.86     8024.09     687.39
+Average      fixed-25k     40.73  66.68 ± 30.73      91.80 ± 2.92    19625.13     711.01
+             fixed-50k     37.33  78.48 ± 26.96      79.59 ± 4.56    39342.62     707.11
+             full-context  34.47  86.79 ± 20.88      57.76 ± 5.92    86093.44     789.47
+             SELF-ROUTE    36.32  100.00 ± 0.00       0.00 ± 0.00    27700.34     785.69
+             adaptive-k    36.35  70.18 ± 29.18    69.25 ± 43.22     24711.58    1170.32
+             zeroshot      39.01  75.74 ± 30.48    74.07 ± 25.68         56.18    260.24
+             fixed-1k                              100.00 ± 0.00        999.90    473.22
+             fixed-5k       7.01     0.00 ± 0.00     99.19 ± 0.40     4233.97     708.81
+             fixed-10k     19.25     6.53 ± 3.11     95.84 ± 1.90     8254.73     796.22
+             fixed-25k     33.58  31.77 ± 14.86      91.74 ± 3.47    19898.58     840.93
+             fixed-50k     31.87  59.10 ± 27.14      79.55 ± 5.42    39561.99    1070.07
+             full-context  29.75  78.18 ± 26.55      57.88 ± 6.41    86347.34    1143.99
+             SELF-ROUTE    28.60  87.34 ± 20.51       0.00 ± 0.00    25307.50    1167.84
+             adaptive-k    30.50  100.00 ± 0.00    72.57 ± 41.54     20348.23     709.23
+             zeroshot      33.51  51.87 ± 29.27    79.22 ± 21.59         56.18    277.41
+             fixed-1k      34.69  68.54 ± 32.55    100.00 ± 0.00        997.53    473.57
+             fixed-5k                0.00 ± 0.00     99.21 ± 0.32     4226.03     682.94
+             fixed-10k      7.23     2.77 ± 1.15     95.96 ± 1.56     8298.52     759.61
+             fixed-25k     17.62   14.06 ± 5.50      91.86 ± 3.09    20562.19     795.73
+             fixed-50k     29.44   28.80 ± 9.87      79.60 ± 7.10    40309.13    1268.03
+             full-context  28.95  68.13 ± 22.77      58.46 ± 8.58    86997.00     961.38
+             SELF-ROUTE    31.39  86.88 ± 20.14       0.00 ± 0.00    21041.81     914.91
+             adaptive-k    28.35  100.00 ± 0.00    76.81 ± 38.65     25958.96     854.74
+             zeroshot      25.94  32.25 ± 34.30    73.86 ± 23.04         56.18    427.23
+             fixed-1k      29.08  66.16 ± 36.90    100.00 ± 0.00      1004.93     416.12
+             fixed-5k      26.90     0.00 ± 0.00     99.22 ± 0.23     4246.40     639.41
+             fixed-10k               1.47 ± 0.55     96.02 ± 1.12     8317.29     735.40
+             fixed-25k      6.18     7.54 ± 2.52     92.01 ± 2.13    20706.06     956.62
+             fixed-50k     11.93   15.39 ± 4.25      79.75 ± 5.38    41427.09     854.82
+             full-context  22.89   39.55 ± 8.89      58.85 ± 9.99    88197.90    1321.16
+             SELF-ROUTE    23.75  76.90 ± 16.82       0.00 ± 0.00    27508.79     980.10
+             adaptive-k    23.94  100.00 ± 0.00    70.50 ± 42.76     39897.64    1182.12
+             zeroshot      25.46  32.58 ± 40.92    60.73 ± 25.94         56.18    307.84
+             fixed-1k      22.10  67.43 ± 38.13                         999.29    453.26
+             fixed-5k      22.24                               0.00   4225.56     670.47
+             fixed-10k     25.45             0.00            99.20    8223.66     744.66
+             fixed-25k                       5.70            95.92   20197.99     826.07
+             fixed-50k      7.48            26.32            91.85   40160.21     975.01
+             full-context  19.58            42.49            79.62   86908.92    1054.00
+             SELF-ROUTE    31.57            66.09            58.24   25389.61     962.14
+             adaptive-k    31.33            84.48              0.00  27729.10     979.11
+                           30.60          100.00             72.28
+                           29.22            46.72            71.97
+                           28.72            69.47
+                           30.29
+                           31.51
+
+             Table 15: Full Llama4-Scout's results in the HoloBench tasks.
+
+                                  20127
+Info amount  Method        Score  Context recall   Reduction (%)            nin       nout
+info5k       zeroshot       9.65     0.00 ± 0.00   100.00 ± 0.00         56.18    328.77
+info10k      fixed-1k              12.05 ± 6.42                         994.79    591.14
+info25k      fixed-5k      28.05                     99.18 ± 0.43     4195.84     799.80
+info50k      fixed-10k     48.57  51.92 ± 29.82      95.85 ± 1.86     8024.09     834.79
+Average      fixed-25k     54.30  66.68 ± 30.73      91.80 ± 2.92    19625.13     874.41
+             fixed-50k     56.39  78.48 ± 26.96      79.59 ± 4.56    39342.62     919.02
+             full-context  53.54  86.79 ± 20.88      57.76 ± 5.92    86093.44    1101.66
+             SELF-ROUTE    55.13  100.00 ± 0.00       0.00 ± 0.00    18195.21     897.80
+             adaptive-k    48.47  65.03 ± 29.24    79.91 ± 35.98     24711.58     836.68
+             zeroshot      51.77  75.74 ± 30.48    74.07 ± 25.68         56.18    322.59
+             fixed-1k                              100.00 ± 0.00        999.90    609.29
+             fixed-5k       9.06     0.00 ± 0.00     99.19 ± 0.40     4233.97     892.93
+             fixed-10k     23.16     6.53 ± 3.11     95.84 ± 1.90     8254.73     927.12
+             fixed-25k     39.02  31.77 ± 14.86      91.74 ± 3.47    19898.58     883.56
+             fixed-50k     42.91  59.10 ± 27.14      79.55 ± 5.42    39561.99    1020.78
+             full-context  44.54  78.18 ± 26.55      57.88 ± 6.41    86347.34    1357.50
+             SELF-ROUTE    50.37  87.34 ± 20.51       0.00 ± 0.00    18010.20    1053.86
+             adaptive-k    48.02  100.00 ± 0.00    79.95 ± 36.00     20348.23     934.27
+             zeroshot      37.68  44.92 ± 27.75    79.22 ± 21.59         56.18    322.77
+             fixed-1k      44.91  68.54 ± 32.55    100.00 ± 0.00        997.53    629.03
+             fixed-5k                0.00 ± 0.00     99.21 ± 0.32     4226.03     896.96
+             fixed-10k      7.26     2.77 ± 1.15     95.96 ± 1.56     8298.52     867.99
+             fixed-25k     19.15   14.06 ± 5.50      91.86 ± 3.09    20562.19    1053.26
+             fixed-50k     30.36   28.80 ± 9.87      79.60 ± 7.10    40309.13    1291.90
+             full-context  30.28  68.13 ± 22.77      58.46 ± 8.58    86997.00    1455.21
+             SELF-ROUTE    40.47  86.88 ± 20.14       0.00 ± 0.00    19123.37    1038.17
+             adaptive-k    44.69  100.00 ± 0.00    79.00 ± 36.97     25958.96    1122.81
+             zeroshot      43.38  29.97 ± 33.04    73.86 ± 23.04         56.18    342.58
+             fixed-1k      28.57  66.16 ± 36.90    100.00 ± 0.00      1004.93     574.83
+             fixed-5k      39.40     0.00 ± 0.00     99.22 ± 0.23     4246.40     783.99
+             fixed-10k               1.47 ± 0.55     96.02 ± 1.12     8317.29     825.16
+             fixed-25k      8.51     7.54 ± 2.52     92.01 ± 2.13    20706.06    1127.69
+             fixed-50k     11.24   15.39 ± 4.25      79.75 ± 5.38    41427.09    1317.22
+             full-context  22.39   39.55 ± 8.89      58.85 ± 9.99    88197.90    1706.96
+             SELF-ROUTE    24.53  76.90 ± 16.82       0.00 ± 0.00    19460.93    1183.29
+             adaptive-k    27.94  100.00 ± 0.00    78.99 ± 36.95     39897.64    1687.78
+             zeroshot      34.89  24.17 ± 35.52    60.73 ± 25.94         56.18    329.18
+             fixed-1k      36.54  67.43 ± 38.13                         999.29    601.07
+             fixed-5k      21.90                               0.00   4225.56     843.42
+             fixed-10k     34.63             0.00            99.20    8223.66     863.76
+             fixed-25k                       5.70            95.92   20197.99     984.73
+             fixed-50k      8.62            26.32            91.85   40160.21    1137.23
+             full-context  20.40            42.49            79.62   86908.92    1405.33
+             SELF-ROUTE    35.09            66.09            58.24   18697.43    1043.28
+             adaptive-k    38.00            84.48              0.00  27729.10    1145.38
+                           42.33          100.00             79.46
+                           45.87            41.02            71.97
+                           45.77            69.47
+                           34.16
+                           42.68
+
+Table 16: Full Llama4-Maverick's results in the HoloBench tasks.
+
+                                  20128
+A.3.3 Factoid QA tasks (GTE embeddings)
+
+Task      Method        Score  Context recall   Reduction (%)                           nin              nout
+HotpotQA  zeroshot         50     0.00 ± 0.00   100.00 ± 0.00               63.03 ± 6.98     19.31 ± 16.53
+NQ        fixed-1k         50   6.00 ± 16.33                             881.29 ± 76.42      31.19 ± 16.09
+TriviaQA  fixed-5k         51   9.33 ± 19.44      99.16 ± 0.20        4106.52 ± 327.20       30.61 ± 16.31
+Average   fixed-10k        54                     95.84 ± 0.67        8145.75 ± 576.29       29.29 ± 15.20
+          fixed-25k        58  13.67 ± 23.73      91.81 ± 1.19     20337.90 ± 1369.28        29.06 ± 17.08
+          fixed-50k        60  27.50 ± 32.17      80.21 ± 2.40     40520.53 ± 2661.25        28.96 ± 18.42
+          full-context     48  43.50 ± 33.16      61.79 ± 3.81    109666.92 ± 5537.59        18.91 ± 20.30
+          SELF-ROUTE       46  100.00 ± 0.00                      76201.89 ± 52199.49        22.69 ± 20.51
+          adaptive-k       49  25.83 ± 39.17       0.00 ± 0.00          877.06 ± 409.16      32.87 ± 23.82
+          zeroshot         57                   78.64 ± 37.04               53.37 ± 2.29     27.38 ± 24.23
+          fixed-1k         53   5.50 ± 15.72      99.20 ± 0.36           813.57 ± 84.46      31.61 ± 25.74
+          fixed-5k         53     0.00 ± 0.00   100.00 ± 0.00         3871.35 ± 353.77       33.67 ± 28.72
+          fixed-10k        58     2.65 ± 9.56     99.29 ± 0.19        7702.16 ± 668.50       34.24 ± 26.91
+          fixed-25k        62   9.07 ± 18.72      96.44 ± 0.49     19183.81 ± 1661.81        35.55 ± 29.97
+          fixed-50k        64  14.22 ± 22.67      92.96 ± 0.77     38288.26 ± 3141.73        36.84 ± 34.84
+          full-context     41  31.38 ± 31.59      82.54 ± 1.61    110607.54 ± 4711.16        24.74 ± 33.79
+          SELF-ROUTE       49  45.18 ± 33.28      65.32 ± 2.88    54951.43 ± 55725.18        27.13 ± 25.83
+          adaptive-k       51  100.00 ± 0.00                            907.79 ± 263.30      32.75 ± 25.98
+          zeroshot         91  20.67 ± 31.77       0.00 ± 0.00              60.09 ± 7.79
+          fixed-1k         96     2.85 ± 9.72   78.12 ± 38.03            857.89 ± 96.49         8.33 ± 7.16
+          fixed-5k         94     0.00 ± 0.00     99.22 ± 0.24        4040.80 ± 358.14       16.98 ± 10.66
+          fixed-10k        93   3.00 ± 13.48    100.00 ± 0.00         8038.26 ± 670.72       17.35 ± 10.37
+          fixed-25k        96   4.79 ± 15.73      99.15 ± 0.49     19985.92 ± 1507.53        17.64 ± 10.47
+          fixed-50k        95   6.43 ± 17.79      95.94 ± 0.83     39806.06 ± 2867.46        16.64 ± 10.50
+          full-context     62  16.65 ± 30.03      92.04 ± 1.25    110733.69 ± 3419.97        17.17 ± 10.11
+          SELF-ROUTE       88  39.57 ± 41.22      80.93 ± 1.99    32620.05 ± 48431.50        12.94 ± 12.48
+          adaptive-k       93  100.00 ± 0.00      63.01 ± 3.13          929.99 ± 604.34      13.76 ± 10.53
+          zeroshot             10.20 ± 24.97                                                 17.33 ± 10.55
+          fixed-1k      66.00   3.00 ± 13.48       0.00 ± 0.00                       58.83
+          fixed-5k      66.33                   87.30 ± 27.60                      850.92              18.34
+          fixed-10k     66.00             0.00    99.16 ± 0.56                    4006.22              26.59
+          fixed-25k     68.33             3.88                                    7962.06              27.21
+          fixed-50k     72.00             7.73              0.00                19835.88               27.06
+          full-context  73.00            11.44            99.20                 39538.28               27.08
+          SELF-ROUTE    50.33            25.18            96.07                110336.05               27.66
+          adaptive-k    61.00            42.75            92.27                 54591.12               18.86
+                        64.33          100.00             81.23                    904.95              21.19
+                                         18.90            63.38                                        27.65
+                                          3.78              0.00
+                                                          81.35
+                                                          99.19
+
+Table 17: Full GPT-4o's results in the factoid QA tasks with the embeddings by gte-Qwen2-1.5B-instruct.
+
+                                         20129
+A.3.4 HoloBench (GTE embeddings)
+
+Info amount  Method        Score  Context recall   Reduction (%)            nin       nout
+info5k       zeroshot       7.22     0.00 ± 0.00   100.00 ± 0.00         58.13      65.21
+info10k      fixed-1k              12.05 ± 6.42                       1000.07     289.39
+info25k      fixed-5k      26.14                     99.18 ± 0.43     4194.01     913.32
+info50k      fixed-10k     42.32  51.92 ± 29.82      95.85 ± 1.86     8011.64    1334.67
+Average      fixed-25k     49.79  66.68 ± 30.73      91.80 ± 2.92    19574.94    2087.61
+             fixed-50k     46.27  78.48 ± 26.96      79.59 ± 4.56    39224.80    3188.69
+             full-context  43.82  86.79 ± 20.88      57.76 ± 5.92    73652.50    3680.13
+             SELF-ROUTE    48.30  100.00 ± 0.00       0.00 ± 0.00    12113.12    1288.40
+             adaptive-k    40.69  65.18 ± 28.08    76.14 ± 38.33     29079.80    1879.49
+             zeroshot      45.23  82.20 ± 25.15    64.79 ± 32.49         58.13      64.00
+             fixed-1k                              100.00 ± 0.00      1003.83     298.53
+             fixed-5k       5.11     0.00 ± 0.00     99.19 ± 0.40     4228.71    1001.83
+             fixed-10k     21.83     6.53 ± 3.11     95.84 ± 1.90     8235.02    2589.58
+             fixed-25k     32.45  31.77 ± 14.86      91.74 ± 3.47    19838.92    3527.68
+             fixed-50k     36.48  59.10 ± 27.14      79.55 ± 5.42    39437.42    4061.82
+             full-context  39.65  78.18 ± 26.55      57.88 ± 6.41    75768.00    4767.44
+             SELF-ROUTE    38.55  87.34 ± 20.51       0.00 ± 0.00    18646.59    1307.47
+             adaptive-k    41.75  100.00 ± 0.00    79.47 ± 35.80     28475.07    2238.23
+             zeroshot      32.28  45.87 ± 24.77    65.70 ± 30.96         58.13      65.69
+             fixed-1k      39.66  78.99 ± 28.37    100.00 ± 0.00        999.62    282.18
+             fixed-5k                0.00 ± 0.00     99.21 ± 0.32     4215.72    1350.80
+             fixed-10k      3.54     2.77 ± 1.15     95.96 ± 1.56     8269.06    2520.64
+             fixed-25k     16.51   14.06 ± 5.50      91.86 ± 3.09    20475.06    3406.40
+             fixed-50k     27.52   28.80 ± 9.87      79.60 ± 7.10    40152.73    4366.80
+             full-context  29.10  68.13 ± 22.77      58.46 ± 8.58    75787.37    4802.50
+             SELF-ROUTE    40.25  86.88 ± 20.14       0.00 ± 0.00    18905.02    1334.77
+             adaptive-k    34.18  100.00 ± 0.00    77.63 ± 37.70     36711.21    3509.82
+             zeroshot      42.24  31.02 ± 32.35    58.43 ± 29.94         58.13      62.30
+             fixed-1k      23.60  76.47 ± 31.62    100.00 ± 0.00      1006.91     274.89
+             fixed-5k      36.33     0.00 ± 0.00     99.22 ± 0.23     4235.36     735.80
+             fixed-10k               1.47 ± 0.55     96.02 ± 1.12     8288.68    1595.42
+             fixed-25k      5.19     7.54 ± 2.52     92.01 ± 2.13    20622.82    4269.89
+             fixed-50k     11.59   15.39 ± 4.25      79.75 ± 5.38    41264.63    4244.67
+             full-context  20.62   39.55 ± 8.89      58.85 ± 9.99    87936.41    3051.19
+             SELF-ROUTE    23.15  76.90 ± 16.82       0.00 ± 0.00    17563.86    1843.27
+             adaptive-k    28.11  100.00 ± 0.00    79.88 ± 35.94     46590.91    3806.21
+             zeroshot      34.58  21.90 ± 31.81    49.06 ± 29.83         58.13      64.30
+             fixed-1k      27.40  72.54 ± 36.80                       1002.61     286.25
+             fixed-5k      22.08                               0.00   4218.45    1000.44
+             fixed-10k     30.80             0.00            99.20    8201.10    2010.08
+             fixed-25k                       5.70            95.92   20127.94    3322.89
+             fixed-50k      5.26            26.32            91.85   40019.90    3965.49
+             full-context  19.02            42.49            79.62   78286.07    4075.32
+             SELF-ROUTE    30.73            66.09            58.24   16807.15    1443.48
+             adaptive-k    34.63            84.48              0.00  35214.25    2858.44
+                           38.57          100.00             78.28
+                           37.78            40.99            59.49
+                           39.92            77.55
+                           29.66
+                           38.00
+
+Table 18: Full GPT-4o's results in the HoloBench tasks with the embeddings by gte-Qwen2-1.5B-Instruct.
+
+                                  20130
+

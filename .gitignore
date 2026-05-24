@@ -1,0 +1,109 @@
+# ─── Large data artifacts (must regenerate or fetch separately) ──────────────
+artifacts/
+embeddings/*.npy
+analysis/citation_graph/*.sqlite
+analysis/citation_graph/*.sqlite.bak*
+analysis/citation_graph/*.json
+analysis/citation_graph/*.jsonl
+analysis/gold_coverage/*.json
+analysis/gold_coverage/train_gold_citations.*
+analysis/gold_coverage/val_gold_citations.*
+drive_sync/
+llm_enrichment/
+research/cascade_pool_500_*/
+research/scratch_*/
+research/_scratch_*/
+research/local_v75_snapshot_mirror/
+research/local_hybrid_rerank_cache_mirror/
+research/_structured_law_v1/
+research/stage_*/
+research/reranker_finetune_poc/
+research/decompose_rerank_poc/
+research/v75_chan16_download/
+research/_archive_*/
+research/_notion_dump/
+research/_scan_*
+reference_caches/judge/
+reference_caches/rerank/
+reference_caches/forensic_debug/
+pipeline/
+logs/
+research_repos/
+
+# ─── Raw corpus and gold (large CSVs) ───────────────────────────────────────
+data/*.csv
+data/*.json
+data/laws_de_segments/
+!data/.gitkeep
+
+# ─── Notebook outputs / inventories ─────────────────────────────────────────
+notebooks/inventory/*.md
+notebooks/_drive_pull/
+notebooks/concept_embedding_retry_outputs/
+**/.ipynb_checkpoints/
+
+# ─── Secrets / credentials (never commit) ───────────────────────────────────
+**/token.json
+**/credentials.json
+**/kaggle.json
+**/.env
+**/*.pem
+**/id_rsa*
+**/*.key
+
+# ─── Personal Claude config (not part of the project) ───────────────────────
+.claude/
+.agents/
+skills-lock.json
+
+# ─── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# ─── ML/DS artifacts ────────────────────────────────────────────────────────
+*.npy
+*.npz
+*.parquet
+*.sqlite
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp/
+*.pkl
+*.pickle
+*.bin
+*.faiss
+*.jsonl
+*.zip
+*.tar.gz
+
+# Keep small text-like things even if they match above patterns
+!**/requirements*.txt
+!**/environment*.yml
+!**/pyproject.toml
+!**/setup.py
+!**/setup.cfg
+
+# ─── IDE / OS ───────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ─── Wheels (large binary packages) ─────────────────────────────────────────
+kaggle_wheels_gptqmodel/
+*.whl

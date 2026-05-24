@@ -1,0 +1,600 @@
+                                                                     From Citations to Criticality:
+                                        Predicting Legal Decision Influence in the Multilingual Swiss Jurisprudence
+
+                                        Ronja Stern 1*                                            Ken Kawamura 5
+
+                                        Matthias Stürmer 1,2  Ilias Chalkidis 4                   Joel Niklaus 1,2,3
+
+                                               1University of Bern 2Bern University of Applied Sciences
+                                        3Stanford University 4University of Copenhagen 5Independent Scholar
+
+arXiv:2410.13460v2 [cs.CL] 30 May 2025                        Abstract                                Figure 1: Overview of the Criticality Prediction Task.
+
+                                             Many court systems are overwhelmed all over          framework--Criticality Prediction--designed to
+                                             the world, leading to huge backlogs of pend-         predict the potential influence of Swiss Federal
+                                             ing cases. Effective triage systems, like those      Court cases on future jurisprudence.
+                                             in emergency rooms, could ensure proper pri-
+                                             oritization of open cases, optimizing time and          While prior work such as the Importance Pre-
+                                             resource allocation in the court system. In this     diction task for European Court of Human Rights
+                                             work, we introduce the Criticality Prediction        (ECtHR) (Chalkidis et al., 2019) cases focused
+                                             dataset, a novel resource for evaluating case        on predicting importance on a defined scale using
+                                             prioritization. Our dataset features a two-tier      human-assigned labels, our approach employs algo-
+                                             labeling system: (1) the binary LD-Label, iden-      rithmically derived labels to evaluate case critical-
+                                             tifying cases published as Leading Decisions         ity. Our dataset introduces a two-tier labeling sys-
+                                             (LD), and (2) the more granular Citation-Label,      tem: the LD-Label, a binary indicator of whether a
+                                             ranking cases by their citation frequency and        case is published as a Leading Decision (LD), and
+                                             recency, allowing for a more nuanced evalua-         the Citation-Label, a more nuanced categorization
+                                             tion. Unlike existing approaches that rely on        based on the frequency and recency-weighted ci-
+                                             resource-intensive manual annotations, we al-        tation counts of these decisions across subsequent
+                                             gorithmically derive labels leading to a much        cases. This distinct formulation of "criticality" not
+                                             larger dataset than otherwise possible. We           only distinguishes critical cases from non-critical
+                                             evaluate several multilingual models, includ-        ones but also ranks them by their relative impor-
+                                             ing both smaller fine-tuned models and large         tance over time. The complexity of this dataset
+                                             language models in a zero-shot setting. Our          challenges even recent LLMs such as ChatGPT.
+                                             results show that the fine-tuned models con-
+                                             sistently outperform their larger counterparts,         Our contributions are threefold: (1) We propose
+                                             thanks to our large training set. Our results        a novel Criticality Prediction task that provides a
+                                             highlight that for highly domain-specific tasks      more comprehensive and challenging evaluation of
+                                             like ours, large training sets are still valuable.   case law importance. (2) We release the datasets
+                                                                                                  to the community, providing valuable resources for
+                                        1 Introduction                                            further research in legal NLP. (3) We evaluate sev-
+                                                                                                  eral multilingual models of various sizes, including
+                                        Predicting the impact of legal cases is a critical task   fine-tuned variants to establish baselines.
+                                        in the legal domain, as it aids professionals in the ju-
+                                        dicial system prioritize and manage large volumes
+                                        of case law more effectively, ensuring that critical
+                                        cases receive the necessary attention. Despite its
+                                        significance, the task of predicting the case critical-
+                                        ity remains relatively under-explored. Existing ap-
+                                        proaches to evaluating the importance of legal cases
+                                        are primarily manual, very resource-intensive and
+                                        subject to the judgments of individual annotators.
+                                        This paper introduces a novel dataset , licensed un-
+                                        der CC BY 4.0,1 and a more challenging evaluation
+
+                                            * Equal contribution.
+                                            1https://huggingface.co/datasets/rcds/swiss_
+                                        criticality_prediction
+2 Related Work
+
+One of the most common text classification tasks         Figure 2: Facts (Blue) and consideration (Orange) length
+in the legal domain is Legal Judgment Prediction         distribution measured in Words with Spacy (Honnibal et al.,
+(LJP), which involves predicting outcome of a case       2020). Those with more than 6000 words are binned together.
+based on its facts. Researchers have leveraged
+datasets with unique characteristics to analyze and      We developed the Citation-Label for a more
+predict case outcomes across various languages,
+jurisdictions, and input types (Feng et al., 2022;       granular measure. It counts how often each LD
+Aletras et al., 2016; S¸ ulea et al., 2017; Medvedeva
+et al., 2018; Chalkidis et al., 2019; Niklaus et al.,    case is cited in SFSC cases, with less weight on
+2021, 2022; Semo et al., 2022). While LJP is fo-
+cused on the outcome of individual cases, Impor-         older cases to prioritize recency. The score is cal-
+tance Prediction shifts the focus toward assessing
+the broader significance of a case.                      culated as:  score  =  count  ×  year-2002+1  .  The
+                                                                                          2023-2002+1
+   Chalkidis et al. (2019) introduced the Impor-
+tance Prediction task using cases from the Euro-         count is the citation frequency, and the weighting
+pean Court of Human Rights (ECtHR). In this task,
+ECtHR provided scores that denote each case's            reduces older cases' influence. This score ranks
+`importance' to the common law. These scores,
+ranging from 1 (key case) to 4 (unimportant), were       LD cases, and we categorized them into four criti-
+designed to help legal practitioners identify cases
+that play a crucial role in shaping jurisprudence.       cality levels--critical-1 (least critical) to critical-
+The labels reflect the long-term impact of a case on
+future rulings and the evolution of legal precedent.     4--based on the 25th, 50th, and 75th percentiles.
+While the task is invaluable for identifying land-
+mark cases, it relies on legal experts to assign the     More details on the constants are in Appendix A.
+labels, making the process resource-intensive and
+potentially subject to subjective interpretations. Ad-   Unlike a prior approach (Chalkidis et al., 2019),
+ditionally, the ECtHR dataset contains only English
+samples, whereas our Swiss dataset is multilingual.      which also used four categories, we explicitly incor-
+To our knowledge, no other study has specifically
+addressed the task of Criticality Prediction.            porate temporal weighting to account for both the
+
+3 Task and Dataset                                       influence of a case and how its criticality shifts over
+
+3.1 Criticality                                          time. Furthermore, our framework allows for the
+
+Understanding the legal framework of the Swiss           dynamic recalculation of scores and re-labeling of
+Federal Supreme Court (SFSC) is key to defining
+criticality in Swiss case law. The SFSC shapes the       criticality as case law evolves. This adaptability en-
+legal landscape through its rulings, with a subset
+known as Leading Decisions (LDs) published sepa-         sures that our dataset reflects the ongoing changes
+rately due to their influence on the interpretation of
+law. We quantify case criticality using two labels:      in the legal system, whereas prior studies would
+the LD-Label and the Citation-Label.
+                                                         require manual re-annotation as the law develops.
+   The LD-Label is binary, categorizing cases as
+critical or non-critical. SFSC cases are labeled         3.2 Criticality Prediction Task and Dataset
+critical if also published as LD, reflecting their rec-
+ognized importance within the Swiss legal system.        The Criticality Prediction (CP) task leverages two
+We used regular expressions to extract SFSC cases        primary inputs from the Swiss Federal Supreme
+published as LD. SFSC cases not published as LD          Court (SFCS) cases: facts and considerations.
+are labeled non-critical.                                Facts describe a factual account of the events of
+                                                         each case and form the basis for the considerations
+                                                         of the court. Considerations reflect the formal legal
+                                                         reasoning, citing laws and other influential rulings,
+                                                         and forming the basis for the final ruling.
+
+                                                            We see two distinct applications for these inputs
+                                                         in the Criticality Prediction task, illustrated in Fig-
+                                                         ure 1. In the Case Prioritization task, only the facts
+                                                         are used as input. This produces a score indicat-
+                                                         ing how critical or important a case is. The goal
+                                                         is to help prioritize cases, which could assist in
+Table 1: Task Configurations. Label names are Critical (C), Non-critical (NC), Critical-1 (C1) to Critical-4 (C4).
+
+Task Name                 Size          Train            Size        Validation           Size           Test
+
+LD-Facts                 74799       Label Distribution  12019       Label Distribution  26239       Label Distribution
+LD-Considerations        87555                           13386                           29486
+                                   C NC                            C NC                            C NC
+Citation­Facts            2506  2542 72257 - -              563  580 11439 - -              725  950 25289 - -
+Citation-Considerations   2509  2544 85011 - -              563  580 12806 - -              723  948 28538 - -
+
+                                 C-1 C-2 C-3 C-4                 C-1 C-2 C-3 C-4                 C-1 C-2 C-3 C-4
+                                 782 626 585 513                 186 152 131 94                  137 177 224 187
+                                 779 624 586 520                 186 154 131 92                  137 177 224 185
+
+determining which cases should be heard sooner                   Swiss-RoBERTa and Legal Swiss Longformer
+or assigned to more experienced judges. Many                     (Base) (Rasiah et al., 2023), GPT-3.5 (Brown et al.,
+court systems are overwhelmed all over the world                 2020), and LLaMA-2 (Touvron et al., 2023).
+leading to huge backlogs of pending cases. Effec-
+tive triage systems, like those in emergency rooms,                 We fine-tuned all models per task, using early
+could ensure proper prioritization of open cases.                stopping on the dev set. Due to resource constraints,
+                                                                 further fine-tuning of GPT-3.5 and LLaMA-2 is
+   In the Leading Decisions Selection task, consid-              reserved for future work, with their current perfor-
+erations are used for a post-hoc analysis, comparing             mance serving as baseline results. SwissBERT and
+the ruling to prior case law to assess its potential             Legal-Swiss models were chosen for their Swiss-
+impact on future jurisprudence. This analysis is ex-             specific pretraining, while the other models were
+actly what the Supreme Court does at the end of the              chosen for their multilingual capabilities, essential
+year to arrive at the selection of leading decisions.            for our multilingual dataset.
+
+   Our approach, by offering facts and consider-                    We evaluated GPT-3.5 and LLaMA-2 in a zero-
+ations as inputs, reflects different stages of legal             shot setting following Chalkidis (2023). Samples
+processing. Both tasks can utilize the LD-Label or               were randomly selected from the validation set to
+Citation-Label, providing varying levels of granu-               prevent test set leakage for future evaluations es-
+larity. This dual approach enhances the dataset's                pecially for a closed model (GPT-3.5). To manage
+practical utility, supporting both early-stage pri-              costs, we limited the validation set to 1000 samples.
+oritization and post-judgment evaluation, thereby                Our experiments focused on zero-shot classifica-
+addressing multiple aspects of legal workflows.                  tion due to the long input lengths. The prediction
+                                                                 labels were determined using regular expressions to
+   Our dataset spans from 2002 to 2023, and is par-              match model outputs to class labels. We show the
+titioned into train (2002-2015), dev (2016-2017),                prompts used in Appendix Figure 4 and Figure 5.
+and test (2018-2022) sets, as outlined in Table 1.
+We allocated a relatively large test set to accommo-             4.2 Metrics
+date longitudinal studies, including the COVID-19
+pandemic years. This setup ensures that the test set             We adopt the LEXTREME benchmark setup
+represents the most recent data for realistic evalua-            (Niklaus et al., 2023), and use aggregation of
+tion (Søgaard et al., 2021). The dataset consists of             macro-averaged F1 scores with the harmonic mean
+138,531 total cases, with 85,167 in German, 45,451               to emphasize lower scores, promoting fairness
+in French, and 7,913 in Italian. See Figure 2 for                across languages and input types. Scores are aver-
+length distributions of facts and considerations and             aged over random seeds, languages (de, fr, it), and
+Appendix Table 4 for general dataset metadata.                   input types (facts or considerations), encouraging
+                                                                 consistent performance across configurations.
+4 Methods
+                                                                 5 Results
+4.1 Models
+                                                                 We present results in Table 3, with standard devia-
+We evaluated the following models: XLM-R                         tions in Appendix Table 5 and scores on the valida-
+(Base and Large) (Conneau and Lample, 2019),                     tion dataset in Appendix Table 6. The best perfor-
+MiniLM (Wang et al., 2020), DistilmBERT (Sanh,                   mance was achieved by XLM-RLarge, with an aggre-
+2019), mDeBERTa-v3 (He et al., 2021), X-MOD                      gate (Agg.) score of 37.1. SwissBERT also demon-
+(Base) (Pfeiffer et al., 2022), SwissBERT (Vamvas                strated competitive results, with an Agg. score of
+et al., 2023), mT5 (Small and Base) (Xue et al.,                 34.8. Interestingly, larger models did not always
+2021), BLOOM (560M) (Scao et al., 2022), Legal-
+Table 2: Configuration aggregate scores. The macro-F1 scores from the language-specific subsets of the test set are provided.
+
+Model                       LD-F                LD-C                  C-F                 C-C                 Agg.
+Languages               de / fr / it        de / fr / it         de / fr / it        de / fr / it        de / fr / it
+
+MiniLM                57.5 / 53.9 / 52.9  68.1 / 65.4 / 64.2   12.1 / 13.1 / 6.8   24.6 / 21.9 / 17.3  25.7 / 25.7 / 16.7
+DistilmBERT           56.3 / 55.6 / 56.8  67.8 / 63.9 / 64.7   20.2 / 18.2 / 20.7  22.6 / 21.6 / 22.2  31.7 / 29.7 / 31.6
+mDeBERTa-v3           57.6 / 55.1 / 52.7  73.9 / 68.1 / 67.7   25.4 / 22.8 / 16.8  22.1 / 21.6 / 12.6  34.6 / 32.5 / 23.2
+XLM-RBase             59.4 / 56.3 / 56.0  70.2 / 65.4 / 62.5   20.0 / 20.6 / 23.5  26.5 / 22.1 / 23.1  33.7 / 31.5 / 33.4
+XLM-RLarge            58.4 / 56.8 / 54.1  70.5 / 67.3 / 66.0   22.5 / 19.7 / 36.2  26.7 / 28.2 / 33.0  46.9 / 33.7 / 43.7
+X-MODBase             59.0 / 56.2 / 54.8  71.1 / 68.7 / 64.1   19.8 / 17.2 / 24.4  23.2 / 24.2 / 16.4  32.1 / 30.3 / 29.5
+SwissBERT(xlm-vocab)  57.6 / 55.9 / 57.3  72.4 / 69.3 / 61.2   23.8 / 20.3 / 39.4  28.5 / 24.0 / 18.7  36.9 / 32.3 / 35.5
+
+mT5Small              54.8 / 51.7 / 50.3  69.2 / 61.9 / 56.4   14.2 / 16.2 / 10.5  15.9 / 18.1 / 20.2  24.1 / 26.2 / 21.9
+mT5Base               54.1 / 52.1 / 50.3  66.4 / 61.9 / 56.8   10.6 / 16.3 / 16.9  18.7 / 18.7 / 22.1  22.1 / 26.6 / 28.2
+
+BLOOM-560m            55.1 / 53.2 / 50.9  64.6 / 65.3 / 56.2   12.6 / 16.1 / 7.1    9.5 / 13.6 / 5.1   18.3 / 23.6 / 10.7
+
+Legal-Swiss-RBase     59.3 / 58.4 / 55.5  73.8 / 69.4 / 68.6   24.3 / 20.5 / 10.5  26.2 / 25.3 / 14.0  36.5 / 33.4, 20.1
+Legal-Swiss-RLarge    58.3 / 55.7 / 53.6  71.9 / 68.5 / 66.7   23.0 / 21.3 / 38.7  28.5 / 26.0 / 9.0   36.5 / 33.9 / 23.4
+Legal-Swiss-LFBase    60.7 / 58.3 / 55.5  74.8 / 70.0 / 67.8   25.3 / 21.5 / 18.4  29.2 / 26.7 / 9.9   38.6 / 34.7 / 21.3
+
+Table 3: Results using Macro F1, with highest values in bold.  a focus on German achieved the highest aggre-
+'LD' and 'C' denote LD and Citation labels, while 'F' and 'C'  gate score in German, but interestingly with scores
+refer to inputs from Facts or Considerations. Models marked    in Italian being the highest by far in C-F. Mod-
+with (*) are zero-shot LLMs evaluated on the validation set.   els pretrained on CC100 (Conneau et al., 2020)
+                                                               (MiniLM, mDeBERTa, XLM-R and X-MOD) ex-
+Model                 LD-F LD-C C-F C-C Agg.                   hibited mixed results in French and Italian, with all
+                                                               models performing best in German. MiniLM, mDe-
+Random Baseline       36.2 36.0 24.1 25.7 29.5                 BERTa, and X-MOD showed underperformance
+Majority Baseline     49.1 49.2 11.8 11.8 19.0                 in Italian but stronger results in French. In con-
+                                                               trast, XLM-R, particularly the large variant, demon-
+MiniLM                54.7 65.8 9.8 20.8 21.8                  strated robust performance in Italian. mT5 models
+DistilmBERT           56.2 65.4 19.6 22.1 30.9                 performed well in French, and the base variant ad-
+mDeBERTa-v3           55.1 69.8 21.0 17.5 29.1                 ditionally also performed well on Italian. BLOOM
+XLM-RBase             57.2 65.9 21.3 23.7 32.8                 was much better in French than in other languages,
+XLM-RLarge            56.4 67.9 24.4 29.1 37.1                 not surprising given it did not have German and
+X-MODBase             56.6 67.8 20.0 20.6 30.5                 Italian in the pretraining data.
+SwissBERT(xlm-vocab)  56.9 67.3 25.7 23.0 34.8
+                                                                  Overall, the connection between the proportion
+mT5Small              52.2 62.1 13.2 17.9 24.0                 of a language in the pretraining corpus and the
+mT5Base               52.1 61.5 14.0 19.7 25.4                 model's downstream performance in that language
+                                                               appears weak. While some models showed stronger
+BLOOM560M             53.0 61.7 10.7 8.0 15.8                  results in languages with higher representation in
+                                                               their pretraining data, this trend was inconsistent
+Legal-Swiss-RoBERTaBase 57.7 70.5 16.2 20.1 28.0               across all models and languages.
+
+Legal-Swiss-RoBERTaLarge 55.9 68.9 25.8 16.3 30.2              6 Conclusions and Future Work
+
+Legal-Swiss-LFBase    58.1 70.8 21.4 17.4 29.5                 This work introduced a novel Criticality Prediction
+                                                               task to assess the potential influence of SFSC cases
+GPT-3.5*              46.6 44.8 25.7 16.7 28.1                 on future jurisprudence. Our approach utilizes lead-
+LLaMA-2*              45.2 26.6 7.0 8.5 12.5                   ing decision citation for a more comprehensive and
+                                                               challenging multilingual evaluation of case law im-
+outperform their smaller counterparts. For exam-               portance compared to existing methods. We also
+ple, mT5Base and mT5Small both underperformed                  released its multilingual dataset for a community.
+DistilmBERT in all configurations. The Legal-
+Swiss models performed well in LD labels, partic-                 We conducted a comprehensive evaluation of our
+ularly the Legal-Swiss-LFBase, which achieved the              Criticality Prediction task, comparing a range of
+highest scores in LD-F and LD-C. However, their                models, from smaller multilingual models to LLMs
+weak performance on Citation labels highlights
+the dataset's complexity, even for domain-specific
+models. GPT-3.5 and LLaMA-2 underperform fine-
+tuned models, underlining the need for specialized
+models for these tasks. The difference is largest
+in the LD labels where the small fine-tuned mod-
+els always outperformed LLMs despite their huge
+parameter number difference (e.g., MiniLM with
+118M parameters versus GPT-3.5 with 175B).
+
+   Table 2 shows more detailed results on the lan-
+guage specific scores. SwissBERT pretrained with
+like GPT-3.5. Our findings show that small fine-       the anonymous reviewers for their insightful and
+tuned models consistently outperform zero-shot         constructive comments.
+LLMs, highlighting the importance of task-specific
+adaptation in legal NLP applications.                  References
+
+   Future studies could apply the Criticality Predic-  Nikolaos Aletras, Dimitrios Tsarapatsanis, Daniel
+tion task in other legal contexts by incorporating        Preo¸tiuc-Pietro, and Vasileios Lampos. 2016. Pre-
+sources from different jurisdictions and languages.       dicting judicial decisions of the European Court of
+This approach would broaden the research's im-            Human Rights: a Natural Language Processing per-
+pact and enhance the model's adaptability across          spective. PeerJ Computer Science, 2:e93. Publisher:
+different legal systems.                                  PeerJ Inc.
+
+Limitations                                            Tom Brown, Benjamin Mann, Nick Ryder, Melanie
+                                                          Subbiah, Jared D Kaplan, Prafulla Dhariwal, Arvind
+It is very difficult to estimate the importance of        Neelakantan, Pranav Shyam, Girish Sastry, Amanda
+a case. By relying on proxies such as whether             Askell, Sandhini Agarwal, Ariel Herbert-Voss,
+the case was converted to a leading decision (LD-         Gretchen Krueger, Tom Henighan, Rewon Child,
+label) and how often this leading decision was cited      Aditya Ramesh, Daniel Ziegler, Jeffrey Wu, Clemens
+(Citation-label), we were able to create labels algo-     Winter, Chris Hesse, Mark Chen, Eric Sigler, Ma-
+rithmically. While we discussed this with lawyers         teusz Litwin, Scott Gray, Benjamin Chess, Jack
+at length and implemented the solution we agreed          Clark, Christopher Berner, Sam McCandlish, Alec
+on finally, this task remains somewhat artificial.        Radford, Ilya Sutskever, and Dario Amodei. 2020.
+Additionally, it is worth noting that LLMs can be         Language Models are Few-Shot Learners. In Ad-
+sensitive to prompt formats and the order of answer       vances in Neural Information Processing Systems,
+options, leading to inconsistent outputs as high-         volume 33, pages 1877­1901. Curran Associates,
+lighted in recent research (Webson and Pavlick,           Inc.
+2022; Elazar et al., 2021). Incorporating varied
+prompt designs into future studies could strengthen    Ilias Chalkidis. 2023. Chatgpt may pass the bar exam
+our approach further.                                     soon, but has a long way to go for the lexglue bench-
+                                                          mark. Preprint, arXiv:2304.12202.
+Ethics Statement
+                                                       Ilias Chalkidis, Ion Androutsopoulos, and Nikolaos Ale-
+While automating case prioritization and identi-          tras. 2019. Neural Legal Judgment Prediction in
+fying leading decisions can greatly benefit legal         English. In Proceedings of the 57th Annual Meet-
+professionals, there are potential risks associated       ing of the Association for Computational Linguistics,
+with deploying such classifiers. One concern is           pages 4317­4323, Florence, Italy. Association for
+the risk of perpetuating biases present in histori-       Computational Linguistics.
+cal legal trends. For instance, case prioritization
+decisions should not be influenced by factors such     Alexis Conneau, Kartikay Khandelwal, Naman Goyal,
+as gender, race, or other protected characteristics.      Vishrav Chaudhary, Guillaume Wenzek, Francisco
+We acknowledge these concerns and will pursue             Guzmán, Edouard Grave, Myle Ott, Luke Zettle-
+measures to mitigate such biases in future work.          moyer, and Veselin Stoyanov. 2020. Unsupervised
+                                                          cross-lingual representation learning at scale. In Pro-
+   Additionally, there are challenges with repro-         ceedings of the 58th Annual Meeting of the Asso-
+ducibility when using closed models like ChatGPT.         ciation for Computational Linguistics, pages 8440­
+Since the internal workings of these models are not       8451, Online. Association for Computational Lin-
+fully transparent, results may be difficult to repli-     guistics.
+cate. To promote open science, we have provided
+comprehensive evaluations of open source multi-        Alexis Conneau and Guillaume Lample. 2019. Cross-
+lingual models, aiming to make our findings more          lingual Language Model Pretraining. In Advances in
+accessible and reproducible.                              Neural Information Processing Systems, volume 32.
+                                                          Curran Associates, Inc.
+Acknowledgments
+                                                       Yanai Elazar, Nora Kassner, Shauli Ravfogel, Abhi-
+We thank Luca Rolshoven and Mara Häusler for              lasha Ravichander, Eduard Hovy, Hinrich Schütze,
+their thoughtful feedback on the manuscript, and          and Yoav Goldberg. 2021. Measuring and improving
+                                                          consistency in pretrained language models. Transac-
+                                                          tions of the Association for Computational Linguis-
+                                                          tics, 9:1012­1031.
+
+                                                       Yi Feng, Chuanyi Li, and Vincent Ng. 2022. Legal
+                                                          judgment prediction: A survey of the state of the
+                                                          art. In Proceedings of the Thirty-First International
+                                                          Joint Conference on Artificial Intelligence, IJCAI-22,
+   pages 5461­5469. International Joint Conferences on    Matthias Gallé, Jonathan Tow, Alexander M. Rush,
+   Artificial Intelligence Organization. Survey Track.    Stella Biderman, Albert Webson, Pawan Sasanka Am-
+                                                          manamanchi, Thomas Wang, Benoît Sagot, Niklas
+Pengcheng He, Jianfeng Gao, and Weizhu Chen. 2021.        Muennighoff, Albert Villanova del Moral, Olatunji
+   Debertav3: Improving deberta using electra-style pre-  Ruwase, Rachel Bawden, Stas Bekman, Angelina
+   training with gradient-disentangled embedding shar-    McMillan-Major, Iz Beltagy, Huu Nguyen, Lucile
+   ing. arXiv preprint arXiv:2111.09543.                  Saulnier, Samson Tan, Pedro Ortiz Suarez, Vic-
+                                                          tor Sanh, Hugo Laurençon, Yacine Jernite, Julien
+Matthew Honnibal, Ines Montani, Sofie Van Lan-            Launay, Margaret Mitchell, Colin Raffel, Aaron
+   deghem, and Adriane Boyd. 2020. spaCy: Industrial-     Gokaslan, Adi Simhi, Aitor Soroa, Alham Fikri
+   strength Natural Language Processing in Python.        Aji, Amit Alfassy, Anna Rogers, Ariel Kreisberg
+                                                          Nitzav, Canwen Xu, Chenghao Mou, Chris Emezue,
+Maria Medvedeva, Michel Vols, and Martijn Wieling.        Christopher Klamm, Colin Leong, Daniel van Strien,
+   2018. Judicial decisions of the European Court of      David Ifeoluwa Adelani, Dragomir Radev, Ed-
+   Human Rights: looking into the crystall ball. Pro-     uardo González Ponferrada, Efrat Levkovizh, Ethan
+   ceedings of the Conference on Empirical Legal Stud-    Kim, Eyal Bar Natan, Francesco De Toni, Gérard
+   ies in Europe 2018.                                    Dupont, Germán Kruszewski, Giada Pistilli, Hady
+                                                          Elsahar, Hamza Benyamina, Hieu Tran, Ian Yu, Idris
+Joel Niklaus, Ilias Chalkidis, and Matthias Stürmer.      Abdulmumin, Isaac Johnson, Itziar Gonzalez-Dios,
+   2021. Swiss-Judgment-Prediction: A Multilingual        Javier de la Rosa, Jenny Chim, Jesse Dodge, Jian Zhu,
+   Legal Judgment Prediction Benchmark. In Proceed-       Jonathan Chang, Jörg Frohberg, Joseph Tobing, Joy-
+   ings of the Natural Legal Language Processing Work-    deep Bhattacharjee, Khalid Almubarak, Kimbo Chen,
+   shop 2021, pages 19­35, Punta Cana, Dominican          Kyle Lo, Leandro Von Werra, Leon Weber, Long
+   Republic. Association for Computational Linguistics.   Phan, Loubna Ben allal, Ludovic Tanguy, Manan
+                                                          Dey, Manuel Romero Muñoz, Maraim Masoud,
+Joel Niklaus, Veton Matoshi, Pooja Rani, Andrea
+   Galassi, Matthias Stürmer, and Ilias Chalkidis. 2023.  María Grandury, Mario Sasko, Max Huang, Max-
+   LEXTREME: A multi-lingual and multi-task bench-        imin Coavoux, Mayank Singh, Mike Tian-Jian Jiang,
+   mark for the legal domain. In Findings of the As-      Minh Chien Vu, Mohammad A. Jauhar, Mustafa
+   sociation for Computational Linguistics: EMNLP         Ghaleb, Nishant Subramani, Nora Kassner, Nuru-
+   2023, pages 3016­3054, Singapore. Association for      laqilla Khamis, Olivier Nguyen, Omar Espejel, Ona
+   Computational Linguistics.                             de Gibert, Paulo Villegas, Peter Henderson, Pierre
+                                                          Colombo, Priscilla Amuok, Quentin Lhoest, Rheza
+Joel Niklaus, Matthias Stürmer, and Ilias Chalkidis.      Harliman, Rishi Bommasani, Roberto Luis López,
+   2022. An Empirical Study on Cross-X Transfer for       Rui Ribeiro, Salomey Osei, Sampo Pyysalo, Se-
+   Legal Judgment Prediction. In Proceedings of the       bastian Nagel, Shamik Bose, Shamsuddeen Hassan
+   2nd Conference of the Asia-Pacific Chapter of the      Muhammad, Shanya Sharma, Shayne Longpre, So-
+   Association for Computational Linguistics and the      maieh Nikpoor, Stanislav Silberberg, Suhas Pai, Syd-
+   12th International Joint Conference on Natural Lan-    ney Zink, Tiago Timponi Torrent, Timo Schick, Tris-
+   guage Processing (Volume 1: Long Papers), pages        tan Thrush, Valentin Danchev, Vassilina Nikoulina,
+   32­46, Online only. Association for Computational      Veronika Laippala, Violette Lepercq, Vrinda Prabhu,
+   Linguistics.                                           Zaid Alyafeai, Zeerak Talat, Arun Raja, Benjamin
+                                                          Heinzerling, Chenglei Si, Elizabeth Salesky, Sab-
+Jonas Pfeiffer, Naman Goyal, Xi Lin, Xian Li, James       rina J. Mielke, Wilson Y. Lee, Abheesht Sharma, An-
+   Cross, Sebastian Riedel, and Mikel Artetxe. 2022.      drea Santilli, Antoine Chaffin, Arnaud Stiegler, Deba-
+   Lifting the Curse of Multilinguality by Pre-training   jyoti Datta, Eliza Szczechla, Gunjan Chhablani, Han
+   Modular Transformers. In Proceedings of the 2022       Wang, Harshit Pandey, Hendrik Strobelt, Jason Alan
+   Conference of the North American Chapter of the        Fries, Jos Rozen, Leo Gao, Lintang Sutawika, M. Sai-
+   Association for Computational Linguistics: Human       ful Bari, Maged S. Al-shaibani, Matteo Manica, Ni-
+   Language Technologies, pages 3479­3495, Seattle,       hal Nayak, Ryan Teehan, Samuel Albanie, Sheng
+   United States. Association for Computational Lin-      Shen, Srulik Ben-David, Stephen H. Bach, Taewoon
+   guistics.                                              Kim, Tali Bers, Thibault Fevry, Trishala Neeraj, Ur-
+                                                          mish Thakker, Vikas Raunak, Xiangru Tang, Zheng-
+Vishvaksenan Rasiah, Ronja Stern, Veton Matoshi,          Xin Yong, Zhiqing Sun, Shaked Brody, Yallow Uri,
+   Matthias Sturmer, Ilias Chalkidis, Daniel Ho, and      Hadar Tojarieh, Adam Roberts, Hyung Won Chung,
+   Joel Niklaus. 2023. One law, many languages:           Jaesung Tae, Jason Phang, Ofir Press, Conglong Li,
+   Benchmarking multilingual legal reasoning for ju-      Deepak Narayanan, Hatim Bourfoune, Jared Casper,
+   dicial support.                                        Jeff Rasley, Max Ryabinin, Mayank Mishra, Minjia
+                                                          Zhang, Mohammad Shoeybi, Myriam Peyrounette,
+V Sanh. 2019. Distilbert, a distilled version of bert:    Nicolas Patry, Nouamane Tazi, Omar Sanseviero,
+   Smaller, faster, cheaper and lighter. arXiv preprint   Patrick von Platen, Pierre Cornette, Pierre François
+   arXiv:1910.01108.                                      Lavallée, Rémi Lacroix, Samyam Rajbhandari, San-
+                                                          chit Gandhi, Shaden Smith, Stéphane Requena, Suraj
+Teven Le Scao, Angela Fan, Christopher Akiki, El-         Patil, Tim Dettmers, Ahmed Baruwa, Amanpreet
+   lie Pavlick, Suzana Ilic´, Daniel Hesslow, Roman
+   Castagné, Alexandra Sasha Luccioni, François Yvon,
+Singh, Anastasia Cheveleva, Anne-Laure Ligozat,         Open-Access Multilingual Language Model. arXiv
+Arjun Subramonian, Aurélie Névéol, Charles Lover-       preprint. ArXiv:2211.05100 [cs].
+ing, Dan Garrette, Deepak Tunuguntla, Ehud Reiter,
+Ekaterina Taktasheva, Ekaterina Voloshina, Eli Bog-  Gil Semo, Dor Bernsohn, Ben Hagag, Gila Hayat, and
+danov, Genta Indra Winata, Hailey Schoelkopf, Jan-      Joel Niklaus. 2022. ClassActionPrediction: A Chal-
+Christoph Kalo, Jekaterina Novikova, Jessica Zosa       lenging Benchmark for Legal Judgment Prediction of
+Forde, Jordan Clive, Jungo Kasai, Ken Kawamura,         Class Action Cases in the US. In Proceedings of the
+Liam Hazan, Marine Carpuat, Miruna Clinciu, Na-         Natural Legal Language Processing Workshop 2022,
+joung Kim, Newton Cheng, Oleg Serikov, Omer             pages 31­46, Abu Dhabi, United Arab Emirates (Hy-
+Antverg, Oskar van der Wal, Rui Zhang, Ruochen          brid). Association for Computational Linguistics.
+Zhang, Sebastian Gehrmann, Shani Pais, Tatiana
+Shavrina, Thomas Scialom, Tian Yun, Tomasz Lim-      Anders Søgaard, Sebastian Ebert, Jasmijn Bastings, and
+isiewicz, Verena Rieser, Vitaly Protasov, Vladislav     Katja Filippova. 2021. We Need to Talk About
+Mikhailov, Yada Pruksachatkun, Yonatan Belinkov,        Random Splits. arXiv:2005.00636 [cs]. ArXiv:
+Zachary Bamberger, Zdenek Kasner, Alice Rueda,          2005.00636.
+Amanda Pestana, Amir Feizpour, Ammar Khan,
+Amy Faranak, Ana Santos, Anthony Hevia, Antig-       Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier
+ona Unldreaj, Arash Aghagol, Arezoo Abdollahi,          Martinet, Marie-Anne Lachaux, Timothée Lacroix,
+Aycha Tammour, Azadeh HajiHosseini, Bahareh             Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal
+Behroozi, Benjamin Ajibade, Bharat Saxena, Car-         Azhar, Aurelien Rodriguez, Armand Joulin, Edouard
+los Muñoz Ferrandis, Danish Contractor, David Lan-      Grave, and Guillaume Lample. 2023. LLaMA: Open
+sky, Davis David, Douwe Kiela, Duong A. Nguyen,         and Efficient Foundation Language Models. arXiv
+Edward Tan, Emi Baylor, Ezinwanne Ozoani, Fa-           preprint. ArXiv:2302.13971 [cs].
+tima Mirza, Frankline Ononiwu, Habib Rezane-
+jad, Hessie Jones, Indrani Bhattacharya, Irene So-   Jannis Vamvas, Johannes Graën, and Rico Sennrich.
+laiman, Irina Sedenko, Isar Nejadgholi, Jesse Pass-     2023. SwissBERT: The Multilingual Language
+more, Josh Seltzer, Julio Bonis Sanz, Karen Fort,       Model for Switzerland. arXiv e-prints, pages arXiv­
+Livia Dutra, Mairon Samagaio, Maraim Elbadri, Mar-      2303.
+got Mieskes, Marissa Gerchick, Martha Akinlolu,
+Michael McKenna, Mike Qiu, Muhammed Ghauri,          Wenhui Wang, Furu Wei, Li Dong, Hangbo Bao, Nan
+Mykola Burynok, Nafis Abrar, Nazneen Rajani, Nour       Yang, and Ming Zhou. 2020. Minilm: Deep self-
+Elkott, Nour Fahmy, Olanrewaju Samuel, Ran An,          attention distillation for task-agnostic compression
+Rasmus Kromann, Ryan Hao, Samira Alizadeh, Sar-         of pre-trained transformers. Advances in Neural In-
+mad Shubber, Silas Wang, Sourav Roy, Sylvain Vigu-      formation Processing Systems, 33:5776­5788.
+ier, Thanh Le, Tobi Oyebade, Trieu Le, Yoyo Yang,
+Zach Nguyen, Abhinav Ramesh Kashyap, Alfredo         Albert Webson and Ellie Pavlick. 2022. Do prompt-
+Palasciano, Alison Callahan, Anima Shukla, Anto-        based models really understand the meaning of their
+nio Miranda-Escalada, Ayush Singh, Benjamin Beil-       prompts? In Proceedings of the 2022 Conference of
+harz, Bo Wang, Caio Brito, Chenxi Zhou, Chirag          the North American Chapter of the Association for
+Jain, Chuxin Xu, Clémentine Fourrier, Daniel León       Computational Linguistics: Human Language Tech-
+Periñán, Daniel Molano, Dian Yu, Enrique Manjava-       nologies, pages 2300­2344, Seattle, United States.
+cas, Fabio Barth, Florian Fuhrimann, Gabriel Altay,     Association for Computational Linguistics.
+Giyaseddin Bayrak, Gully Burns, Helena U. Vrabec,
+Imane Bello, Ishani Dash, Jihyun Kang, John Giorgi,  Linting Xue, Noah Constant, Adam Roberts, Mi-
+Jonas Golde, Jose David Posada, Karthik Ranga-          hir Kale, Rami Al-Rfou, Aditya Siddhant, Aditya
+sai Sivaraman, Lokesh Bulchandani, Lu Liu, Luisa        Barua, and Colin Raffel. 2021. mT5: A mas-
+Shinzato, Madeleine Hahn de Bykhovetz, Maiko            sively multilingual pre-trained text-to-text trans-
+Takeuchi, Marc Pàmies, Maria A. Castillo, Mari-         former. arXiv:2010.11934 [cs]. ArXiv: 2010.11934.
+anna Nezhurina, Mario Sänger, Matthias Samwald,
+Michael Cullan, Michael Weinberg, Michiel De Wolf,   Octavia-Maria S¸ ulea, Marcos Zampieri, Mihaela Vela,
+Mina Mihaljcic, Minna Liu, Moritz Freidank, Myung-      and Josef van Genabith. 2017. Predicting the Law
+sun Kang, Natasha Seelam, Nathan Dahlberg,              Area and Decisions of French Supreme Court Cases.
+Nicholas Michio Broad, Nikolaus Muellner, Pascale       In Proceedings of the International Conference Re-
+Fung, Patrick Haller, Ramya Chandrasekhar, Renata       cent Advances in Natural Language Processing,
+Eisenberg, Robert Martin, Rodrigo Canalli, Rosaline     RANLP 2017, pages 716­722, Varna, Bulgaria. IN-
+Su, Ruisi Su, Samuel Cahyawijaya, Samuele Garda,        COMA Ltd.
+Shlok S. Deshmukh, Shubhanshu Mishra, Sid Ki-
+blawi, Simon Ott, Sinee Sang-aroonsiri, Srishti Ku-
+mar, Stefan Schweter, Sushil Bharati, Tanmay Laud,
+Théo Gigant, Tomoya Kainuma, Wojciech Kusa, Ya-
+nis Labrak, Yash Shailesh Bajaj, Yash Venkatraman,
+Yifan Xu, Yingxin Xu, Yu Xu, Zhe Tan, Zhongli
+Xie, Zifan Ye, Mathilde Bras, Younes Belkada, and
+Thomas Wolf. 2022. BLOOM: A 176B-Parameter
+A Weighting Formula for Citation-Label                          Personally identifying information has already
+                                                             been anonymized by the Swiss Federal Supreme
+The weighting formula used for the Citation-Label            Court in accordance with its anonymization rules5.
+is designed to balance the impact of older cases
+with more recent rulings, ensuring that the ranking          E Zero-shot Prompts
+reflects both citation frequency and recency. The
+formula is as follows:                                       Figures 4 and 5 show the zero-shot prompts we
+                                                             used for the Case Prioritization and Leading Deci-
+                               year - 2002 + 1               sion Selection tasks respectively.
+        score = count ×
+                                                             F Hyperparameters and Package Settings
+                               2023 - 2002 + 1
+
+Where:                                                       We used a fixed learning rate of 1e-5 without tun-
+                                                             ing, running each experiment with three random
+· count refers to the number of times a partic-              seeds (1-3) and excluding seeds with high evalu-
+  ular case is cited in Swiss Federal Supreme                ation losses. Gradient accumulation was applied
+  Court (SFSC) decisions.                                    when GPU memory was insufficient to maintain
+                                                             a final batch size of 64. Training employed early
+· The year 2002 is the starting year of our                  stopping with a patience of 5 epochs, based on
+  dataset.                                                   validation loss. To reduce costs, AMP mixed preci-
+                                                             sion was used where it didn't cause overflows (e.g.,
+· The year 2023 is the end point of the our                  mDeBERTa-v3). The max-sequence length was
+  dataset.                                                   set at 2048 for Facts and 4096 for Considerations.
+                                                             For LLM evaluations, we used the ChatComple-
+We have +1 adjustment in weighting factor                    tion API for GPT-3.5 (as of June 7, 2023), and ran
+                                                             LLaMA-2 locally with 4-bit quantization.
+year-2002+1  .  This  ensures  that  cases  from  the  year
+2023-2002+1                                                     For the analysis of consideration and fact lengths,
+                                                             we used SpaCy's en_core_web_sm for tokeniza-
+2002 are still included in the weighted calculation          tion.
+
+and do not receive a weight of zero.                         G Resources
+
+We did not use more than four bins for the
+
+Citation-Label to ensure enough examples also for
+
+the smallest class while still adding more granular-
+
+ity compared to the LD-Label.
+
+B Dataset Example                                            The experiments were run on NVIDIA GPUs, in-
+                                                             cluding the 24GB RTX3090, 32GB V100, 48GB
+Figure 3 shows an example input, target and corre-           A6000, and 80GB A100, using approximately 50
+sponding metadata.                                           GPU days in total.
+
+C General Dataset Metadata                                   H Additional Results
+
+Table 4 shows metadata for cantons, courts, cham-            Table 5 shows results with standard deviations on
+bers law-areas and languages.                                the test set. Table 6 shows scores on the validation
+                                                             set.
+D Dataset Licensing
+                                                             I Use of AI Assistants
+The original case data is available from the Swiss
+Federal Supreme Court2 and the Entscheidsuche                We used ChatGPT and Claude to enhance gram-
+portal3 was used to download HTML files for each             matical correctness and style, and utilized Google
+case.                                                        Colab's Generate AI feature for some of the dataset
+                                                             analysis.
+   In compliance with the Swiss Federal Supreme
+Court's licensing policy4, we are releasing the
+dataset under a CC-BY-4.0 license. The link to the
+dataset will be made available upon acceptance.
+
+    2https://www.bger.ch/de/index.htm                            5https://www.bger.ch/files/live/sites/bger/
+    3https://entscheidsuche.ch/                              files/pdf/Reglemente/Anonymisierungsregeln_2020_
+    4https://www.bger.ch/files/live/sites/bger/              def__d.pdf
+
+files/pdf/de/urteilsveroeffentlichung_d.pdf
+Input                                                                                                                                          Metadata:
+
+[Consideraions]: Erwägungen: 1. Angefochten ist der in einem kantonal letztinstanzlichen Scheidungsurteil festgesetzte nacheheliche Unterhalt  Decision ID: 65aad3f6-33c2-4de2-91c7-
+in einem Fr. 30'000.­ übersteigenden Umfang; auf die Beschwerde ist somit einzutreten (Art. 72 Abs. 1, Art. 74 Abs. 1 lit. b, Art. 75 Abs. 1   436e8143d6ea
+und Art. 90 BGG). 2. Die Parteien pflegten eine klassische Rollenteilung, bei der die Ehefrau die Kinder grosszog und sich um den Haushalt     Year: 2007
+kümmerte. Infolge der Trennung nahm sie im November 2005 wieder eine Arbeitstätigkeit auf und erzielt mit einem 80%-Pensum Fr. 2'955.­         Language: German
+netto pro Monat. Beide kantonalen Instanzen haben ihr jedoch auf der Basis einer Vollzeitstelle ein hypothetisches Einkommen von Fr. 3'690.­   Law Area: Civil
+angerechnet. Das Obergericht hat zwar festgehalten, der Ehefrau sei eine Ausdehnung der Arbeitstätigkeit kaum möglich, gleichzeitig aber       LD Label: Critical
+erwogen, es sei nicht ersichtlich, weshalb sie nicht einer Vollzeitbeschäftigung nachgehen könne. Ungeachtet dieses Widerspruches wird das     Citation Label: Citation-1
+Einkommen von Fr. 3'690.­ von der Ehefrau ausdrücklich anerkannt, weshalb den nachfolgenden rechtlichen Ausführungen dieser Betrag             Court: CH_BGer
+zugrunde zu legen ist. [...]                                                                                                                   Chamber: CH_BGer_005,
+                                                                                                                                               Canton: CH
+Target:                                                                                                                                        Region: Federation
+
+critical-1
+Possible LD label: critical, non-critical, Possible citation label: critical-1, critical-2, critical-3, critical-4
+
+                   Figure 3: Example of an input, target and corresponding metadata
+
+                   Table 4: Metadata for cantons, courts, chambers, law-areas, and languages
+
+Metadata   Number  Examples
+
+Cantons    1       Federation (CH)
+Courts     1       Supreme Court
+Chambers   13      CH-BGer-011 CH-BGer-004 CH-BGer-008 CH-BGer-002 CH-BGer-005 CH-BGer-001 CH-BGer-006 CH-BGer-009 CH-BGer-015 ...
+Law-Areas  4       Civil, Criminal, Public, Social
+Languages  5       German, French, Italian
+
+   Criticality Prediction (CP) LD Facts/Consideration               Table 5: Configuration aggregate scores with standard devia-
+                                                                    tions on the test set. The macro-F1 scores are provided.
+   Given the {facts/considerations} from the fol-
+   lowing Swiss Federal Supreme Court Decision:                     Model                 LD-F        LD-C                                     C-F         C-C         Agg.
+   {INPUT FROM THE VALIDATION SET}
+   Federal Supreme Court Decisions in Switzerland that              MiniLM                54.7+/-1.9  65.8+/-1.6                               9.8+/-2.8   20.8+/-3.0  21.8
+   are published additionally get the label critical, those         DistilmBERT           56.2+/-0.5  65.4+/-1.7                               19.6+/-1.1  22.1+/-0.4  30.9
+   Federal Supreme Court Decisions that are not published           mDeBERTa-v3           55.1+/-2.0  69.8+/-2.8                               21.0+/-3.6  17.5+/-4.4  29.1
+   additionally, get the label non-critical. Therefore, there       XLM-RBase             57.2+/-1.5  65.9+/-3.2                               21.3+/-1.5  23.7+/-1.9  32.8
+   are two labels to choose from:                                   XLM-RLarge            56.4+/-1.8  67.9+/-1.9                               24.4+/-7.2  29.1+/-2.7  37.1
+   - critical                                                       X-MODBase             56.6+/-1.8  67.8+/-2.9                               20.0+/-3.0  20.6+/-3.5  30.5
+   - non-critical                                                   SwissBERT(xlm-vocab)  56.9+/-0.7  67.3+/-4.7                               25.7+/-8.3  23.0+/-4.0  34.8
+   The relevant label in this case is:
+                                                                    mT5Small              52.2+/-1.9  62.1+/-5.2                               13.2+/-2.4  17.9+/-1.7  24.0
+Figure 4: Prompt used for Criticality Prediction (LD Facts/-        mT5Base               52.1+/-1.6  61.5+/-3.9                               14.0+/-2.8  19.7+/-1.6  25.4
+Consideration). The LLM is tasked with predicting whether a
+Swiss Federal Supreme Court decision is labeled as critical or      BLOOM-560m            53.0+/-1.7  61.7+/-4.1                               10.7+/-3.7  8.0+/-3.5   15.8
+non-critical based on the provided facts or considerations
+                                                                    Legal-Swiss-RBase     57.7+/-1.6  70.5+/-2.3                               16.2+/-5.8  20.1+/-5.6  28.0
+                                                                    Legal-Swiss-RLarge    55.9+/-2.2  68.9+/-2.1                               25.8+/-7.8  16.3+/-8.7  30.2
+                                                                    Legal-Swiss-LFBase    58.1+/-2.1  70.8+/-2.9                               21.4+/-2.9  17.4+/-8.6  29.5
+
+   Criticality Prediction (CP) Citation Facts/Consider-             Table 6: Configuration aggregate scores on the validation set.
+   ation                                                            The macro-F1 scores are provided. The highest values are in
+   Given the {facts/considerations} from the following              bold. It is important to note that the scores presented here are
+   Swiss Federal Supreme Court Decision:                            calculated as the harmonic mean over multiple seeds.
+   {INPUT FROM THE VALIDATION SET}
+   How likely is it that this Swiss Federal Supreme Court           Model                 LD-F LD-C C-F C-C Agg.
+   Decision gets cited. Choose between one of the follow-
+   ing labels (a bigger number in the label means that the          MiniLM                59.1 71.0 14.9 36.9 31.9
+   court decision is more likely to be cited):
+   - critical-1                                                     DistilmBERT           59.6 70.1 26.3 35.8 41.2
+   - critical-2
+   - critical-3                                                     mDeBERTa-v3           60.1 73.0 30.4 36.0 44.0
+   - critical-4
+   The relevant label in this case is:                              XLM-RBase             60.1 70.5 26.9 38.5 42.6
+
+Figure 5: Prompt used for Criticality Prediction (Citation          XLM-RLarge            60.5 71.7 27.2 39.7 43.3
+Facts/Consideration). The LLM is tasked with predicting how
+likely a Swiss Federal Supreme Court decision is to be cited,       X-MODBase             57.1 71.0 27.0 33.4 40.6
+using a four-tiered label (critical-1 to critical-4), based on the
+provided facts or considerations.                                   SwissBERT(xlm-vocab) 59.0 72.1 29.4 38.8 44.1
+
+                                                                    mT5Small              54.8 66.1 26.3 32.5 39.2
+                                                                    mT5Base               55.7 64.4 24.3 29.3 36.8
+
+                                                                    BLOOM-560m            52.2 64.3 20.1 21.8 30.7
+
+                                                                    Legal-Swiss-RBase     61.2 73.6 27.7 41.0 44.2
+                                                                    Legal-Swiss-RLarge    61.8 73.5 29.8 32.0 42.3
+                                                                    Legal-Swiss-LFBase    59.4 72.7 32.2 42.5 47.0
+

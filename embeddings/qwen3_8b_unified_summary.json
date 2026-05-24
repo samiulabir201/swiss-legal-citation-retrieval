@@ -1,0 +1,21 @@
+{
+  "model_name": "Qwen/Qwen3-Embedding-8B",
+  "embedding_dim": 4096,
+  "output_dtype": "float16",
+  "normalized": true,
+  "document_prompt_prefix": null,
+  "attention_impl": "sdpa",
+  "max_seq_length": 768,
+  "batch_size": 256,
+  "chunk_size": 100000,
+  "torch_compile": false,
+  "chunk_count": 27,
+  "corpus_rows": 2652248,
+  "family_counts": {
+    "court": 2476315,
+    "law": 175933
+  },
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "torch_version": "2.10.0+cu128",
+  "cuda_version": "12.8"
+}

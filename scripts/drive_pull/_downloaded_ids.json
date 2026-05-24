@@ -1,0 +1,718 @@
+{
+  "1NwZMGqwiTR_c9SnqRROvmxuSu4Xvr2H4": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_009.json",
+    "size": 3257234
+  },
+  "1S4NsK6-BjEYEArmYSEjLKiYF-VKFsd_q": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_010.json",
+    "size": 3539952
+  },
+  "1IucvG43XH2fqehEOTuFU8FGI0P-gaWQC": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\config.json",
+    "size": 1794
+  },
+  "1mwbeoYyOyxTotnU1xbcJbZjJ0tmTXzwC": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\summary_multiquery.json",
+    "size": 35259
+  },
+  "1h-32haFuDRD_8Vn1BFgfyopFqfPbnhHj": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\targets_multiquery.json",
+    "size": 29347
+  },
+  "1_U6I2UvUjkSHlhShId_IVNabtSoJlnIm": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_008.json",
+    "size": 3690924
+  },
+  "1MCga_BE5UfYBjBNX6B1iHTKLPMOYHPLI": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_007.json",
+    "size": 3287098
+  },
+  "1i_UZKtlCjsa4vw1inXsf-BJMCCdbpqx-": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_006.json",
+    "size": 3789763
+  },
+  "1QFJL1pkKV9_ONSFxpfIC_Iu0IOqByhxu": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_005.json",
+    "size": 3378522
+  },
+  "18bxFBG8CgXABKXMx0xCLS6BxAGbgFWPB": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_002.json",
+    "size": 3320216
+  },
+  "1ChLi0Vogjm95LUPr536x1I01YlYZP3bP": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_004.json",
+    "size": 3463379
+  },
+  "1s9PusY16shkoKTauBdZZZ3YmCCqAaLV1": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_003.json",
+    "size": 3504871
+  },
+  "1ju0jECuco4xpG_pCvFNnOCZyiVPJ7TvQ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk_val_001.json",
+    "size": 3564984
+  },
+  "1coUSYdQVnLT3EBiWA9qDbCUOOoO6FbCJ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\targets.json",
+    "size": 882
+  },
+  "1DjXc7qreGBYh0nTKzHk9aNZW9njqYZIb": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\final_topk.json",
+    "size": 94042
+  },
+  "1BoaY7NBFnv8B0_T_11DgssRqHCl2sR9j": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\gold_missed_diagnosis.json",
+    "size": 5756
+  },
+  "1GLkma8672pmm7vEvcqSs-JHlNd104CYG": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\summary.json",
+    "size": 898
+  },
+  "1D0G6dX7JpcuFmqOiGSe0CrQ_UAzvDaCW": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\gold_in_top.json",
+    "size": 1496
+  },
+  "12kPTAEZR4GVkdQK8wgyQphU4Yjp2b7Uq": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_001_gold_missed_diagnosis.json",
+    "size": 6118
+  },
+  "1gqs8BgBiQHikFf0VjTKADnMUnyLsMPx2": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\aggregate_summary.json",
+    "size": 1877
+  },
+  "1GctLk-9JlCj75bZAjKqcVH8Mrxljqfkr": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_001\\summary.json",
+    "size": 1630
+  },
+  "1Z24M-3iCcFDgkY0yusuxRrSXOz6uPP83": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_001\\targets.json",
+    "size": 2688
+  },
+  "1c2M3s1h7QhhuNvL9l4JLQG0Dxrk1Np8_": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_001\\gold_in_top.json",
+    "size": 1208
+  },
+  "12CnnHOlwyMf2B4eDXi6JsdYDnnihYVjN": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_001\\final_topk.json",
+    "size": 92991
+  },
+  "15rbjsT17wADjLoGZlxOLhodkQMEc2xW1": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_002\\summary.json",
+    "size": 1498
+  },
+  "1FNFoMEevZvRv06ZZE8Q1nlLaoe7RGfMZ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_002\\targets.json",
+    "size": 2703
+  },
+  "1iVglSaDYBecpJu0_dEOsQjLMdPmlwUfA": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_002\\final_topk.json",
+    "size": 93744
+  },
+  "1u2GuyZt6-K6NAs5ZEGOes3fJuiRHWYfV": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_002\\gold_in_top.json",
+    "size": 1688
+  },
+  "1xiBrWAVdXrmIr9WH4mfpyiI-Go0dWgj-": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_003\\summary.json",
+    "size": 1591
+  },
+  "14ESgpvHwNc_GhFs0KQfKJJOW4Ng6BNBO": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_003\\targets.json",
+    "size": 2625
+  },
+  "1Mq9RwWUfK4spSpADTpd9yRObzB6UA4_1": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_003\\gold_in_top.json",
+    "size": 1113
+  },
+  "1MdB3618yidLfoKtZZypdLBAeqJvxowzh": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_003\\final_topk.json",
+    "size": 92813
+  },
+  "1WOG0rm_hQRj-6a3-Oe48IosZxHt_zsit": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_004\\summary.json",
+    "size": 1376
+  },
+  "1pHg8ky7t1IxZU4Pd3ChhqABTAKPgMO1C": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_004\\targets.json",
+    "size": 2190
+  },
+  "1mwYsNOkO8rRec3QkkayaKP_ho-xtUEsU": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_004\\gold_in_top.json",
+    "size": 713
+  },
+  "1Unigxss2IDQTdK86t8lZR4NQ3KIg90oB": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_004\\final_topk.json",
+    "size": 93829
+  },
+  "1d833itptwyNzn06U--MlIHU2MQGcRqxz": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_005\\summary.json",
+    "size": 1511
+  },
+  "1VnbL-o5pJpSxGvDw2AmvbPuy93J0Ui0Z": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_005\\gold_in_top.json",
+    "size": 552
+  },
+  "14CykvQvfaHYJJ5NDTNAI2k7tYcRf8oJq": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_005\\targets.json",
+    "size": 2813
+  },
+  "1JzbQvnmjqjc1muN0jyv0a2EAZhEkne4u": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_005\\final_topk.json",
+    "size": 93486
+  },
+  "1UdFE7UzK0KZ2SdRja_d9Vi97iQ_zuJY7": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_006\\summary.json",
+    "size": 1531
+  },
+  "1rUtn8hkqj_RSkDQJGUEucA5B8S7ba0In": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_006\\targets.json",
+    "size": 2429
+  },
+  "1Cwy8Tsxj-GJtCfemveX7ck0nK-jN6jVN": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_006\\gold_in_top.json",
+    "size": 987
+  },
+  "1yyz-NzcLP4k4FquK77J4nLk_Yt7Xn46r": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_006\\final_topk.json",
+    "size": 93934
+  },
+  "1p2y7DX1ZX0YRnpzmxjtfZzK9mVUvfE2j": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_007\\summary.json",
+    "size": 1564
+  },
+  "1faQCMndG7AN7yUgqQgfJfnFOaQ1DoGv_": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_007\\targets.json",
+    "size": 2668
+  },
+  "1C0wnAQZZyGDhJ8ob79eV_3pNxz9Bd8TP": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_007\\gold_in_top.json",
+    "size": 1172
+  },
+  "1d1Zv5Vt47gBNBJkQF8wpcP3tMYTr9XYZ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_007\\final_topk.json",
+    "size": 93427
+  },
+  "1TfH6wyDQkZKzN01pA8rNbe1YNVO7i-yP": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_008\\summary.json",
+    "size": 1506
+  },
+  "17GB3uohP1n7eIyXNERvDZHgJUOcoeoyC": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_008\\targets.json",
+    "size": 2649
+  },
+  "1XmsJxY8j_toX5c520SdWGyzSLDt34cc3": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_008\\gold_in_top.json",
+    "size": 1170
+  },
+  "1yMWzpQi8Pn1q1bEzjR6iXUzSiFMMbt5v": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_008\\final_topk.json",
+    "size": 93568
+  },
+  "1nOP8QgJ2QGI1YYSRt5wftBhP3mWnzxT1": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_009\\summary.json",
+    "size": 1465
+  },
+  "1_Gv_DALugqVJfQCdLXgOU8VbNQJ_Ug4x": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_009\\targets.json",
+    "size": 2189
+  },
+  "1Oaa1k4oh2fTxgm42IfnuDk1CX35tjDIc": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_009\\gold_in_top.json",
+    "size": 820
+  },
+  "18mk_4_ycmUUOQpqOsJF4PStyPTZXabgM": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_009\\final_topk.json",
+    "size": 94530
+  },
+  "1onoU_cF-Do4yqwnrKRsz7Yw2syIR0GD_": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_010\\summary.json",
+    "size": 1384
+  },
+  "1TXjgk-ecqLmf0B4FudAjCLNsi16hNdAm": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_010\\targets.json",
+    "size": 3040
+  },
+  "1C9F6ataWQvo2OLZ8CldsUW3cOpQya2Ld": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_010\\gold_in_top.json",
+    "size": 810
+  },
+  "1M9uaWjz-btj0cWszzoQQ-znNj_Jacksw": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\val_010\\final_topk.json",
+    "size": 93242
+  },
+  "1bVEkcTUfxBVhZX1P_21QCczPVjM4LtVu": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\v75_run\\per_query_snapshot.json",
+    "size": 7290568
+  },
+  "15F6WkibGPb5WuQYoPefdbS6hbcGtotTs": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\v75_run\\config.json",
+    "size": 1876
+  },
+  "1U6qHcTDD6C1lWtfGPJt9FxnEv8LGfVrV": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\v75_run\\hyde_aspects.json",
+    "size": 32876
+  },
+  "1qjP3ETKPWSI2pKmEqfpE_uokrqVjGf_R": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\v75_run\\paths.json",
+    "size": 146
+  },
+  "13aVqgjO1RS6-AYtzXkz208eyb4y2XL4H": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\v75_run\\all_targets.json",
+    "size": 22847
+  },
+  "1j2hAUGkiKqjn_Wlgi_p8D2pVuRS9aMEV": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\v75_run\\gold_doc_sets.json",
+    "size": 3899
+  },
+  "137u7_E8s2NxPkrhjSAQ0zrj349LvZ98R": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v7\\snapshot\\corpus_snapshot.json.gz",
+    "size": 116054462
+  },
+  "17gaAcVewTm3Zwk_-TICCgw2d4NrD8Ohy": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v6_summary.md",
+    "size": 2101
+  },
+  "1AqMyC2sgU2nPI-Ge7_R0uXfBcNepHNzZ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v6_per_gold_trace.tsv",
+    "size": 2076
+  },
+  "1r1vq8trutH5miBVqPgk-pThtGdjMF6QI": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v6_top1000_pool.txt",
+    "size": 31899
+  },
+  "1PDPd9uNwtxqdGGo118JIMORi0VoDU7DF": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v6_per_channel.json",
+    "size": 1396
+  },
+  "1rnLYv4Bd2B8idkF1LgxcVuWnjTJ_Jdrs": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_query_targets.json",
+    "size": 2013
+  },
+  "17jHT-uMS-zH5fg3DFYlj3zo6Wb69xIUm": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v5_summary.md",
+    "size": 2149
+  },
+  "1uOsJvTu3_YTspCK2aDdq_pr_Jd4fIDAY": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v5_top1000_pool.txt",
+    "size": 34858
+  },
+  "1tVtvjWsoHgfvm_AaJPob5pnKiJFt9rez": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v5_per_gold_trace.tsv",
+    "size": 1917
+  },
+  "1HIjOPjQM_uFSpbVZQwMPG2dZtJkk_Cvp": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v5_per_channel.json",
+    "size": 1311
+  },
+  "1_CKJIRzY7pGMqOiFCQn8AB_rS1QYFfsS": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v4_summary.md",
+    "size": 2197
+  },
+  "1i8iWat6hI_6uIiw87L4t3KzyzRiYIpu-": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v4_top1000_pool.txt",
+    "size": 34243
+  },
+  "1HN4jTFHrrdbJuwm8RtekqrEZK8DOfwtw": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v4_per_gold_trace.tsv",
+    "size": 1613
+  },
+  "1xxxSVfACHD94FFnfCqgXwS6oIxQfcmVs": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001_v4\\val_001_v4_per_channel.json",
+    "size": 1186
+  },
+  "17EenA5Lom4MVi3czruL2CyIN2wDEag-O": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001\\val_001_summary.md",
+    "size": 2152
+  },
+  "1yQ6HNsk9yH00gyRENwHzq9aAyW3PnxgP": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001\\val_001_top1000_pool.txt",
+    "size": 33544
+  },
+  "1vF--98DAePOrzUM90Hggg0Yn7DNmxHFW": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001\\val_001_per_channel_recall.json",
+    "size": 1607
+  },
+  "1nOKBSzlzkiN65WRh57C2x6I-gJT4by7q": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001\\val_001_per_gold_trace.tsv",
+    "size": 1616
+  },
+  "1BhMsnqVeu1SKwZzNAQpI7LZlhwF_HLzq": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__anchor_funnel_val001\\val_001_query_targets.json",
+    "size": 1934
+  },
+  "118UuqU_R6UTXmt-PhtP8aUqwbsuEMCmi": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__hybrid_rerank_final\\hybrid_rerank_results.json",
+    "size": 28991
+  },
+  "1xJceSGVezb6f9jDjy8p-hC0Faa2nsNhI": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__hybrid_rerank_final\\cache\\scores_jina.npz",
+    "size": 692159
+  },
+  "1pN4hcXeQ5Q2a-4vUQcNBQATaqL8c_EoK": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__hybrid_rerank_final\\cache\\scores_bge.npz",
+    "size": 788379
+  },
+  "10IMOrHYoEBUaNurHNNJ0zhNKajt6ls-W": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__hybrid_rerank_final\\cache\\scores_qwen3.npz",
+    "size": 297712
+  },
+  "12lZkdG5vmmytBSMu6fjvOyGLwc4tFSYX": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__hybrid_rerank_final\\cache\\dossier_features.npz",
+    "size": 4343004
+  },
+  "168Heze6IT3iMhrprRi39z9CiXL8br-XB": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__research__rerank_only_diagnostic\\rerank_only_results.json",
+    "size": 3512
+  },
+  "1DJ9gBltycW89yJsYadqxWOkqrR_L3Hit": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval\\endgame_channel_recall.csv",
+    "size": 208
+  },
+  "19R6M2w64G88PuOqZcThuZ-25VuC8nKSQ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval\\endgame_ablation_val.csv",
+    "size": 931
+  },
+  "16RMkDVSOSzCa4GFVPn5ru7nN-7swt9Tv": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval\\endgame_val_per_query.csv",
+    "size": 474
+  },
+  "1lJeGBDjiFZn2_qJyUyYNeuXzOVfCHF_G": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval\\val_candidate_sets.jsonl",
+    "size": 2234124
+  },
+  "17xay8YbSZrJXGHuZMHvQNE_ehhluZMpu": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval\\val_dropped_gold.csv",
+    "size": 3024
+  },
+  "1pLeuQPLd0Gx3-2U3z4AEjAsMPfj5E-FE": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts__eval\\val_summary.json",
+    "size": 1527
+  },
+  "1z5nQ9dVY22jFiee53HX_v1oHMTKUVmLU": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__submissions\\submission_test.csv",
+    "size": 35706
+  },
+  "1GXq-61rgSJkFcsNGhD0oZCo-pHXwCgbZ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__submissions\\submission_val.csv",
+    "size": 3387
+  },
+  "1oXCENK7_0twHF4-jRX2Xsu5I0JKa3Sew": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__submissions\\submission_val_pertype.csv",
+    "size": 8710
+  },
+  "1pm7U760ElVojw9XDkrPDfW2oL8cbb2mr": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__configs\\threshold.json",
+    "size": 103
+  },
+  "1swAPKlf5I0EQUL19gib5agPkKtGfYRZm": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__scripts\\extract_citation_graph.py",
+    "size": 41267
+  },
+  "1NevJXB1FI-_cSQL9l033je6IwnyCd36_": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__scripts\\segment_lattice_v3.py",
+    "size": 59802
+  },
+  "19dG0FwyogQ0WvvldI8Ze6EHOPRGoaRXz": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__artifacts_legalmalr\\stage_a_rerank.json",
+    "size": 5661954
+  },
+  "1np0K4WdTlXV3y9WqHxJJVjFkbeqTXtlW": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__cache_legalmalr\\rerank\\val_006.json",
+    "size": 1697727
+  },
+  "1M32D9dS7voiOarPiPbnQAzXtxg9HGAhj": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__cache_legalmalr\\rerank\\val_004.json",
+    "size": 1617527
+  },
+  "1kFIsRxCWL_g6JxMji5-ZSkJu-kfNNM_Z": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__cache_legalmalr\\rerank\\val_001.json",
+    "size": 1537577
+  },
+  "1GIZRUfccs8UFgkNh6pcDO4neSPgo6buQ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__checkpoints\\law_llm_descriptors_engine_dead_rerun.jsonl",
+    "size": 2733464
+  },
+  "1l3DwRWtE_J7g1XMABSFgeRYtbx2pj82R": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__checkpoints\\law_llm_descriptors_0000000_all.jsonl",
+    "size": 255445816
+  },
+  "1VX5H_H9VLj6z6ar4QzPl9fsljezJpvfa": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__checkpoints\\law_llm_descriptors_0000000_all_failures.jsonl",
+    "size": 577851
+  },
+  "1SVj-51hGTodvlhgtYBPSYEKbmBbj1s-Y": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__checkpoints\\court_llm_descriptors_0000000_all_failures.jsonl",
+    "size": 9472
+  },
+  "19lujarvOy_W3WkuzRrw-Tj01rItWsiQY": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data__checkpoints\\court_llm_descriptors_0000000_all.jsonl",
+    "size": 709425459
+  },
+  "11vF9QC-1rMOIdGQ9KzOBuL-HTOZbHVpf": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\laws_de_links.json",
+    "size": 2703862
+  },
+  "1u1iRbm_UObMkA5-th5PeDkpvvF7oc666": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\laws_de_classified_citations.jsonl",
+    "size": 82893624
+  },
+  "1WmpApXHEsLkn5dneYZwtS2nMi6m8eD9_": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\court_considerations_links.json",
+    "size": 148149021
+  },
+  "1FvS5c4_io6g5yPBf0Vc56AkNlJ4utD2B": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\gold_citation_coverage.csv",
+    "size": 322764
+  },
+  "1dLrAACPQcvCC0VaMG7jSO3ewy-916md6": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\gold_parent_link_check.md",
+    "size": 2888
+  },
+  "1oXoSOZdNL1wC7BMbLHHVdE2rcVMj6GFU": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\gold_parent_link_check.csv",
+    "size": 441059
+  },
+  "1tncWVMkhQ1SZgGk4-y0BYkz1Tr4BF4am": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\gold_parent_link_check.json",
+    "size": 1191667
+  },
+  "1OXR9L2DE68zGR843Cz3c2x_TsVIAiczC": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\gold_citation_coverage.json",
+    "size": 6317854
+  },
+  "1gzXD3BpJlO3S83YXMCpd29pP7b3JLRU4": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\val_gold_citations.json",
+    "size": 5673
+  },
+  "1W6b1ZY-J3Ag5FakKRzMIX2JHrLHTPDgG": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\train_gold_citations.json",
+    "size": 62617
+  },
+  "1Lic35HKO3nZba4V53DtlXoPeJl4qVTeD": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\gold_citation_coverage.md",
+    "size": 14586
+  },
+  "17HjKlBJ3Gkv36P3YqPKyANDa57q4YmVk": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\citation_pattern_analysis.md",
+    "size": 2541
+  },
+  "10SJB1E3A0A6Dh58z1I5CbLSEEJNHed9y": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\citation_patterns.json",
+    "size": 5861
+  },
+  "1zTU-PSiFsWaCYXhGUGa1I_5PZ825eIXN": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\court_considerations_citations.json",
+    "size": 68527086
+  },
+  "1omX5gdKU4iZQHVlqwrL1ACDa37XrKqtz": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\laws_de_citations.json",
+    "size": 5460846
+  },
+  "1C9hn4-FnJSYqoMUrifuRDr93nV5ZZRun": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\citation_graph_fresh.sqlite",
+    "size": 8192
+  },
+  "1ge08zhDoTk6qECNsd7hmX-aNpz9KI7Do": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\sqlite_probe.sqlite",
+    "size": 8192
+  },
+  "1UOlVBq8vYgsRwIoa_ZyXLEeeaHPWT6wq": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\test_write.tmp",
+    "size": 2
+  },
+  "1jz6qiFKq6DG-ThF0waO4UvCe_SSDSjuL": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\citation_graph.sqlite",
+    "size": 0
+  },
+  "1nTAr-IL_WQ24giacCIA9EVojTOfCeNH7": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__swiss_law__data_insights\\citation_graph.sqlite-journal",
+    "size": 512
+  },
+  "1QtstFcgyfOHbO681gZK_4nLKjmerLwQA": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_cache\\reranker_Qwen_Qwen3-Reranker-8B_v3.json",
+    "size": 179674
+  },
+  "1-_bjmg1hH-cOulqrhLGJ7FrTx1uR9MPT": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3\\submission_K30.csv",
+    "size": 22441
+  },
+  "1nMFILQraXa131AW8b82CJMGSY2BqmbNq": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3\\submission_K25.csv",
+    "size": 18756
+  },
+  "1cU42cpWLwVoCOpVYo_2IAB3HlfFEvpbr": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3\\submission_K20.csv",
+    "size": 14997
+  },
+  "1XiWHbsw0MOtZ5bThSs6EujisiYu9dazX": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3\\submission_K15.csv",
+    "size": 11324
+  },
+  "1RHo3HVF5nmoSwJ1UPuMBulFpeW-ugHbi": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3\\submission_K10.csv",
+    "size": 7647
+  },
+  "1q5-yZfCx36HuUxaSQVa8YGA1Ek91IdWw": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__pipeline_output_v3\\submission_K5.csv",
+    "size": 4000
+  },
+  "1kXN3K21a1Dt3Xz2u-I6GfjZC48HJc7kd": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__retrieval__knowledge_base_optimized_hybrid_retrieval\\query_translations_trainval.json",
+    "size": 1630910
+  },
+  "1y1C8S07MW3cmZBz-S9bJK-oib2yJTnFG": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\colab_runtime_patches.py",
+    "size": 27257
+  },
+  "1Kvr9TTUNELMkCWukbe2ponPmftyT7BUz": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\stage2_mas_retrieval.py",
+    "size": 16712
+  },
+  "15PyIB8fyV0A_6cu-el7hoEUqRWueXo3U": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\bm25_v2_index_parts.zip",
+    "size": 767921060
+  },
+  "1Z7DrAnK1f7UsjFUMzvKLkTjBEDD_44xd": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\gold_cocitation_prior_trainval.pkl",
+    "size": 8094849
+  },
+  "1uW44N6XyPSZ61H3VAx09fDqOkOsOS-L9": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\gold_cocitation_prior_train.pkl",
+    "size": 6622333
+  },
+  "1xckrrDP1Of5Hyw5jT0bCXsRjOciGx_fS": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\citation_signal_lookup.pkl",
+    "size": 133659441
+  },
+  "1V0laDavvvUGXRau_oPOsXEoVnqbP9RqB": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\citation_lookup.pkl",
+    "size": 12459576
+  },
+  "1wgJtAZFNWSvgXlIV7o6z2PAoWCxLqUqS": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\citation_graph.pkl",
+    "size": 155409520
+  },
+  "10FiojJAAeOwpMT3hWrMOQuQM06llWA2_": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\bm25_v2_index.pkl",
+    "size": 297
+  },
+  "1shWc-7PokxeiiGkD_ThM8sCogJTsekND": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\pipeline.py",
+    "size": 7121
+  },
+  "1be53kis4Oh52L4Pk-MkAUasWmXiz1QdM": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\stage3_graph_expansion.py",
+    "size": 14308
+  },
+  "1GaAIR_NlEauCYwAbdTUWXM9B5St-w0pQ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\stage1_query_analysis.py",
+    "size": 48087
+  },
+  "1X9YjXVY5JhSuBMWubnN6jfg2R2_v5FxN": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\stage4b_cross_encoder.py",
+    "size": 15341
+  },
+  "1wuPLrrWekmTxKbCx5HpLC3gMcfF0oxNu": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\stage4_llm_reranker.py",
+    "size": 19608
+  },
+  "1vxk3IWuP06HCjT4byWPdHtpSCU2_y5Ro": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\stage5_verify_and_score.py",
+    "size": 23571
+  },
+  "1UIEgaD7wGvi6qAflM6cjeg_nOvFfGQmd": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\submit.py",
+    "size": 2790
+  },
+  "1tA71JLcCA-trl4RnULsKw8ptppJHkRGD": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\verifier.py",
+    "size": 6770
+  },
+  "1r7hjAxr1COL3GLjc_y3vDtB005SPE4wz": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\llm_backend.py",
+    "size": 6946
+  },
+  "1L21VDCqD9U0Zw0GZClrLT7Fyc7pT2AsD": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\__init__.py",
+    "size": 0
+  },
+  "1R0zKZl8P2zhEnlXQlJLLiPpr1HPYmcKe": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\prompts\\reranker_prompt.txt",
+    "size": 1407
+  },
+  "1uFeuzh7ZZogziI8u4y2sdeygQekeEUGP": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\prompts\\direct_gen_prompt.txt",
+    "size": 1432
+  },
+  "1MkcZcgiRpUcxT0Ha8KiR54sA6OwCoPht": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\prompts\\mas_prompts.py",
+    "size": 8213
+  },
+  "1TVg5Dyj0RLKknv_5h9V6IBXizqMpzpS5": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\agent\\prompts\\query_analyzer_prompt.txt",
+    "size": 3073
+  },
+  "19QS4kxiPSosGCkLbiPp73O3mKCH8F_s6": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\retrieval\\sparse_retriever.py",
+    "size": 6902
+  },
+  "159a6qg6LUwhcYz6qUY3yKySuK_U3_Lfr": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\retrieval\\bm25_artifact.py",
+    "size": 5157
+  },
+  "1nI18nPAyQiJrTez_nO71agp3imJPLUvt": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\retrieval\\explicit_citations.py",
+    "size": 4948
+  },
+  "1vPrap4WqjqIwELOCnpY5VEIiu42Fni7h": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\retrieval\\graph_retriever.py",
+    "size": 4191
+  },
+  "1ShxNRPT2cqfyFkpSnBjGQiNgzpT0zFEZ": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\retrieval\\__init__.py",
+    "size": 0
+  },
+  "1RImdDIW7mTRMu5Yvv9cgeJQShbPQnF7n": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\scoring\\confidence.py",
+    "size": 9258
+  },
+  "10JzsbLk3Hp4N1wbPotBTJ0xYeJmpyeXw": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\scoring\\__init__.py",
+    "size": 0
+  },
+  "11Q_H4viSXG7A1xsaIu8ys7I6-pfQZqVm": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__swiss-law-pipeline\\configs\\default.json",
+    "size": 583
+  },
+  "1SXliJRD5YCdcRKq-CPTvNYcvPlplYqXt": {
+    "path": "e:\\swiss_citation_extraction\\drive_sync\\My Drive__Omnilex-Agentic-Retrieval-Competition__abbrev-translations.json",
+    "size": 0
+  },
+  "1nXwbIL6xvPL3lRV5Y80hlmutySL5U4On": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\channel_16\\v75_concept_cosine_channel_multi.json",
+    "size": 1385634
+  },
+  "1r8RyXzney_W1AMC4f3n6ukozNw5Fe0bx": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\channel_16\\per_query_aspect_scores.parquet",
+    "size": 516558
+  },
+  "1yMLnNOuPa-JftTYgf9Vd4ecc5cgMVlKm": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\channel_16\\val_aspect_manifest.parquet",
+    "size": 19091
+  },
+  "1b4WqBfROjyRgNPKMbsFvcaibINQ66bx8": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\channel_16\\val_aspect_embeddings.fp16.npy",
+    "size": 327808
+  },
+  "1Ju4XUwWdLfQiEWL6HdbdDfkh1XqTwmLc": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\channel_16\\val_aspects.parquet",
+    "size": 50203
+  },
+  "1JvtHUH64vhJq-jklEgToPabQBgJe3Nsr": {
+    "path": "e:\\swiss_citation_extraction\\research\\v75_chan16_download\\pool_v75_multiquery_recall_0.89_at_k50k_CANONICAL.ipynb",
+    "size": 413505
+  },
+  "156vKlJy7IXAGU8cWXxhC3PSy_qY6lcVj": {
+    "path": "e:\\swiss_citation_extraction\\artifacts\\unified_retrieval.sqlite",
+    "size": 24074375168
+  }
+}

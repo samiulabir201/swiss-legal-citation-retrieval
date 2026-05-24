@@ -1,0 +1,691 @@
+                                       Cluster-based Adaptive Retrieval: Dynamic Context Selection for
+                                                                       RAG Applications
+
+                                              Yifan Xu           Vipul Gupta                                                Rohit Aggarwal
+
+                                                 Coinbase             Coinbase                                                    Coinbase
+                                       Mountain View, CA, USA  Bengaluru, KA, India                                        Bengaluru, KA, India
+
+arXiv:2511.14769v1 [cs.IR] 2 Oct 2025                                 Varsha Mahadevan                                      Bhaskar Krishnamachari
+
+                                                                                     Coinbase                              University of Southern California
+                                                                             Bengaluru, KA, India                                 Los Angeles, CA, USA
+
+                                       Abstract                                                                            Figure 1: Examples illustrating varying query complexity in
+                                                                                                                           CDP documentation search: (top-left) simple query answered
+                                       Retrieval-Augmented Generation (RAG) enhances large language                        by one API doc; (bottom-left) moderate query needing mul-
+                                       models (LLMs) by pulling in external material, document, code,                      tiple docs to clarify product relationships; (right) complex
+                                       manuals, from vast and ever-growing corpora, to effectively answer                  query requiring synthesis across diverse sources.
+                                       user queries. The effectiveness of RAG depends significantly on                     Retrieval-Augmented Generation (RAG) [5, 11, 14] emerging as a
+                                       aligning the number of retrieved documents with query charac-                       prominent framework for question answering systems--powering
+                                       teristics: narrowly focused queries typically require fewer, highly                 applications such as retrieval-based answer generation and cus-
+                                       relevant documents, whereas broader or ambiguous queries benefit                    tomer service chatbots. RAG systems enhance language model
+                                       from retrieving more extensive supporting information. However,                     performance by integrating external knowledge -- drawn from con-
+                                       the common static top-k retrieval approach fails to adapt to this                   tinuously evolving and heterogeneous sources -- directly into the
+                                       variability, resulting in either insufficient context from too few                  generation process. These RAG systems typically relies on a static
+                                       documents or redundant information from too many.                                   top- retrieval strategy [7, 14]: the query is first encoded into an
+                                                                                                                           embedding vector, and then the  documents whose embeddings
+                                          Motivated by these challenges, we introduce Cluster-based Adap-                  are most similar to the query are selected as context. Although
+                                       tive Retrieval (CAR), an algorithm that dynamically determines the                  effective for straightforward information needs, this approach as-
+                                       optimal number of documents by analyzing the clustering patterns                    sumes that every query benefits equally from an identical number
+                                       of ordered query-document similarity distances. CAR detects the                     of documents in a production system--a presumption increasingly
+                                       transition point within similarity distances, where tightly clustered,              at odds with the varied and dynamic nature of real-world content.
+                                       highly relevant documents shift toward less pertinent candidates, es-
+                                       tablishing an adaptive cut-off that scales with query complexity. On
+                                       Coinbase's CDP corpus and the public MultiHop-RAG benchmark,
+                                       CAR consistently picks the optimal retrieval depth and achieves
+                                       the highest TES score, outperforming every fixed top-k baseline.
+                                       In downstream RAG evaluations, CAR cuts LLM token usage by
+                                       60%, trims end-to-end latency by 22%, and reduces hallucinations
+                                       by 10% while fully preserving answer relevance. Since integrating
+                                       CAR into Coinbase's virtual assistant, we've seen user engagement
+                                       jump by 200%.
+
+                                       CCS Concepts
+
+                                       · Information systems  Top-k retrieval in databases; · Com-
+                                       puting methodologies  Information extraction; Cluster anal-
+                                       ysis.
+
+                                       Keywords
+
+                                       Retrieval-Augmented Generation, Large Language Models, Adap-
+                                       tive Top-k Selection, Deployed Application
+
+                                       1 Introduction
+
+                                       Recent advances in large language models (LLMs) [1, 27] have
+                                       catalyzed a paradigm shift in natural language processing, with
+
+                                       
+
+                                        Work done while at Coinbase.
+
+                                       
+
+                                        Bhaskar Krishnamachari is a paid consultant for Coinbase and has assisted on this
+                                       paper in this capacity.
+ACM Conference (in submission), 2025, USA                                                                                      Xu, et al.
+
+                                                                                                      200  Feb 3 - Feb 9 2025
+
+                                                                                                           Jan 27 - Feb 2 2025
+
+                                                                                   Percentage Growth  180  Jan 20 - Jan 26 2025
+
+                                                                                                           Jan 13 - Jan 19 2025
+
+                                                                                                      160
+
+                                                                                                      140
+
+                                                                                                      120
+
+                                                                                                      100
+
+                                                                                                           Mon Tue Wed Thu Fri Sat Sun
+                                                                                                                                Day of Week
+
+Figure 2: Visualization of CAR's cutoff mechanism: it adap-                        Figure 3: Week-over-week growth in CDP search queries after
+tively selects retrieval thresholds (e.g., 3, 7, 11) based on clus-                deploying the AI summary system, showing increasing user
+tering patterns in the embedding space, preserving relevant                        engagement (week of January 13-19 is taken as reference).
+documents and filtering out weaker ones. The clustering
+outcome--shaped by query complexity and document char-                                To address these challenges, we introduce Cluster-based Adap-
+acteristics--guides the cutoff decision.                                           tive Retrieval (CAR), a method that dynamically adjusts the num-
+                                                                                   ber of documents retrieved by combining the natural ordering of
+   This challenge is particularly evident on our Coinbase developer                similarity distances with a clustering analysis. CAR ranks candi-
+platform1. As shown in Figure 1, user queries range from simple fact-              date documents by their similarity distance, where lower distances
+based lookups to complex multi-document understanding tasks. For                   imply higher relevance, and then applies a clustering algorithm
+instance, a developer seeking to "generate an API key" may require                 to these ordered values. This approach groups documents with
+only a single, well-defined snippet from the API documentation.                    similar relevance patterns (each cluster potentially capturing a dif-
+In contrast, a more intricate query--such as understanding "the                    ferent facet of the query) and reveals natural breakpoints in the
+differences between Smart Wallets and MPC Wallets"--necessitates                   distance distribution. For example, A dense cluster of low-distance
+retrieving documents from both products to provide a compre-                       documents followed by a sharp increase indicates that only a few
+hensive response. Even more complex queries, such as "Guide me                     documents are truly pertinent, while a gradual transition across
+through the various types of advanced trading APIs", require retriev-              clusters suggests that a broader set is needed. Using these insights,
+ing and synthesizing information from multiple diverse sources.                    CAR adaptively determines a cut-off point (illustrated in Figure 2),
+Answering such a query involves referencing the REST API doc-                      ensuring that the language model receives an optimally sized set of
+umentation for available endpoints, the WebSocket API guide for                    relevant documents, enhancing the quality of the response without
+real-time updates and authentication methods, and the Python SDK                   incurring unnecessary retrieval overhead.
+documentation for programmatic interaction with the trading APIs.
+These examples highlight the inherent trade-offs in retrieval: while                  On December 16, 2024, the CDP documentation search bar tran-
+simpler queries can be effectively addressed with a minimal doc-                   sitioned from keyword-based search to a RAG pipeline utilizing our
+ument set, more complex inquiries demand an adaptive retrieval                     CAR algorithm. Figure 3 shows weekly query growth from January
+approach to balance completeness against computational efficiency.                 13 to February 9, 2025, using the initial week (January 13­19) as
+                                                                                   the baseline to ensure query volume stabilization. Query volume
+   At Coinbase, our RAG-based pipeline forms the backbone of our                   exhibited steady growth, peaking above 200% on Monday during
+virtual assistant systems integrated into the documentation search                 the week of February 3­9, 2025, and maintaining robust engage-
+bar 2and the active chatbot on our CDP Discord Server 3. These                     ment throughout the week. This pattern highlights increased user
+systems support developers as they navigate our comprehensive                      adoption and perceived value of the AI-driven retrieval system.8
+and diverse documentation, which includes API references4, tabular
+data5, markdown texts with embedded code6, and GitHub source                          Our extensive evaluations of CAR span two distinct scenarios:
+code7. We observe that a fixed retrieval strategy often falls short                (1) real-world deployment on Coinbase's large-scale, unstructured,
+in balancing the need for detailed, diverse information against effi-              and continuously updated corpora, and (2) the MultiHop-RAG news
+ciency concerns. This insight has motivated us to pursue a more                    dataset [26], chosen specifically for its domain-agnostic content
+adaptive retrieval method that dynamically tailors the number of                   and diverse retrieval complexity (queries requiring between one
+documents based on the complexity of each query, without incur-                    and four documents). Experimental results consistently demon-
+ring a latency penalty in production environments.                                 strate CAR's superior performance over the widely-used fixed top-
+                                                                                   cut-off approach. In particular, CAR retrieves more precisely tar-
+1                                                                                  geted document sets for narrowly scoped queries while adaptively
+                                                                                   broadening context for complex inquiries--all without additional
+ https://coinbase.com/developer- platform                                          inference steps or modeling overhead. Furthermore, CAR's com-
+2 https://docs.cdp.coinbase.com/                                                   putational cost is negligible, introducing less than 50 milliseconds
+3 https://discord.com/invite/cdp
+                                                                                   8
+4
+                                                                                    Absolute query counts are omitted for confidentiality; only relative growth trends
+ API Example: https://docs.cdp.coinbase.com/advanced-trade/reference               are presented.
+5Tabular Example: https://docs.cdp.coinbase.com/advanced-trade/docs/rest-api-pro-
+mapping
+6Code Example: https://docs.cdp.coinbase.com/advanced-trade/docs/rest-api-auth
+7Github Example: https://github.com/coinbase/coinbase-advanced-py
+Cluster-based Adaptive Retrieval: Dynamic Context Selection for RAG Applications  ACM Conference (in submission), 2025, USA
+
+of latency per query. Consequently, CAR effectively addresses re-                    Next, we describe the deployed application and cluster-based
+trieval challenges identified in our CDP documentation scenario,                  approach of CAR in more detail.
+establishing itself as a practical, scalable, and robust solution for
+advanced RAG-based systems.                                                       3 Deployed RAG Application: CDP Docs Search
+                                                                                      and Discord Chatbot
+2 Related Work
+                                                                                  We developed a RAG framework that powers both a documenta-
+Next, we discuss several related approaches that focus on retrieval               tion search interface and a customer service chatbot for the CDP
+quality and propose CAR as a novel and efficient alternative.                     documentation. This compound system leverages multiple LLM
+                                                                                  calls--including intent detection, dedicated input guardrails, and
+   Retrieval-Augmented Generation (RAG): The seminal work                         iterative quality checks--to ensure that users receive fast, reliable,
+by [14] introduced RAG as a means to augment large language mod-                  and high-quality answers. Our search interface meets strict latency
+els (LLMs) with external knowledge. In traditional RAG systems, a                 requirements, with an average response time of 5 seconds (standard
+fixed top-k strategy is used to retrieve documents from an external               deviation: 1 second). In addition to search functionality, the chatbot
+corpus. Although effective in some scenarios, this approach can                   is tailored for advanced developer assistance, supporting multi-turn
+lead to either redundancy or omission of crucial information when                 interactions, contextual refinement, and code snippet debugging.
+dealing with diverse and complex queries.                                         At a high level, the architecture, as illustrated in Figure 4, processes
+                                                                                  user queries through a structured pipeline that retrieves relevant
+   Recent research has sought to address these limitations through                documents and generates responses using large language models
+dynamic retrieval strategies. For example, DRAGIN [25] and Mem-                   (LLMs). The key components of the pipeline include:
+oRAG [22] adaptively select documents based on the model's real-
+time information needs or memory-inspired signals, while Lon-                        1. Query Processing and Dynamic Document Retrieval:
+gRAG [10] and ChatQA 2 [29] focus on handling long-context                        When a user submits a question, the system converts the input into
+scenarios. Despite these advances, many of these methods still rely               query embeddings and performs a semantic search against a vector
+on multi-stage processing or are tailored to specific applications,               database of pre-embedded CDP documents. The proposed Cluster-
+motivating the need for a more general and lightweight dynamic                    based Adaptive Retrieval (CAR) algorithm then dynamically filters
+retrieval mechanism.                                                              the initial set of candidate documents, ensuring that only the most
+                                                                                  pertinent content is forwarded to subsequent stages.
+   Dynamic Cutoff Algorithms: Dynamic cutoff algorithms aim
+to determine the optimal number of documents to retrieve on a                        2. Answer Generation: A fast, low-latency language model,
+per-query basis. Several recent approaches, such as Self-RAG [3]                  referred to as the Turbo model, is used first to generate an initial
+and SeaKR [30], leverage self-reflection or uncertainty estimates                 response. This draft is subjected to a series of output quality checks
+from LLMs to trigger retrieval when needed. Similarly, RA-DIT [15]                (outlined below). If the response fails to meet the required standards,
+integrates dual instruction tuning to refine retrieval output, and                the system triggers a fallback mechanism: the same query and
+RETRO [4] dynamically adjusts context windows to improve effi-                    context are sent to a more capable, higher-latency base model for
+ciency on massive corpora. Although these methods offer promising                 re-generation. This ensures that every response is swift and adheres
+directions, they often introduce extra computational overhead in                  to rigorous standards of accuracy, safety, and grounding.
+terms of added finetuning, training or inference stages, increase
+the overall complexity of the system.                                                3. Input Guardrails and Output Quality Checks: Before
+                                                                                  answer generation, the system enforces input guardrails on both
+   Re-ranking Methods: Re-ranking techniques have been widely                     user query and retrieved documents to ensure safety and suitability
+employed to improve the quality of retrieved documents. For exam-                 of the content. After response generation, output quality checks
+ple, DSLR [9] refines retrieval results by decomposing documents                  are applied to verify that the answer meets the following criteria:
+into sentences, filtering irrelevant content, and reconstructing co-
+herent passages. RankRAG [31] and Re2G [8] utilize advanced rank-                  · Safety: The answer must be free of harmful or inappropriate
+ing models to reorder candidates according to relevance. Although                     content.
+these methods improve contextual quality, they often use a rerank
+model incur additional computational steps that can increase la-                   · Trustworthiness: The response should reliably align with verified
+tency, cost and complexity of the system.                                             information.
+
+   Unlike the approaches described above, CAR dynamically de-                      · Groundedness: The answer must be well-supported and properly
+termines the optimal number of documents by identifying natural                       anchored in the retrieved documents.
+breakpoints in the similarity score distribution via clustering. Rather
+than relying on fixed top-k selection [14] or additional uncertainty-                4. Multi-turn Chatbot Enhancements: For conversational
+based retrieval triggers [3, 30], CAR automatically adapts to the                 queries, the chatbot extends the document search pipeline with
+complexity of each query. By discarding clusters of less relevant doc-            multi-turn context processing. Each query is evaluated alongside
+uments, CAR ensures that only the most pertinent context is passed                the preceding conversation history (while discarding previously re-
+to the language model. This adaptive mechanism reduces noise                      trieved documents to maintain clarity). An intent classifier analyzes
+and hallucination while avoiding the overhead of extra re-ranking                 the multi-turn dialogue to refine document retrieval and tailor the
+or dual-stage tuning methods (e.g., RA-DIT [15]). As such, CAR                    LLM response accordingly.
+enables efficient and adaptive retrieval even in complex, heteroge-
+neous document repositories, making it particularly well-suited for                  By tailoring retrieval, enforcing robust safeguards, and incorpo-
+real-time applications.                                                           rating multi-turn context, our solution meets evolving developer
+                                                                                  needs while upholding strict latency and quality standards.
+ACM Conference (in submission), 2025, USA                                                             Xu, et al.
+
+Figure 4: Overview of the CDP RAG system pipeline, from query input to response generation. It employs multiple LLM calls for
+intent detection, retrieval, guardrails, answer generation, and quality checks, ensuring accuracy and trust. The CAR algorithm
+enhances search result relevance.
+
+4 Method                                                                  BisectingKMeans [12]--to partition the  candidates into cohe-
+                                                                          sive segments with small intra-cluster distances. Any method that
+We introduce Cluster-based Adaptive Retrieval (CAR), a technique          (i) tolerates varied cluster shapes and (ii) supports explicit outlier
+that replaces static top- document selection with a data-driven           labelling can be used, as these properties naturally capture the
+approach based on clustering patterns observed in the ranked simi-        "plateaus" in relevance.
+larity distances between the query and candidate documents. Below,
+we describe the key steps of CAR, highlight its motivation in the            When the chosen algorithm has hyper-parameters that influ-
+context of Retrieval-Augmented Generation (RAG), and explain              ence the final partition-for example, the number of clusters  in
+why this methodology is particularly suited for complex, evolving         BisectingKMeans or the neighbourhood radius  in DBSCAN--we
+knowledge sources of mixed content (e.g., code, documentation,            determine the optimal setting by maximising the average silhouette
+FAQs).                                                                    score [23, 24]. Concretely, CAR performs a grid search over the
+                                                                          user-specified hyper-parameter space and retains the configuration
+4.1 Overview of the Algorithm                                             that yields the highest silhouette value; full details of this procedure
+                                                                          are given in Section 5.4.
+Let D denote a large-scale corpus of documents, and let  be a
+query encoded into the same embedding space as the documents                 Phase 3: Adaptive Cutoff Selection. Following the identifica-
+in D. In Algorithm 1, we present CAR method proceeds in three             tion of clusters, CAR sets a dynamic cutoff    to finalize which
+main phases:                                                              candidates should be included. This step capitalizes on the fact that
+                                                                          dense clusters often sit near the top of the ranked list, where docu-
+   Phase 1: Initial Retrieval. We begin by performing a standard          ments are most relevant to . Concretely, CAR determines  based
+embedding-based lookup against D to retrieve the top- candidate           on cluster boundaries, discarding documents that fall outside the
+documents most similar to . This step yields a ranked list                highly relevant clusters. By aligning the cutoff with inherent gaps
+                                                                          in the distance distribution, CAR adaptively tailors the retrieval set
+      {(1, 1), (2, 2), . . . , ( ,  )},               (1)                 size to the complexity of the query.
+
+where each  is a candidate document and  is its distance (or                 Cutoff Score with Position Penalty: In our implementation, we
+inverse similarity) from , with 1  2  · · ·   . The parameter             apply an additional position penalty to adjust the gap score based
+                                                                          on its rank, thereby discouraging an overly early cutoff. Let  denote
+ is chosen as an upper bound large enough to capture a diverse set        the set of indices where a new cluster begins (i.e., the boundaries
+                                                                          between clusters). For each   , define the gap at the boundary as
+of possibly relevant results. In practice, we set n where it can include
+
+all correct documents for at least 90+% queries. Here, smaller values
+
+of  indicate higher similarity.                                                     = ~ - ~-1.
+   Before proceeding with clustering, we normalize these distance
+
+scores to ensure consistency in scale. Specifically, we define the        We then define the composite score for a gap at a boundary index 
+normalized distance ~ as follows:                                         as:
+
+~  =           - min{1, . . . ,  }                 ,
+      max{1, . . . ,  } - min{1, . .              }
+                                           .  ,                           score =                  ,
+                                                                                      +
+
+which rescales each  to lie in the range [0, 1]. This normalization                max  
+facilitates the detection of natural gaps in the ranked list.                       
+
+Phase 2: Cluster Formation. From the ranked list, CAR ap-                 where the second term (  ) represents a position-based "penalty"
+
+plies a clustering algorithm--e.g., HDBSCAN [18], OPTICS [2], or                                                    
+
+                                                                          that discourages cutoffs too close to the top of the list.
+Cluster-based Adaptive Retrieval: Dynamic Context Selection for RAG Applications                                 ACM Conference (in submission), 2025, USA
+
+Algorithm 1 Cluster-based Adaptive Retrieval (CAR)                                Method Accuracy  Avg. Candidates                  TES 
+
+1: Input: Query , corpus D, hyper-parameter grid    can                                                  Clean Query 300            0.700
+                                                                                                                                    0.553
+   include , eps, linkage, . . .                                                  Top-3                  0.97                 3.0   0.417
+                                                                                                                                    0.866
+2: Output: Optimised subset of retrieved documents R, cutoff                      Top-5                  0.99                 5.0
+   point , best hyper-parameters                                                                                                    0.433
+                                                                                  Top-10                 1.00                 10.0  0.374
+                                                                                                                                    0.363
+3: procedure CAR(, D, )                                                           CAR (Ours) 0.98                             2.1   0.459
+
+4: R  RetrieveTopN(, D,  )  Retrieve top- candidates                                                     Noisy Query 300
+
+5: {(1, 1), . . . , ( ,  )}  R  Distances  to the query                           Top-3                  0.60                 3.0
+
+6: for  = 1 to  do                                                                Top-5                  0.67                 5.0
+                              - min(1, . . . ,  )
+7:   ~               max(1, . . . ,  ) - min(1, . .                               Top-10                 0.87                 10.0
+
+                                                     . ,  )                       CAR (Ours) 0.69                             3.5
+
+8: end for
+
+9:   -,    None                                                                   Table 1: Comparison of retrieval accuracy and efficiency for
+                                                                                  different retrieval methods across Clean and Noisy Queries.
+10: for all    do  Grid search over candidate settings                            TES highlights the trade-off between accuracy (higher is bet-
+                                                                                  ter) and the number of candidates returned (lower is better).
+11:  C  Cluster({(~, )}=1,  )
+
+12:    SilhouetteScore({(~, )}, C )
+
+13:  if  >  then
+
+14:              ,                                                                and set the cutoff as
+
+15:  end if                                                                                                      =     -  1.
+
+                                                                                                                    
+
+16: end for                                                                       Hence, the final retrieval set includes all documents up to the can-
+17: C  Cluster({(~, )}=1,  )                                                      didate preceding the highest-scoring boundary. This approach bal-
+18: Identify contiguous cluster regions P  C  Detect stable                       ances gap size and ranking position, yielding a flexible mechanism
+                                                                                  that tailors itself to the intrinsic structure of the candidate set rather
+     clusters along ranking                                                       than a one-size-fits-all threshold.
+
+19:     {2, . . . ,  } : C  C-1  C = cluster label
+    of the -th document; Each    is the first rank of every new
+
+     cluster region                                                               5 Experiments
+
+20: if  =  then                    All  docs fell into one region                  This section answers three practical questions. First, does the pro-
+                                                                                   posed Cluster-based Adaptive Retrieval (CAR) algorithm achieve
+21:                            no natural cutoff; keep everything                  a better balance between accuracy and number of candidates re-
+                                                                                   trieved when each query has only one gold document? Second,
+22: else                                                                           is that improvement robust to different corpus domain and em-
+                                                                                   bedding choice when the answer requires reasoning over multiple
+23:    ~ - ~-1 |                        Gradients at boundaries                    pieces of evidence? Third, what is the end-to-end impact on a pro-
+                                                                                   duction Retrieval-Augmented Generation (RAG) pipeline--namely,
+24:  for all    do                                                                 response relevancy, hallucination rate, token budget, and wall-clock
+                                                                                   latency?
+25:                                                   Gap size + rank
+                                       +                                              To that end we design a two-stage protocol.
+
+                        max                                                       (1) Retrieval-only stage. We benchmark CAR against fixed top-
+                                                                                      cut-offs on two datasets of complementary structure. On the
+     penalty                                                                          Coinbase CDP corpus each query admits one authoritative an-
+                                                                                      swer document; on the public MultiHop-RAG corpus [26] each
+26:  end for                                                                          question is resolved by 2­4 documents dispersed across the col-
+                                                                                      lection. Accuracy and the average number of candidates retrieved
+27:    arg max                                                                        are recorded, and their balance is summarized with the Trade-off
+                                                                                      Efficiency Score (TES) introduced below.
+28:     - 1                        Cutoff = last doc before best gap
+                                                                                  (2) Full RAG stage. We plug each retrieval strategy into Coinbase's
+29: end if                                                                            production search-bar assistant and replay 1400 real user queries.
+                                                                                      Besides retrieval statistics, we measure end-to-end latency and
+30: R  {  |    }                                                                      apply the DeepEval open-source library9 to score answer rele-
+31: return R, ,                                                                       vancy, contextual relevancy, and hallucination rate.
+
+32: end procedure
+
+   The gap term  captures the relative magnitude of the                           5.1 Retrieval Effectiveness Evaluation
+
+                             max                                                  Benchmarks. We evaluate on two corpora that pose complemen-
+                                                                                  tary challenges. (1) Coinbase CDP. From the Advanced Trading
+boundary, highlighting where a large discontinuity separates adja-
+                                                                                  9GitHub URL: https://github.com/confident-ai/deepeval
+cent clusters. Simultaneously,  accounts for the position of that
+
+                                                   
+
+boundary in the overall ranking. This is particularly helpful for
+
+long-tail or more open-ended queries where multiple reasonably
+large gaps may appear. By adding  , the method adaptively shifts
+
+                                                          
+
+the cutoff further down the ranked list if multiple boundary gaps
+
+are comparable in size, ensuring we include enough relevant docu-
+
+ments.
+
+   Once each boundary index  has a composite cutoff score , we
+select the index  that maximizes this score:
+
+                        =    arg  max  score ,
+
+                     
+
+                                   
+ACM Conference (in submission), 2025, USA                                                                                          Xu, et al.
+
+        Method      BAAI/llm-embedder [32]  text-embedding-ada-002 [20]  text-embedding-3-small [21]  text-embedding-3-large [21]
+        Top-3                     0.17                       0.25                        0.26                         0.25
+        Top-5                     0.22                       0.30                        0.31                         0.29
+        Top-10                    0.25                       0.33                        0.32                         0.30
+        Top-20                    0.25                       0.29                        0.30                         0.29
+        CAR (Ours)                0.25                      0.34                         0.34                         0.31
+
+Table 2: Trade-off Efficiency Score (TES; higher is better) on the MultiHop-RAG dataset. CAR consistently surpasses fixed top-
+retrieval across four leading embedding models while using fewer documents on average.
+
+REST API10 we derive 600 queries that each map unambiguously to         CAR against two fixed retrieval baselines: Top-40 and Top-16. In the
+                                                                        Top-40 baseline, every query retrieves 40 documents (30 from CDP
+a single endpoint. To stress-test robustness, we construct two splits:  documentation and 10 from API references), whereas the Top-16
+a high-precision clean set filtered by an offline embedder's top-5      baseline consistently retrieves 16 documents (12 from CDP docu-
+recall, and a paraphrased noisy split whose ground-truth document       mentation and 4 from API references). Top-40 threshold was chosen
+is harder to recover. (2) MultiHop-RAG. The news dataset of Tang        based on prior experiments, which demonstrated that retrieving at
+et al. [26] contains 2556 questions whose answers require evidence      least 40 documents was necessary for the semantic search to con-
+scattered across two to four documents, mirroring multi-document        sistently include all relevant results. The choice of 16 was guided
+                                                                        by the CAR algorithm for reference, which retrieves an average of
+reasoning in production RAG systems.                                    approximately 16 documents.
+
+   Embedding models. CDP experiments use TextEmbedding                     CAR is initialized with the same set of 40 candidate documents
+Gecko [13]. For MultiHop-RAG we probe four encoders--BAAI llm           used in the Top-40 baseline. It then applies a clustering-based se-
+embedder [32], text embedding ada 002 [20], text embedding              lection process to filter out less relevant documents, retaining only
+3 small, and text embedding 3 large [21].                               those that best match the specific information needs of the query.
+                                                                        As a result shown in table 3, CAR returns, on average, approxi-
+   Metrics. We report Accuracy (ground-truth document present)          mately 16 documents per query, effectively tailoring the retrieved
+and the Average Candidates Returned. To penalise over-retrieval we      context to each query.
+introduce the Trade-off Efficiency Score (TES):
+                                                                           We conducted our experiments on 1400 real-world queries col-
+        TES =       Accuracy                                            lected from the CDP search bar. The primary retrieval metrics eval-
+                                                                        uated include the number of retrieved documents, the token count and
+                                                   .                    end-to-end pipeline latency. To assess the quality of responses gen-
+                                                                        erated using different retrieval strategies, we employ the DeepEval
+               ln 1 + Average Candidates Returned                       open-source library11, focusing on the following metrics:
+
+   Results. Tables 1 and 2 summarize findings. On the CDP bench-        · Answer Relevancy: Measures the alignment of the generated
+mark, CAR matches or exceeds the accuracy of static top- while             response with the query's intent and correctness.
+returning  30% fewer documents, yielding the highest TES. On
+                                                                        · Hallucination: Quantifies the presence of incorrect or fabricated
+MultiHop-RAG, CAR outperforms top- across all four encoders,               information in the response by cross-checking the generated
+                                                                           content against the retrieved context. A hallucination score of 1
+confirming that its adaptive cut-off generalizes beyond any single         indicates the presence of fabricated content, whereas a score of
+                                                                           0 indicates its absence.
+embedding space. Overall, CAR delivers a superior accuracy­latency
+                                                                        · Contextual Relevancy: Evaluates the extent to which the re-
+trade-off that is critical for large-scale Retrieval-Augmented Gener-      trieved context supports the given query, defined as:
+
+ation.                                                                                                      Number of Relevant Statements
+                                                                             Contextual Relevancy =
+5.2 Full RAG Evaluation (Coinbase Deployed
+      Application)                                                                                            Total Number of Statements
+
+The RAG evaluation is designed to reflect real-world usage where           Experimental Findings and Discussion: Figure 5 illustrates
+more condense relevant documents may enhance LLM generated              the distribution of reference counts retrieved by different retrieval
+response. A query can benefit from several relevant documents that      methods, highlighting the dynamic nature of CAR based on the
+together provide a richer and multifaceted context.                     complexity of the query. CAR exhibits a more varied distribution
+                                                                        compared to static methods, adapting the number of retrieved ref-
+   Dynamic Reference Utilization: In a deployed RAG system,             erences dynamically based on the complexity of the query. This
+a query might be supported by a dynamic number of useful refer-         adaptability allows CAR to balance efficiency and relevance by
+ences rather than one uniquely correct document. This flexibility       fetching more references for complex queries while reducing un-
+is essential for capturing the inherent ambiguity and complexity        necessary retrievals for simpler ones.
+of natural language queries. Shown in Figure 5, while a fixed re-
+trieval method might return a preset number of documents, our           11GitHub URL: https://github.com/confident-ai/deepeval
+CAR method dynamically adjusts the number of retrieved refer-
+ences based on query complexity, thereby balancing efficiency with
+contextual richness.
+
+   Experimental Setup and Methodology: In our experiments,
+we evaluate the performance of our proposed cluster-based adaptive
+retrieval algorithm, CAR, within a Retrieval-Augmented Generation
+(RAG) framework deployed on the CDP search bar. We compare
+
+10 https://docs.cdp.coinbase.com/advanced- trade/reference
+Cluster-based Adaptive Retrieval: Dynamic Context Selection for RAG Applications                               ACM Conference (in submission), 2025, USA
+
+           Method # Documents  Tokens  Latency (s)  Answer Relevancy  Contextual Relevancy  Hallucination 
+
+           Top-16              16.00  14,896  5.14                                0.87                   0.48          0.16
+
+           Top-40              40.00  34,472  6.99                                0.90                   0.44          0.12
+
+           CAR (Ours)          15.57  13,477  5.46                                0.89                   0.49          0.10
+
+Table 3: Comparison of retrieval efficiency, latency, and LLM response evaluation for Top-40, Top-16, and CAR methods
+averaged over 1400 user queries on the CDP search bar. Higher is better () for Answer Relevancy and Contextual Relevancy,
+while lower is better () for Docs/Tokens Consumption, Latency, and Hallucination.
+
+           1400    Top-40                                                         Clustering Method      Coinbase CDP  MultiHop-RAG
+           1200    Top-16                                                         K-Means [17]                  0.62           0.33
+           1000    CAR (Ours)                                                     DBSCAN [6]                    0.62           0.31
+                                                                                  HDBSCAN [18]                  0.62           0.30
+Frequency  800                                                                    OPTICS [2]                    0.58           0.32
+                                                                                  Agglomerative [28]            0.62           0.33
+           600                                                                    Spectral [19]                 0.58           0.32
+                                                                                  BIRCH [33]                    0.63           0.33
+           400                                                                    Bisecting KMeans [12]         0.59          0.34
+
+           200                                                                    Table 4: Comparison of CAR performance measured by
+                                                                                  Trade-off Efficiency Score (TES; higher is better) with dif-
+           0       5 10 15 20 25 30 35 40                                         ferent clustering algorithm on Coinbase CDP and MultiHop-
+                0               Number of References                              RAG Datasets
+
+Figure 5: CAR dynamically adjusts the number of retrieved                            On the more heterogeneous MultiHop-RAG dataset, perfor-
+references based on query complexity, unlike fixed retrieval                      mance remains stable across methods, ranging from 0.30 to 0.34.
+methods.                                                                          Bisecting K-Means delivers the best score (0.34), with K-Means,
+                                                                                  Agglomerative, and BIRCH close behind at 0.33. Density-based ap-
+   Table 3 presents a performance comparison of the Top-40, Top-16,               proaches (DBSCAN and HDBSCAN) reach 0.31­0.32, showing only
+and CAR methods, averaged over 1400 queries. CAR always re-                       marginal degradation.
+trieves substantially fewer documents than the Top-40 baseline,
+leading to a significant reduction in total token consumption by                     Overall, variation across clustering backbones is modest on both
+60%. This also translates to reduction in end-to-end LLM generation               benchmarks, indicating that CAR's gains stem primarily from the
+latency and costs.                                                                use of an adaptive cut-off rather than reliance on a specific cluster-
+                                                                                  ing heuristic.
+   In terms of response quality, CAR demonstrates strong perfor-
+mance in both answer relevancy and Contextual Relevancy while                     5.4 Clustering Parameter Optimization
+significantly reducing the hallucination rate by 10% compare to Top-
+40 baseline. As a financial institution, Coinbase must prioritize                 For every clustering backbone we conduct a compact grid-search
+response accuracy, as even a slight increase in hallucinations                    that maximises the silhouette score of the scaled (index, distance)
+can degrade user experience and pose reputational risks. Al-                      pairs produced by CAR. The search spaces are listed verbatim below
+though the Top-40 method achieves marginally higher answer rele-                  for reproducibility, where  is the number of data points.
+vancy, this advantage is offset by its increased hallucination rate,
+likely due to retrieving excessive and potentially redundant in-                     K-Means [17]: The number of clusters (n_clusters) was optimized
+formation. Due to its high hallucination rate, Top-16 is the worst                by searching integers from 2 up to a maximum determined by half
+performing method from a deployed application perspective.                        the data size, capped by .
+
+   Overall, these findings validate CAR's effectiveness in balancing                 DBSCAN [6]: The neighborhood distance (eps) was tested across
+retrieval efficiency with high-quality response generation. By op-                five steps from 0.1 to 1.0, while the minimum neighborhood size
+timizing document selection and minimizing hallucinations, CAR                    (min_samples) was tested for integers from 2 up to 5 (or  - 1 if
+offers a simple, scalable and robust solution for real-world RAG                  smaller).
+deployments.
+                                                                                     HDBSCAN [18]: The minimum cluster size (min_cluster_size)
+5.3 Effect of Clustering Algorithm Choice                                         was tested with values {2, 3, 4, 5} (up to ), and min_samples was
+                                                                                  tested with {1, 2, 3} (constrained to be less than  and no larger than
+Table 4 reports CAR's Trade-off Efficiency Score when its adaptive                min_cluster_size).
+cut-off is driven by eight popular clustering algorithms. Results on
+the Coinbase CDP corpus are tightly clustered: K-Means, DBSCAN,                      OPTICS [2]: The minimum neighborhood size (min_samples)
+HDBSCAN, and Agglomerative all reach 0.62, while OPTICS and                       was tested with values {2, 3, 4, 5} (less than ), and the cluster
+Spectral trail slightly at 0.58. The highest score, 0.63, is obtained             extraction steepness (xi) was tested with {0.01, 0.05, 0.1}.
+with the BIRCH algorithm.
+                                                                                     Agglomerative Clustering [28]: The number of clusters (n_clusters)
+                                                                                  was optimized similarly to K-Means, and the linkage method (link-
+                                                                                  age) was tested using `ward', `average', and `complete'.
+ACM Conference (in submission), 2025, USA                                                                                                                           Xu, et al.
+
+   Spectral Clustering [19]: The number of clusters (n_clusters)        The Coinbase Developer Platform (CDP) API does
+was optimized similarly to K-Means, using a dynamically set num-        not directly support recurring buys. The [Wallet API:
+ber of neighbors based on data size.                                    Buys](https://docs.cdp.coinbase.com/coinbase-app/docs/api-
+                                                                        buys) endpoint, which was deprecated on November 30, 2023,
+   BIRCH[33]: The number of clusters (n_clusters) was optimized         allowed for placing buy orders. However, it did not offer
+similarly to K-Means, while the CF-tree threshold (threshold) was       functionality for recurring buys.
+tested with values {0.3, 0.5, 0.7}.
+                                                                          The Top-16 retrieval strategy exhibits the highest hallucination
+   Bisecting K-Means [12]: The number of clusters (n_clusters)         rate while also yielding lower answer relevancy. This outcome
+was optimized by searching integers from 2 up to a maximum             is expected, as complex retrieval-augmented generation (RAG)
+determined by half the data size, capped by .                          pipelines--such as those supporting CDP documentation--require
+                                                                       retrieving sufficient context. A lower top- value often omits critical
+5.5 Empirical Case Study                                               information, leading to incomplete or incorrect responses.
+
+Next, we demonstrate that the CAR approach achieves the lowest            For example, consider the user query "download historical
+hallucination rate with the following examples. Consider the user      spot price of btc-eur". The response generated using the Top-16
+query "adding to quicken mac". The Top-40 retrieval strategy           retrieval strategy is:
+produces the following response:
+                                                                        The Coinbase Developer Platform (CDP) provides various APIs for
+ You are asking about adding Coinbase transactions to Quicken for       accessing market data, including historical spot prices. However,
+ Mac. The Coinbase Developer Platform (CDP) does not directly           the specific endpoint for downloading historical spot prices is not
+ support importing transactions into Quicken for Mac. Quicken for       explicitly documented in the provided URLs.
+ Mac does not have a built-in integration with Coinbase.
+ To import your Coinbase transactions into Quicken for                    This response lacks specificity and fails to direct the user to the
+ Mac, you can use a third-party tool like [Coinbase to                 relevant API. In contrast, CAR dynamically adjusts to a larger K
+ Quicken](https://www.coinbasetoquicken.com/). This tool allows        value, retrieving the appropriate documentation and enabling the
+ you to download your Coinbase transaction history and import it       LLM to generate a more informative and precise response (short-
+ into Quicken for Mac.                                                 ened due to space constraints):
+
+   This response contains incorrect information and even includes       The Coinbase Developer Platform (CDP) API provides various end-
+a fabricated link. In contrast, CAR retrieves more relevant context,    points for retrieving market data, including historical spot prices.
+enabling the LLM to generate a more accurate and reliable response      1. Get Spot Price: This endpoint allows you to retrieve the current
+while utilizing a more efficient input context:                         market price for a given currency pair.
+                                                                        2. Exchange FIX Market Data Messages: The Coinbase Exchange
+ You are asking about adding Coinbase Exchange data to Quicken          FIX API provides a comprehensive set of market data messages,
+ for Mac. The Coinbase Developer Platform (CDP) does not currently      including historical spot prices.
+ offer direct integration with Quicken for Mac. Quicken is a personal
+ finance software, and CDP focuses on providing APIs for developers       Overall, our experiments demonstrate that CAR effectively opti-
+ to build applications and integrate with Coinbase services.           mizes retrieval by dynamically adjusting the number of retrieved
+ To manage your Coinbase Exchange transactions in Quicken for          documents. It reduces search costs and latency while maintaining
+ Mac, you can manually import your transaction history from the        high answer quality, making it a practical alternative to static top-
+ Coinbase Exchange website.                                            retrieval methods.
+
+   Let's consider another example to illustrate how top-40 results     6 Conclusion
+in hallucination due to inundated context. Consider the user query
+"fetching recurring buys". The response generated using the Top-       We introduced Cluster-based Adaptive Retrieval (CAR), a novel
+40 retrieval strategy is:                                              method for dynamically selecting documents in RAG pipelines.
+                                                                       CAR improves upon fixed top- strategies by leveraging clustering
+ "The CDP API does not currently support recurring buys. The Coin-     techniques to determine an optimal cut-off, ensuring relevant con-
+ base App v2 Buys API has been deprecated and no longer supports       text while reducing redundancy and computational overhead. By
+ recurring buys."                                                      optimizing document selection, CAR sets a new standard for intel-
+                                                                       ligent and efficient RAG pipelines. Our experiments on the CDP
+   This response is factually incorrect. Specifically, the claim "no   documentation demonstrate the superiority of CAR over traditional
+longer supports recurring buys" is misleading as the CDP API never     methods by reducing token consumption, latency, and hallucination.
+supported recurring buys. This error arises due to excessive and       Case studies from production deployments highlight its adaptabil-
+irrelevant documents in the retrieval, preventing the LLM from         ity across query complexities, effectively balancing completeness
+focusing on the most important information­an issue known as           and efficiency.
+the "Lost in the Middle" phenomenon [16].
+
+   In contrast, the dynamic CAR approach retrieves more relevant
+documents, resulting in better response quality while avoiding the
+pitfalls of excessive or irrelevant retrieval, as show below.
+Cluster-based Adaptive Retrieval: Dynamic Context Selection for RAG Applications                                                                  ACM Conference (in submission), 2025, USA
+
+References                                                                                       [24] Ketan Rajshekhar Shahapure and Charles Nicholas. 2020. Cluster quality analysis
+                                                                                                       using silhouette score. In 2020 IEEE 7th international conference on data science
+ [1] Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Floren-                     and advanced analytics (DSAA). IEEE, 747­748.
+      cia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal
+      Anadkat, et al. 2023. Gpt-4 technical report. arXiv preprint arXiv:2303.08774              [25] Weihang Su, Yichen Tang, Qingyao Ai, Zhijing Wu, and Yiqun Liu. 2024. Dragin:
+      (2023).                                                                                          Dynamic retrieval augmented generation based on the real-time information
+                                                                                                       needs of large language models. arXiv preprint arXiv:2403.10081 (2024).
+ [2] Mihael Ankerst, Markus M Breunig, Hans-Peter Kriegel, and Jörg Sander. 1999.
+      OPTICS: Ordering points to identify the clustering structure. ACM Sigmod record            [26] Yixuan Tang and Yi Yang. 2024. Multihop-rag: Benchmarking retrieval-
+      28, 2 (1999), 49­60.                                                                             augmented generation for multi-hop queries. arXiv preprint arXiv:2401.15391
+                                                                                                       (2024).
+ [3] Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. 2023.
+      Self-rag: Learning to retrieve, generate, and critique through self-reflection. arXiv      [27] Gemini Team, Petko Georgiev, Ving Ian Lei, Ryan Burnell, Libin Bai, Anmol
+      preprint arXiv:2310.11511 (2023).                                                                Gulati, Garrett Tanzer, Damien Vincent, Zhufeng Pan, Shibo Wang, et al. 2024.
+                                                                                                       Gemini 1.5: Unlocking multimodal understanding across millions of tokens of
+ [4] Sebastian Borgeaud, Arthur Mensch, Jordan Hoffmann, Trevor Cai, Eliza Ruther-                     context. arXiv preprint arXiv:2403.05530 (2024).
+      ford, Katie Millican, George Bm Van Den Driessche, Jean-Baptiste Lespiau, Bog-
+      dan Damoc, Aidan Clark, et al. 2022. Improving language models by retrieving               [28] Joe H Ward Jr. 1963. Hierarchical grouping to optimize an objective function.
+      from trillions of tokens. In International conference on machine learning. PMLR,                 Journal of the American statistical association 58, 301 (1963), 236­244.
+      2206­2240.
+                                                                                                 [29] Peng Xu, Wei Ping, Xianchao Wu, Chejian Xu, Zihan Liu, Mohammad Shoeybi,
+ [5] Jiawei Chen, Hongyu Lin, Xianpei Han, and Le Sun. 2024. Benchmarking large                        and Bryan Catanzaro. 2024. Chatqa 2: Bridging the gap to proprietary llms in
+      language models in retrieval-augmented generation. In Proceedings of the AAAI                    long context and rag capabilities. arXiv preprint arXiv:2407.14482 (2024).
+      Conference on Artificial Intelligence, Vol. 38. 17754­17762.
+                                                                                                 [30] Zijun Yao, Weijian Qi, Liangming Pan, Shulin Cao, Linmei Hu, Weichuan Liu,
+ [6] Martin Ester, Hans-Peter Kriegel, Jörg Sander, Xiaowei Xu, et al. 1996. A density-                Lei Hou, and Juanzi Li. 2024. Seakr: Self-aware knowledge retrieval for adaptive
+      based algorithm for discovering clusters in large spatial databases with noise. In               retrieval augmented generation. arXiv preprint arXiv:2406.19215 (2024).
+      kdd, Vol. 96. 226­231.
+                                                                                                 [31] Yue Yu, Wei Ping, Zihan Liu, Boxin Wang, Jiaxuan You, Chao Zhang, Mohammad
+ [7] Yunfan Gao, Yun Xiong, Xinyu Gao, Kangxiang Jia, Jinliu Pan, Yuxi Bi, Yi Dai,                     Shoeybi, and Bryan Catanzaro. [n. d.]. RankRAG: Unifying Context Ranking
+      Jiawei Sun, and Haofen Wang. 2023. Retrieval-augmented generation for large                      with Retrieval-Augmented Generation in LLMs. In The Thirty-eighth Annual
+      language models: A survey. arXiv preprint arXiv:2312.10997 (2023).                               Conference on Neural Information Processing Systems.
+
+ [8] Michael Glass, Gaetano Rossiello, Md Faisal Mahbub Chowdhury, Ankita Ra-                    [32] Peitian Zhang, Shitao Xiao, Zheng Liu, Zhicheng Dou, and Jian-Yun Nie. 2023.
+      jaram Naik, Pengshan Cai, and Alfio Gliozzo. 2022. Re2G: Retrieve, Rerank,                       Retrieve Anything To Augment Large Language Models. arXiv:2310.07554 [cs.IR]
+      Generate. In Annual Conference of the North American Chapter of the Association
+      for Computational Linguistics.                                                             [33] Tian Zhang, Raghu Ramakrishnan, and Miron Livny. 1996. BIRCH: an efficient
+                                                                                                       data clustering method for very large databases. ACM sigmod record 25, 2 (1996),
+ [9] Taeho Hwang, Soyeong Jeong, Sukmin Cho, SeungYoon Han, and Jong C Park.                           103­114.
+      2024. DSLR: Document Refinement with Sentence-Level Re-ranking and Recon-
+      struction to Enhance Retrieval-Augmented Generation. In Proceedings of the 3rd
+      Workshop on Knowledge Augmented Methods for NLP. 73­92.
+
+[10] Ziyan Jiang, Xueguang Ma, and Wenhu Chen. 2024. Longrag: Enhancing retrieval-
+      augmented generation with long-context llms. arXiv preprint arXiv:2406.15319
+      (2024).
+
+[11] Zhengbao Jiang, Frank F Xu, Luyu Gao, Zhiqing Sun, Qian Liu, Jane Dwivedi-Yu,
+      Yiming Yang, Jamie Callan, and Graham Neubig. 2023. Active retrieval augmented
+      generation. arXiv preprint arXiv:2305.06983 (2023).
+
+[12] Michael Steinbach George Karypis, Vipin Kumar, and Michael Steinbach. 2000.
+      A comparison of document clustering techniques. In TextMining Workshop at
+      KDD2000 (May 2000). 428­439.
+
+[13] Jinhyuk Lee, Zhuyun Dai, Xiaoqi Ren, Blair Chen, Daniel Cer, Jeremy R Cole, Kai
+      Hui, Michael Boratko, Rajvi Kapadia, Wen Ding, et al. 2024. Gecko: Versatile text
+      embeddings distilled from large language models. arXiv preprint arXiv:2403.20327
+      (2024).
+
+[14] Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin,
+      Naman Goyal, Heinrich Küttler, Mike Lewis, Wen-tau Yih, Tim Rocktäschel,
+      et al. 2020. Retrieval-augmented generation for knowledge-intensive nlp tasks.
+      Advances in Neural Information Processing Systems 33 (2020), 9459­9474.
+
+[15] Xi Victoria Lin, Xilun Chen, Mingda Chen, Weijia Shi, Maria Lomeli, Richard
+      James, Pedro Rodriguez, Jacob Kahn, Gergely Szilvasy, Mike Lewis, et al. [n. d.].
+      RA-DIT: Retrieval-Augmented Dual Instruction Tuning. In The Twelfth Interna-
+      tional Conference on Learning Representations.
+
+[16] Nelson F Liu, Kevin Lin, John Hewitt, Ashwin Paranjape, Michele Bevilacqua,
+      Fabio Petroni, and Percy Liang. 2024. Lost in the middle: How language models
+      use long contexts. Transactions of the Association for Computational Linguistics
+      12 (2024), 157­173.
+
+[17] James MacQueen. 1967. Some methods for classification and analysis of multivari-
+      ate observations. In Proceedings of the Fifth Berkeley Symposium on Mathematical
+      Statistics and Probability, Volume 1: Statistics, Vol. 5. University of California press,
+      281­298.
+
+[18] Leland McInnes, John Healy, Steve Astels, et al. 2017. hdbscan: Hierarchical
+      density based clustering. J. Open Source Softw. 2, 11 (2017), 205.
+
+[19] Andrew Ng, Michael Jordan, and Yair Weiss. 2001. On spectral clustering: Analysis
+      and an algorithm. Advances in neural information processing systems 14 (2001).
+
+[20] OpenAI. 2023. New and improved embedding model. https://openai.com/index/
+      new-and-improved-embedding-model/ Accessed: 2025-05-12.
+
+[21] OpenAI. 2024. New embedding models and API updates. https://openai.com/
+      index/new-embedding-models-and-api-updates/ Accessed: 2025-05-12.
+
+[22] Hongjin Qian, Peitian Zhang, Zheng Liu, Kelong Mao, and Zhicheng Dou. 2024.
+      Memorag: Moving towards next-gen rag via memory-inspired knowledge dis-
+      covery. arXiv preprint arXiv:2409.05591 (2024).
+
+[23] Peter J Rousseeuw. 1987. Silhouettes: a graphical aid to the interpretation and
+      validation of cluster analysis. Journal of computational and applied mathematics
+      20 (1987), 53­65.
+

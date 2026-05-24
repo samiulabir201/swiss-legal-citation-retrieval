@@ -1,0 +1,1640 @@
+                                        Talos: Optimizing Top- Accuracy in Recommender Systems
+
+                                          Shengjia Zhang§                 Weiqin Yang§                                           Jiawei Chen§¶
+
+                                            Zhejiang University           Zhejiang University                                    Zhejiang University
+                                              Hangzhou, China              Hangzhou, China                                        Hangzhou, China
+                                        shengjia.zhang@zju.edu.cn        tinysnow@zju.edu.cn                                   sleepyhunt@zju.edu.cn
+
+                                                  Peng Wu                 Yuegang Sun                                                  Gang Wang
+
+                                        Beijing Technology and Business  Intelligence Indeed                                   Bangsheng Technology Co,Ltd.
+                                                     University          Hangzhou, China                                               Hangzhou, China
+
+                                                   Beijing, China          bulutuo@i-i.ai                                         wanggang@bsfit.com.cn
+                                              pengwu@btbu.edu.cn
+arXiv:2601.19276v1 [cs.IR] 27 Jan 2026
+                                               Qihao Shi                                                                         Can Wang¶
+
+                                        Hangzhou City University                                                               Zhejiang University
+                                             Hangzhou, China                                                                    Hangzhou, China
+                                                                                                                                wcan@zju.edu.cn
+                                         shiqihao321@zju.edu.cn
+
+                                        Abstract                                                                               CCS Concepts
+
+                                        Recommender systems (RS) aim to retrieve a small set of items                          · Information systems  Recommender systems.
+                                        that best match individual user preferences. Naturally, RS place
+                                        primary emphasis on the quality of the Top- results rather than                        Keywords
+                                        performance across the entire item set. However, estimating Top-
+                                        accuracy (e.g., Precision@, Recall@) requires determining the                          Recommender Systems, Top- Accuracy, Loss Functions
+                                        ranking positions of items, which imposes substantial computa-
+                                        tional overhead and poses significant challenges for optimization.                     ACM Reference Format:
+                                        In addition, RS often suffer from distribution shifts due to evolving                  Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang
+                                        user preferences or data biases, further complicating the task.                        Wang, Qihao Shi, and Can Wang. 2026. Talos: Optimizing Top- Accuracy
+                                                                                                                               in Recommender Systems. In Proceedings of the ACM Web Conference 2026
+                                           To address these issues, we propose Talos, a loss function that                     (WWW '26), April 13­17, 2026, Dubai, United Arab Emirates. ACM, New York,
+                                        is specifically designed to optimize the Top- recommendation                           NY, USA, 17 pages. https://doi.org/10.1145/nnnnnnn.nnnnnnn
+                                        accuracy. Talos leverages a quantile technique that replaces the
+                                        complex ranking-dependent operations into simpler comparisons                          1 Introduction
+                                        between predicted scores and learned score thresholds. We further
+                                        develop a sampling-based regression algorithm for efficient and                        Being able to provide personalized suggestions, Recommender Sys-
+                                        accurate threshold estimation, and introduce a constraint term                         tems (RS) [24, 64] are integral to several online service platforms.
+                                        to maintain optimization stability by preventing score inflation.                      On these platforms, users are typically presented with only a small
+                                        Additionally, we incorporate a tailored surrogate function to address                  set of items. Consequently, RS primarily emphasizes the quality
+                                        discontinuity and enhance robustness against distribution shifts.                      of the Top- items (e.g., Precision@ and Recall@) rather than
+                                        Comprehensive theoretical analyzes and empirical experiments are                       the performance across the entire item set. Existing RS often adopt
+                                        conducted to demonstrate the effectiveness, efficiency, convergence,                   a learning-based paradigm [16, 53] -- learning a recommendation
+                                        and distributional robustness of Talos. The code is available at                       model to estimate user preference scores over items and then re-
+                                        https://github.com/cynthia-shengjia/WWW-2026-Talos.                                    trieving the Top- items with the highest predicted scores as rec-
+                                                                                                                               ommendations.
+                                        Equal contribution.
+                                        Corresponding author.                                                                     The distinct focus on Top- accuracy has inspired extensive
+                                        State Key Laboratory of Blockchain and Data Security, Zhejiang University.             research on recommendation loss functions. The loss function de-
+                                                                                                                               termines the direction of model optimization, whose importance
+                                        §                                                                                      cannot be overemphasized [54, 57]. Recent years have witnessed
+                                                                                                                               the emergence of two prominent types of loss functions:
+                                         College of Computer Science and Technology, Zhejiang University.                      · Full-ranking Losses: Some works aim to improve the over-
+                                        ¶Hangzhou High-Tech Zone (Binjiang) Institute of Blockchain and Data Security.
+                                         School of Mathematics and Statistics, Beijing Technology and Business University.        all ranking performance without explicitly targeting Top- es-
+                                                                                                                                  timation. Prominent examples include BPR [38] and Softmax
+                                        This work is licensed under a Creative Commons Attribution 4.0 International License.     Losses [54], which have been shown to approximately optimize
+                                        WWW '26, Dubai, United Arab Emirates                                                      the Area Under the ROC Curve (AUC) and Normalized Dis-
+                                        © 2026 Copyright held by the owner/author(s).                                             counted Cumulative Gain (NDCG), respectively. However, AUC
+                                        ACM ISBN 978-x-xxxx-xxxx-x/YYYY/MM                                                        and NDCG evaluate the quality of the entire ranking list, which
+                                        https://doi.org/10.1145/nnnnnnn.nnnnnnn                                                   can differ substantially from the quality of the Top- subset
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates     Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+1  2  3  4                                               5  6  7        8  9  10     Metrics                                  Losses
+
+Ranking 1:                                                                           Full Ranking     Approximate
+Ranking 1: Precision@5 (Recall@5) = 0.60 LLPAUC = 0.08 AUC: 0.52 NDCG: 0.8255            Metrics
+                                                                                                                      BPR, SL
+                                                                                     Drop Truncation
+                                                                                                                    Eq.(2.2), Eq.(2.3)
+
+                                                                                                                    Simplify  Talos
+
+                                                                                     Top- Accuracy
+
+Ranking 2: Precision@5 (Recall@5) = 0.40 LLPAUC = 0.16 AUC: 0.56 NDCG: 0.8260        More Complex                        Eq.(3.7)
+Ranking 2:                                                                           Partial-AUC
+                                                                                                      Adversarial
+                                                                                                       Training
+
+                                                                                                                    LLPAUC
+
+                                                                                                                              Eq.(2.4)
+
+Figure 1: (Left). Illustration of the inconsistency between LLPAUC/AUC/NDCG and Top- accuracy (Precision@ and Recall@)
+
+for two difference ranking schemes of ten items, where ranking scheme 2 achieves better AUC/LLPAUC and NDCG, while
+
+worse on Top- accuracy; (Right). The relationship among Talos, LLPAUC, SL, and BPR.
+
+  most relevant to RS outcomes. Consequently, optimizing these             To address these challenges, we propose Talos, a new loss func-
+  full-ranking loss functions does not necessarily translate to im-     tion specifically designed for optimizing Top- recommendation ac-
+  provements in Top- accuracy and may sometimes reduce it.              curacy (e.g., Precision@ and Recall@). To overcome the ranking-
+  Figure 1 provides an example where AUC and NDCG increase              dependence, we introduce the quantile [13, 25, 40] to reformulate
+  while Precision@ and Recall@ decrease. Such cases are not             Top- selection into simple comparisons between item scores and a
+  rare in RS. By empirically analyzing arbitrary pairs of ranking       learned score threshold. Items with scores above the threshold con-
+  lists for users on real-world datasets, we observe that the ratio of  stitute the Top-, avoiding explicit sorting and thus significantly
+  such inconsistent cases exceeds 34.37% and 28.49% on average.         facilitating optimization. However, this threshold-based strategy
+· Partial-AUC-based Losses: Another line of research focuses            also raises two further questions: 1) Threshold estimation: The
+  on developing loss functions for optimizing Partial-AUC metrics       valid thresholds vary per user, requiring efficient and accurate
+  (e.g., LLPAUC [43] and OPAUC [42]), which evaluate the partial        estimation; 2) Convergence concern: Thresholds evolve during
+  area under the ROC curve and correlate more strongly with Top-        training, raising concerns about training convergence and stabil-
+   accuracy than full-ranking losses. Indeed, as shown in Table 1.1,    ity. Particularly, we observe score inflation phenomenon that both
+  the inconsistency ratio between LLPAUC and Precision@ de-             predicted scores and thresholds rise excessively. We resolve these
+  creases to 21.86% on average. Nevertheless, the gap still exists.     by: 1) Developing a sampling-based quantile regression method
+  More critically, Partial-AUC metrics are highly complex, incur-       for fast and accurate estimation; 2) Introducing a constraint term
+  ring significant optimization challenges. It can be seen from their   limiting the number of items above the threshold, ensuring training
+  surrogate loss functions often involve adversarial training [43],     convergence and stability.
+  which complicates training stability and reduces effectiveness.
+  Furthermore, these loss functions introduce additional hyperpa-          Additionally, to further tackle discontinuity and distribution shift,
+  rameters compared to BPR and SL, necessitating expensive and          we design a specific smooth surrogate function approximating the
+  time-consuming tuning efforts. These limitations significantly        Heaviside step function. These designs endow Talos with three
+  hinder their practical application.                                   fundamental theoretical properties: 1) Talos serves as a tight upper
+                                                                        bound for optimizing Precision@, ensuring its effectiveness; 2)
+   Given these limitations, an important research question raises:      Talos is equivalent to performing Distributionally Robust Optimiza-
+How can we design a loss function that directly optimizes top-K ac-     tion, a theoretical-sound approach that empowers the model with
+curacy in recommender systems? Considering the characteristics of       robustness against distribution shifts; 3) the optimization procedure
+Top- optimization and RS, we identify the following key obstacles:      for Talos provides theoretically convergence guarantees.
+
+· Ranking-aware Discontinuous Objective: Top- accuracy                     The proposed Talos is practical in three aspects: 1) It is concise
+  (e.g., Precision@) are computed only over the Top- ranked             in form and can be easily plug-in existing RS models with minimal
+  items, requiring a ranking-dependent truncation -- determining        code modifications; 2) It is computationally efficient, with both
+  which items lie in the Top- positions. This process requires          theoretical time complexity and practical runtime comparable to
+  computing item ranking positions, incurring high computational        the conventional loss; 3) It preserves simplicity in hyperparameter
+  cost. It also makes the objective discontinuous or constant in        tuning, requiring only a single temperature parameter. In summary,
+  large regions, making gradient-based optimization ineffective.        our main contributions are:
+
+· Distributional-Shift Challenge: It is important to note that RS       · We propose Talos, a novel loss function for directly optimizing
+  often faces severe distribution shifts due to evolving user prefer-     Top- recommendation accuracy.
+  ence [50] or data collection biases [3, 4, 12, 27]. Loss functions
+  that are robust to such shifts have been shown to be essential for    · We provide comprehensive theoretical analyses, demonstrating
+  RS performance [53].                                                    its effectiveness, distributional robustness, and convergence guar-
+                                                                          antees.
+
+                                                                        · We conduct extensive experiments across four datasets and three
+                                                                          backbone models, verifying the superiority of Talos over the
+                                                                          state-of-the-art losses.
+Talos: Optimizing Top- Accuracy in Recommender Systems                                                  WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+Table 1.1: Empirical analyses of the inconsistency between AUC/LLPAUC/NDCG/NDCG@ and Top- accuracy across arbitrary
+pairs of ranking lists on real-world datasets.
+
+Metric               Gowalla                               Beauty                                 Games                    Electronics
+
+            Precision@20 Recall@20 Precision@20 Recall@20 Precision@20 Recall@20 Precision@20 Recall@20
+
+AUC               33.17%            33.89%              34.67%        35.46%           35.17%            34.19%            33.32%       34.58%
+LLPAUC            18.53%            18.65%              23.81%        22.95%           23.30%            22.34%            23.30%       22.25%
+NDCG              26.70%            26.88%              29.65%        29.52%           29.52%            28.02%            29.11%       28.53%
+NDCG@             19.01%            18.24%              22.02%        22.55%           21.14%            22.21%            17.65%       17.51%
+
+2 Preliminaries                                                               accuracy can potentially enhance these metrics, as evidenced by
+                                                                              the results reported in Appendix E.
+In this section, we present the task formulation, an overview of the
+Top- accuracy and an analysis of existing loss functions.
+
+                                                                              2.3 Analyses on Existing Loss Functions
+
+2.1 Task Formulation                                                          Beyond the traditional point-wise and pair-wise loss functions [22,
+                                                                              33, 38], recent years have witnessed the emergence of two promi-
+Aligned with recent studies [17, 44] on recommendation losses, this           nent types of loss function in RS:
+                                                                              Full Ranking Losses. The most prominent examples that optimize
+work focuses on the conventional collaborative filtering (CF) sce-            the full ranking metrics are BPR and Softmax Loss (SL). BPR is a
+nario. Let U and I denote the sets of users and items, respectively.          surrogate loss that is defined as:
+The set of observed interactions is represented as D  U × I,
+where each entry (, )  D signifies an interaction (e.g., click, pur-                      1                            ),              I(    )
+chase, etc) between user  and item . Consequently, for a given user           LBPR  =                     log  (   -       AUC =
+, the positive item set P = {  I : (, )  D} is constructed                             |  P  |                                       P   N |P | |N |
+from the observed interactions, while the remaining unobserved                                    P    N
+items constitute the negative item set N = I \ P . The primary                               
+objective of recommender systems is to leverage the historical data
+D to predict the Top- items that best match the user's preferences.                                                                             (2.2)
+
+   Existing RS mainly adopt a learning-based paradigm [17]. Specifi-          where  seeks to approximate the Heaviside function, typically set
+
+cally, a parameterized recommendation model  takes the features               as the sigmoid function [38]. Consequently, BPR loss serves as an
+(e.g., IDs) of user  and item  as input [58] to generate the prefer-
+ence scores  =  (, ). The model is then optimized from D                      approximation of AUC metric. For each user, SL [54] is defined as:
+under a specific loss function. Ultimately, the recommendation list
+                                                                                                LSL      1                  exp( /)
+for user  is generated by ranking items according to  and retain-                                    =  -                   I exp(  /)
+ing the Top- candidates. Thus, the loss function, which governs                                           |P |       log                        (2.3)
+
+the optimization trajectory of the model, plays a crucial role in RS.                                             P
+
+2.2 Top- Accuracy in RS                                                       where  serves as a temperature hyperparameter. Recent theoretical
+                                                                              analysis [57] have demonstrated that SL as a tight surrogate loss
+As RS typically display only the Top- items to users, Top- ac-                for optimizing the full-ranking metric NDCG. This property often
+curacy, e.g., Precision@ and Recall@, are commonly used to                    allows SL to yield state-of-the-art performance.
+evaluate the recommendation performance, which are defined as
+                                                                                 However, we argue that the full-ranking metrics differ signifi-
+            (  )     I(        )             ()            I(      )          cantly from Top- accuracy. This discrepancy is evident as Top-
+                  =              ,                      =                     accuracy incorporate a truncation term I(  ), indicating that
+Precision@                          Recall@               P |P |              performance is evaluated only on Top- items. To further illustrate
+                                                                              this difference, we conduct an empirical analysis (see Appendix D.1
+                                                                              for details). As shown in Table 1.1, the deviation between NDCG
+                                                                              and Top- accuracy significantly exceeds 20.47% on average. These
+                    P                                                         results suggest that optimizing NDCG may not always lead to better
+                                                                              Top- accuracy and, in some cases, may even degrade performance.
+                                                                  (2.1)       As shown in Table 1.1, the deviation between NDCG and Top-
+                                                                              accuracy is significant (20.47% on average).
+where I(·) denotes the indicator function,  =  I I(    )                      Partial-AUC-based Losses. Another research line focuses on opti-
+                                                                              mizing Partial-AUC metrics [42, 67], which quantify the area under
+denotes the ranking position of item  for user . These metrics                a specific segment of the ROC curve. The general Partial-AUC met-
+                                                                              ric, Lower-Left Partial AUC (LLPAUC), is formally defined as [43]:
+measure the the quality (positivity) of the top-ranked items, and
+incorporate a ranking-dependent truncation term I(  ) that
+determines whether an item ranks within the Top- . Notably, this
+study primarily targets the optimization of Top- accuracy, i.e.,
+
+Precision@ and Recall@. Although more sophisticated metrics                                              I(    ) · I(   ) · I(    )
+(e.g., NDCG@, MRR@) additionally capture position-aware rel-                  LLPAUC =
+                                                                                                                           |P ||N |
+                                                                                                  P   N                                         (2.4)
+
+evance, they are not as prevalent as Precision@ and Recall@ in                s.t. Pr ( P ) [   ] =  and Pr (N ) [    ] = 
+
+modern RS. Precision@ and Recall@ exhibit a more direct cor-                  where  and  denote the hyperparameters that delineate the
+relation with online business-critical metrics [8, 35, 65] (e.g., CTR),       evaluation region,  (·) denotes the uniform distribution. Compared
+                                                                              to the original AUC, constraints in Eq.(2.4) are introduced, eval-
+and are widely regarded as gold-standard indicators for the recall
+                                                                              uating ranking performance on positive and negative items with
+stage of recommendation pipelines [37, 63]. Furthermore, since com-
+
+plex metrics are on the basis of Top- accuracy, improving Top-
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates     Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+high scores. Recent work [43] and our empirical analysis (Table 1.1)              Introducing Quantile Technique: To tackle the non-feasible
+both show Partial-AUC metrics are more consistent with Top-                       ranking-dependent truncation term, we borrow the quantile tech-
+accuracy, with the average inconsistency ratio reduced to 21.86%.                 nique [13, 25, 40]. For each user, we introduce a score threshold
+                                                                                  named quantile that separates the Top- items from the rest ac-
+   Nevertheless, we identify several critical limitations. First, the             cording to their scores. The formal threshold can be defined as:
+residual inconsistency between Partial-AUC and Top- accuracy re-
+mains non-negligible. Second, Partial-AUC metrics are highly com-                                                        = ,     where        =                    (3.1)
+plex, involving three indicator functions, significantly increasing
+the optimization difficulty. This complexity manifests in their surro-                                               
+gate loss functions, which often necessitate adversarial training [57],
+potentially compromising training stability and effectiveness. Our                                                    
+experimental observations confirm the instability of LLPAUC loss
+(cf. Table 3.1), which in some cases underperforms the basic BPR                  which represents the score of the item exactly at the -th position.
+loss. Third, these losses introduce additional hyperparameters (e.g.,
+ and  in (2.4)), requiring expensive tuning. These limitations                    When    the  item  score           exceeds  the  threshold,  i.e.,       ,   it  indicates
+heavily hinder the practical applications of these losses.
+NDCG@ Surrogate Loss. Recently, a contemporaneous and                                                                                                      
+parallel study, SL@ [58], has been proposed to optimize the Top-
+ ranking metric NDCG@. For each user, SL@ is defined as:                          that  the  item  is  included          in   Top- ,   while    <     implies  it  does  not.
+
+                                                                                                                                                    
+
+                                                                                  This technique simplifies the complex truncation term I( )
+
+                                                                                  into a simple comparison between item scores and the threshold
+
+                                                                                  I(         ),  heavily          facilitating   fast  computation    and  optimization.
+
+                                                                                           
+
+                                                                                  Specifically, the Precision@1optimization can be transformed as:
+
+                                                                                                                                                I(        )
+
+                                                                                                  - log Precision@               = - log                           (3.2)
+
+                                                                                                                                                     
+
+                                                                                                                                            P
+
+                                                                                  Here the objective only involves the model-predicted scores and
+
+             1                                                                    thresholds. However, this quantile-based transformation further
+                                                                                  raises two challenges: 1) Threshold estimation: the Top- thresh-
+LSL@   =-                 (  -      )/  log exp             (  - )/               old plays a central role in the optimization, and its precise esti-
+            |P |
+                                                I
+
+                                 
+
+                    P                                                             mation is crucial. Furthermore, the threshold must be computed
+
+                                                                           (2.5)  individually for each user and evolves throughout training, thereby
+
+where    and    are  two  hyperparameters;     is        a  user-specific  score  imposing significant computational demands. Conventional regres-
+
+                                             
+
+threshold (the score at rank );  is the sigmoid function. SL@                     sion based strategies [25] are computationally prohibitive in RS,
+
+has been shown to serve as an upper bound for NDCG@ [58].                         while Monte Carlo-based approaches [58] suffer from considerable
+                                                                                  estimation bias (cf. Table A.4). Consequently, efficient and accu-
+However, several limitations warrant attention: 1) SL@ is de-                     rate threshold estimation in RS remains largely underexplored. 2)
+                                                                                  Convergence concern: The evolving threshold also poses risks to
+signed to optimize NDCG@, rather than the Top- accuracy                           optimization convergence. In particular, we observe that directly
+(e.g., Precision@ and Recall@). These metrics differ substan-
+
+tially. As demonstrated in Table 1.1, NDCG@ exhibits notable
+
+inconsistency with Top- accuracy (20.04% on average). More-                       optimizing Eq.(3.2) often leads to pathological and unstable results,
+
+over, Precision@ and Recall@ are more prevalent in indus-                         in which both positive and negative item scores, together with
+
+trial RS and align more closely with common online business met-                  the thresholds, iteratively increase in a synchronized manner. This
+
+rics [8, 10, 35, 65]. 2) SL@ does not provide theoretical guarantees              phenomenon, termed score inflation, is not desirable, as RS aim
+
+for robustness against distribution shifts, which is essential for                to differentiate positive and negative items and target positioning
+
+RS [53]. 3) SL@ demonstrates instability with fewer negative                      positive items at the Top-. How to ensure the stable optimization
+training signals (cf. Table A.2). 4) SL@ relies on Monte-Carlo
+                                                                                  is also an important question to be addressed.
+method to estimate the Top- threshold, which often incurs a high                  Efficient Quantile Estimation: Quantile estimation [25] has been
+estimation error (0.18 on average, cf. Table A.4). 5) SL@ intro-                  well-studied in statistical learning literature. A prominent method
+
+duces an extra hyperparameter  that requires exhaustive tuning.                   is quantile regression [13]. However, estimating Top- quantile
+
+These observations motivate the development of loss functions                     for a user in vanilla quantile regression requires traversing the
+                                                                                  complete item space (cf. Appendix H.1), which is computationally
+tailored for Top- accuracy while addressing the aforementioned                    intensive in large-scale RS. To address this, we propose an efficient
+
+challenges.
+
+                                                                                  negative sampling-based quantile regression loss:
+
+3 Methodology                                                                                      1                                          
+
+In this section, we first detail the proposed loss Talos for optimizing           Q () = |I |                         ( - ^ ) +                    (  - ^ )        (3.3)
+Top- accuracy, and then we conduct comprehensive theoretical
+analyses to demonstrate its effectiveness.                                                               P                                     
+
+3.1 Loss Function for Top- Accuracy                                               where        =  | I | - | P  |  ,      ( )  =  (1-/|I|) ()+ + (/|I|) (-)+        with
+                                                                                                     | |
+Our Talos first employs a quantile-based approach to simplify the
+ranking-dependent truncation term. We subsequently design a re-                   ()+ = max{0,  }, and  denotes the sampled negative item set
+gression method to enable efficient and accurate threshold estima-
+tion, and introduce an additional constraint term to ensure optimiza-             from N . We introduce importance weights  to ensure unbiased
+tion stability. Finally, we integrate a customized surrogate function
+to mitigate discontinuities and improve distributional robustness.                estimation (i.e., E [Q ()] = LQR (), cf. Appendix H.1 for proof).
+
+                                                                                  This treatment can not only reduce the computational complexity
+
+                                                                                  to O (| | + |P |) for a user, but remain high estimation accuracy.
+
+                                                                                  The estimation error is less than 0.02 as reported in Table A.4.
+
+                                                                                  1Considering Precision@ may achieve the value 0, making the express
+                                                                                  - log Precision@ ill-defined. For rigor, we extend the support of the function and
+                                                                                  re-define log( ) as log(0) = log( ), where  denotes a sufficient small constant.
+Talos: Optimizing Top- Accuracy in Recommender Systems                                WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+Constrained Optimization for Stable Convergence: To tackle               change the order of the summation and logarithmic operations as:
+the inflation issue, we further transform Eq.(3.2) into:
+                                                                                                                     (  -   )
+                                                                                                1                
+                                                                                 LTalos = - |P |   P log                    
+                                                                                                                                         (3.7)
+
+              Eq.(3.2) = - log        P     (   -   )                                                               (  -  )
+
+                                                    
+
+                                                                  (3.4)
+
+                                      I  (  -  )                         This formulation greatly facilitates implementation. We do not need
+                                                                         to sum over all positive items in the system, which also facilitates
+The equality holds due to the fact      I  I(       )   = . Here  ()     mini-batch updates -- we can sample a mini-batch of positive items
+                                                                         for optimization. In fact, this transformation has a theoretical basis
+                                                                         where Eq.(3.4) can be upper bounded by Eq.(3.7) due to the Jensen's
+                                                                         inequality [21].
+denotes the Heaviside step function with  () = I(  0). The intro-
+
+duction of new denominator could naturally penalize the number
+
+of items larger than the Top- quantile, avoiding the score inflation
+
+phenomenon. From a theoretical view, Eq.(3.4) can be understood as
+
+an objective equipped with constraint log    I      (   -  )   =  log .  3.2 Analyses on Talos
+
+                                                                         Our proposed Talos offers several advantages:
+                                                                         Advantage 1: Concise and efficient. Talos has a concise form (cf.
+Note that the Lagrange multiplier function of objective Eq.(3.2)         Eq.(3.7)). Compared to SL, it differs only in integrating the quantile
+                                                                          and replacing the activation from exp()1/ to sigmoid()1/ .
+with this constraint can be written as follows:
+                                                                           
+       1                              
+                                                                         Such a simple revision allows Talos to approximately optimize Top-
+- log          (  -      )  +   (log        (   -   )   -  log )  (3.5)
+                                                                          accuracy. Similar to SL, only hyperparameter  is introduced.
+                                                    
+                                                                            Regarding the efficiency, the time complexity of Talos is calcu-
+                                                                         lated as O (¯ |U|| |) for both quantile estimation and loss opti-
+           P                            I                                mization, which is the same as SL. Here, ¯ denotes the average
+
+If we simply set the parameter  = 1 and drop the irrelevant con-         number of positive items per user;  denotes the sampled negative
+stant, we can obtain Eq.(3.4). The introduction of the denominator       item set satisfying | |  |I|. Our experiments also confirm the
+                                                                         computational efficiency of Talos (cf. Appendix F).
+term helps mitigate the inflation of the score  , as it enforces a       Advantage 2: Tight surrogate for optimizing Precision@. We
+penalty such that only  items can exceed the quantile threshold.         establish theoretical connections between Talos and Precision@:
+
+This constraint is crucial, and our empirical results demonstrate        Theorem 3.1 (Talos serves as a tight surrogate for Precisio-
+
+significant performance improvements when incorporating this             n@ ). For a proper  , satisfying   [ log( (2+2)sigmoid(-2)/2) , log(1/2) ],
+denominator term (cf. Table 4.1).                                                                                       log              log 
+Introducing Customized Surrogate Function: Note that the
+discontinuity mainly arises from the Heaviside function  (). The         we have the following bound relations:
+
+conventional solution is to develop a proper activation function                      - log Precision@  LTalos +                         (3.8)
+to approximate it as  (·)   (·). Previous works [18, 19, 58] typi-
+cally introduce a temperature  within the sigmoid function  (·) =        where  = log(1 + 2/2)1/ is a constant.
+sigmoid(·/) to approximate the Heaviside step function. In this
+work, we incorporate  outside the sigmoid function, i.e.,  (·) =
+sigmoid(·)1/ and define our Talos as follows:
+
+              LTalos = - log      P        (    -   )                    The proof is given in Appendix A.1. This theorem ensures that
+                                                                         optimizing Talos can lower the upper bound of - log Precision@,
+                                                    
+                                                                         and thus improve the Precision@ with theoretical guarantee.
+                                                                  (3.6)
+                                                                         Advantage 3: Robustness to distribution shifts. We establish
+                                      I  (  -  )                         a connection between Talos and the Distributionally Robustness
+                                                                         Optimization (DRO). Specifically, we have:
+This design has multiple advantages: 1) It equips Talos with distri-
+butional robustness. In Section 3.2, we demonstrate that optimizing         Theorem 3.2 (Distributional robustness). For user  and pos-
+Talos is equivalent to performing distributional robustness opti-        itive item , let ^ be the uniform negative distribution over N . Given
+mization, ensuring the model is optimized under distribution per-        a robustness radius  > 0, consider the uncertainty set Q consisting of
+turbations. However, the function with inner temperature cannot          all perturbed distributions , which is constrained by the KL diver-
+enjoy such a merit. 2) This design ensures Talos serving as an tight     gence, i.e., KL ( ^)  . Let  () be a sigmoid function, optimizing
+upper bound for - log Precision@ (cf. Theorem 3.1), ensuring op-         Talos is equivalent to solving the following optimization problem:
+timizing Talos can improve Top- accuracy. 3) Empirical results
+presented in Table 4.1 also demonstrate that activation with an          1            log  (         )               log  (    -      )
+outside temperature performs much better than inside.                    -                    -         +
+Implementation Details. The optimization process alternates                |P |                            max  E                        (3.9)
+between two steps: 1) updating model parameters through gradient                                                                  
+descent using Eq.(3.6); 2) updating quantile estimates via gradient                                         Q
+descent using Eq.(3.3). This procedure iterates until convergence.                 P
+Besides, to address scalability challenges with large item sets, a
+negative sampling strategy is adopted in the calculation of Talos,       The proof is presented in Appendix A.2. Theorem 3.2 demonstrates
+similar to SL and LLPAUC, where the denominator term in Eq.(3.6)         Talos is equivalent to performing DRO [52, 53, 62], a theoretically
+is computed over a sampled subset of negative items.                     sound tool that empowers models with robustness to distribution
+                                                                         shifts. Intuitively, it can be understood that the model is trained not
+   Finally, note that Talos involves retrieving all positive items for   only on the original uniform negative distribution ^, but across
+each user, which may incur implementation complexity and does            a family of adversarially perturbed distributions. Thus, the model
+not facilitate parallel computation. Therefore, in practice, we simply   trained under DRO would exhibit robustness. With proper design,
+                                                                         our Talos can inherit this property from DRO through equivalence.
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates  Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+Table 3.1: Overall performance comparison of Talos with other losses. blue indicates the best result, and the runner-up
+is underlined. Imp.% indicates the relatively improvements of Talos over the best baselines. "P@20" denotes the metric
+Precision@20, and "R@20" denotes Recall@20; The mark `*' suggests the improvement is statistically significant with  < 0.05.
+
+Model         Loss                     Gowalla                              Beauty   Games             Electronics
+
+                          P@20                           R@20     P@20      R@20     P@20     R@20     P@20     R@20
+
+         BPR              0.0438 0.1511 0.0146 0.1267 0.0142 0.1334 0.0058 0.0566
+
+         AATP             0.0327 0.1078 0.0120 0.1044 0.0142 0.1330 0.0028 0.0272
+
+         RS@              0.0397 0.1218 0.0094 0.0669 0.0104 0.0872 0.0020 0.0159
+
+         SmoothI@ 0.0586 0.1882 0.0163 0.1352 0.0192 0.1778 0.0059 0.0565
+
+         SL               0.0625 0.2017 0.0172 0.1403 0.0208 0.1918 0.0064 0.0626
+
+MF       BSL              0.0625 0.2017 0.0171 0.1401 0.0210 0.1934 0.0065 0.0630
+
+         PSL              0.0631 0.2031 0.0174 0.1432 0.0210 0.1935 0.0066 0.0637
+
+         AdvInfoNCE 0.0623 0.2012 0.0171 0.1403 0.0210 0.1935 0.0063 0.0616
+
+         LLPAUC           0.0562 0.1847 0.0157 0.1336 0.0187 0.1748 0.0059 0.0583
+
+         Talos            0.0642                         0.2079   0.0179    0.1499   0.0213   0.1967   0.0067   0.0655
+
+         Imp.%            +1.71% +2.35% +2.69% +4.69% +1.19% +1.62% +3.04% +2.75%
+
+LGCN     BPR              0.0527                         0.1761   0.0159    0.1385   0.0192   0.1801   0.0050   0.0482
+         AATP             0.0249                         0.0754   0.0121    0.1067   0.0127   0.1175   0.0030   0.0289
+         RS@              0.0536                         0.1735   0.0151    0.1192   0.0168   0.1511   0.0038   0.0357
+         SmoothI@         0.0590                         0.1898   0.0169    0.1427   0.0196   0.1801   0.0065   0.0630
+         SL               0.0628                         0.2025   0.0172    0.1433   0.0211   0.1942   0.0065   0.0629
+         BSL              0.0628                         0.2025   0.0172    0.1433   0.0210   0.1931   0.0064   0.0626
+         PSL              0.0634                         0.2042   0.0173    0.1425   0.0210   0.1925   0.0065   0.0627
+         AdvInfoNCE       0.0627                         0.2028   0.0172    0.1433   0.0210   0.1936   0.0064   0.0626
+         LLPAUC           0.0516                         0.1722   0.0170    0.1423   0.0202   0.1882   0.0066   0.0642
+         Talos             0.0642                         0.2080   0.0178    0.1489   0.0212   0.1960   0.0068   0.0662
+                          +1.26%                         +1.85%   +3.08%    +3.87%   +0.68%   +0.95%   +3.48%   +3.06%
+         Imp.%
+
+XSimGCL  BPR              0.0584                         0.1917   0.0170    0.1450   0.0194   0.1810   0.0064   0.0625
+         AATP             0.0451                         0.1515   0.0153    0.1264   0.0173   0.1619   0.0051   0.0501
+         RS@              0.0515                         0.1669   0.0151    0.1221   0.0174   0.1590   0.0040   0.0373
+         SmoothI@         0.0532                         0.1731   0.0077    0.0560   0.0144   0.1320   0.0040   0.0395
+         SL               0.0623                         0.2010   0.0171    0.1418   0.0208   0.1915   0.0065   0.0627
+         BSL              0.0625                         0.2013   0.0169    0.1413   0.0209   0.1931   0.0063   0.0619
+         PSL              0.0630                         0.2023   0.0172    0.1407   0.0207   0.1910   0.0066   0.0636
+         AdvInfoNCE       0.0623                         0.2010   0.0171    0.1415   0.0209   0.1923   0.0064   0.0622
+         LLPAUC           0.0612                         0.1980   0.0171    0.1443   0.0207   0.1910   0.0064   0.0635
+         Talos             0.0638                         0.2057   0.0180    0.1506   0.0212   0.1961   0.0067   0.0654
+                          +1.27%                         +1.68%   +4.87%    +3.81%   +1.32%   +1.60%   +2.65%   +2.81%
+         Imp.%
+
+Advantage 4: Convergence Guarantee. While the proposed op-                  4 Experiments
+timization process involves dynamic update between Eq.(3.3) and             4.1 Experimental Setup
+Eq.(3.6), it has the following theoretical convergence guarantee:
+                                                                            Recommendation Backbones. We closely refer to Yang et al. [57]
+   Theorem 3.3 (Convergence guarantee). Let  be the Lipschitz               and evaluate Talos and baselines on three distinct recommendation
+constant of L . With the fixed stepsize 0 <  < 2/, the gradient
+norm is bounded by:                                                         backbones: the classic Matrix Factorization (MF) model [38], the
+
+         (2 - 2)          LT(a )los 2   1 L(0)                    (3.10)    representative graph-based model LightGCN [16], and the SOTA
+                       E                   
+                                                                            method XSimGCL [59]. See Appendix D.2 for more details.
+               4                                                            Baselines. The following baselines are included: 1) BPR [38], the
+                                                                            classic pair-wise loss in RS; 2) SL [54]: the loss approximately opti-
+where  denotes the total number of optimization iterations, LT(a )los       mizing the NDCG; 3) BSL [53], AdvInfoNCE [61], and PSL [57]:
+denotes the gradient of the loss w.r.t. the score variables at iteration ,  three enhanced variants of SL from different perspectives, achieving
+and L (0) denotes the the initial loss value.                               SOTA performance; 4) LLPAUC [43], the loss approximately opti-
+                                                                            mizing the lower-left partial AUC; 5) SmoothI@ [46], RS@ [34],
+                                                                            and AATP [2], three surrogate losses for Top- metrics. Note that
+
+The proof is presented in Appendix A.3. Theorem 3.3 provides a
+theoretical foundation for Talos optimization reliability.
+Talos: Optimizing Top- Accuracy in Recommender Systems                                WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+Table 3.2: Performance comparisons with varying  on MF                  Table 3.3: Performance comparisons with varying  on MF
+backbone in Gowalla dataset. blue indicates the best result.            backbone in Beauty dataset. blue indicates the best result.
+
+Gowalla     Recall@20 Recall@50 Recall@80                               Beauty        Recall@20 Recall@50 Recall@80
+
+AATP           0.1062  0.2068                           0.2160          AATP          0.1077  0.1850  0.2371
+RS@            0.1218  0.1059                           0.2406          RS@           0.0669  0.0989  0.1223
+SmoothI@       0.1882  0.3027                           0.3625          SmoothI@      0.1352  0.2041  0.2454
+SL             0.2017  0.3185                           0.3900          SL            0.1403  0.2163  0.2617
+BSL            0.2017  0.3185                           0.3900          BSL           0.1401  0.2159  0.2617
+AdvInfoNCE     0.2013  0.3183                           0.3900          AdvInfoNCE    0.1409  0.2160  0.2621
+LLPAUC         0.1847  0.2927                           0.3640          LLPAUC        0.1336  0.2047  0.2443
+PSL            0.2038  0.3192                           0.3902          PSL           0.1432  0.2184  0.2625
+Talos@20       0.2078  0.3202                           0.3894          Talos@20      0.1499  0.2205  0.2620
+Talos@50       0.2078  0.3212                           0.3907          Talos@50      0.1484  0.2218  0.2637
+Talos@80       0.2074  0.3211                           0.3911          Talos@80      0.1485  0.2213  0.2674
+
+Imp.%          +1.98%  +0.63%                           +0.22%          Imp.%         +1.85%  +4.69%  +1.59%
+
+         Table 3.4: Temporal shift explorations. P@20 denotes Precision@20, while R@20 denotes Recall@20.
+
+Dataset Metric AATP RS@ SmoothI@ SL BSL PSL AdvInfoNCE LLPAUC Talos Imp.%
+
+Gowalla  P@20  0.0300  0.0404                           0.0544  0.0544 0.0544 0.0542  0.0542  0.0567 0.0574 +1.24%
+         R@20  0.0807  0.1103                           0.1497  0.1497 0.1497 0.1492  0.1499  0.1541 0.1577 +2.37%
+
+Beauty P@20 0.0061 0.0046                               0.0076  0.0089 0.0089 0.0086  0.0089  0.0087 0.0094 +5.51%
+               R@20 0.0461 0.0381                       0.0589  0.0696 0.0697 0.0679  0.0699  0.0697 0.0738 +5.45%
+
+these methods are tailored for other domains, and their effectiveness   observe that the best performance is achieved when  =, aligned
+in RS is limited. We discuss these methods in Section 5.                with our expectations. For instance, when evaluating Recall@80 for
+Datasets. We conduct experiments on four widely-used datasets           a model trained with Talos@20 (targets optimizing for Recall@20),
+containing users' ratings on items: Beauty, Games, Electron-            the discrepancy between  and  leads to performance drop.
+ics [57] and Gowalla [16]. See Appendix D.3 for more details.           Performance with distribution shifts. To evaluate the robust-
+Hyperparameter Setting. A grid search is adopted to find optimal        ness against distribution shifts, we follow [47], introducing tem-
+hyperparameters. For all compared methods, we closely follow            poral bias to construct the test scenario with distribution shifts
+configurations in their respective publications to ensure the optimal   (cf. Appendix D.4). Table 3.4 shows that Talos achieves the best
+performance. We refer readers to Appendix D.5 for more details.         performance, demonstrating its superior distributional robustness.
+                                                                        LLPAUC benefits from adversarial training and exhibits fine robust-
+4.2 Analysis on Experiment Details                                      ness. Moreover, Talos achieves more pronounced average improve-
+                                                                        ments than in IID setting, i.e., 1.26%  3.37%. The effectiveness can
+Talos VS. others. Table 3.1 compares Talos with other baselines.        be attributed to its connection with DRO.
+Overall, Talos outperforms all baselines across all datasets and back-  Ablation study. In Table 4.1, we evaluate three Talos variants:
+bones. Especially in Beauty, Talos achieves the impressive improve-     1) quantile fixed as zero (w/o-quantile); 2) sigmoid(·)1/ replaced
+ments -- 3.83% average on two evaluation metrics, highlighting          by sigmoid(·/) (w/o-outside); 3) the denominator term in Eq.(3.6)
+the effectiveness of Talos that directly optimizes Top- accuracy.       replaced by the constant  (w/o-denominator). Talos outperforms
+Additional results in Appendix E demonstrate Talos also brings          all variants. We highlight three key observations: 1) The gap be-
+improvements on NDCG@ and MRR@.                                         tween Talos and w/o-quantile highlights the importance of quantile
+LLPAUC VS. SL. While LLPAUC demonstrates a stronger correla-            technique; 2) Talos surpasses w/o-outside, indicating the superior-
+tion with Top- metrics than SL, we observe it does not consistently     ity of introducing DRO; 3) Compared to w/o-denominator, results
+outperforms SL. In fact, LLPAUC is unstable across different back-      confirm our analysis in Section 3.1 that Talos naturally penalizes
+bones, even worse than basic BPR on Gowalla with LGCN.                  negatives exceeding the Top- quantile, addressing score inflation.
+Performance comparison with varying . Tables 3.2 and 3.3                Temperature Sensitivity. Figure 2 depicts the performance with
+illustrate the performance across different values of . We observe      varying  in Talos. Performance initially improves as  increases,
+that Talos consistently outperforms the compared methods for            but degrades beyond a certain point. This aligns with Theorem 3.1:
+various  values. However, as  increases, the magnitude of the           When  satisfies the surrogate condition, smaller  means the tighter
+improvements decreases. This observation aligns with our intuition.     upper bound for Top- accuracy but increases training difficulty
+As  increases, the Top- accuracy gradually degrades to the full         due to the decreased Lipschitz smoothness. As  increases, the
+ranking metrics. Consequently, the advantage of optimizing for          approximation would be looser, even not satisfy the surrogate con-
+Top- accuracy diminishes as  grows.                                     dition, thus impacting performance.
+Consistency study. Tables 3.2 and 3.3 present Recall@, and the
+performance of Talos@ for varying values , {20, 50, 80}. We
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates  Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+Figure 2: Sensitivity analysis of Talos on , where - - - denotes the performance of SL with optimal hyperparameter.
+
+0.208                               0.150                                  0.198
+Recall@20                                                                                                         0.065
+                             Recall@20
+                                                           Recall@200.2000.1400.184                               0.063
+                                                                                        Recall@20
+0.192               SL                                   SL                0.170              SL                                          SL
+                                                                                              Talos
+                    Talos           0.129                Talos                                                    0.061                   Talos
+
+      0.03 0.04 0.05 0.06 0.07      0.050 0.075 0.100 0.125 0.150                  0.050 0.075 0.100 0.125 0.150  0.050 0.075 0.100 0.125 0.150
+
+       (a) Gowalla                         (b) Beauty                              (c) Games                             (d) Electronics
+
+Table 4.1: Ablation study, we examine three variations of Talos, where the quantile is removed (w/o-quantile), the sigmoid()1/
+form is replaced by sigmoid(/) (w/o-outside), and the denominator term is replaced by the constant  (w/o-denominator).
+
+Loss                       Gowalla                       Beauty                            Games                         Electronics
+
+                 Precision@20 Recall@20 Precision@20 Recall@20 Precision@20 Recall@20 Precision@20 Recall@20
+
+w/o-quantile        0.0626          0.2037               0.0175            0.1487  0.0208         0.1931          0.0066  0.0640
+w/o-outside         0.0577          0.1859               0.0166            0.1375  0.0194         0.1799          0.0062  0.0592
+w/o-denominator     0.0278          0.0869               0.0101            0.0841  0.0127         0.1173          0.0018  0.0160
+Talos               0.0642          0.2079               0.0179            0.1499  0.0213         0.1967          0.0067  0.0655
+
+5 Related Work                                                             from SL@ in several important aspects: 1) This work targets the
+                                                                           optimization of Precision@ and Recall@, whereas SL@ is
+Since this work focuses on recommendation loss functions, here             designed to optimize NDCG@. These metrics are not consistent
+we mainly introduce related work on this topic. For the area of            as discussed in Section 2.3. 2) Talos demonstrates the robustness
+recommendation models and recommendation loss consistency, we              to distribution shifts, while SL@ does not. Under temporal shifts,
+refer readers to Appendix C. In recommendation losses, two promi-          Talos achieves superior performance (over 1.12%, cf. Table A.1).
+nent types stand out: 1) full ranking optimization losses such as          3) Talos achieves greater stability when fewer negative items are
+BPR [38] and SL [54]. BPR optimizes the relative ranking of positive       sampled, yielding markedly higher performance compared with
+items over negatives as an AUC surrogate, while SL has been shown          SL@ (over 1.96%, cf. Table A.2). 4) Talos incorporates a more
+to approximately optimize the NDCG ranking metric with excel-              accurate threshold estimation strategy, resulting in substantially
+lent performance. Motivated by the success of SL, several works            lower estimation error than SL@ (0.01 v.s. 0.18, cf. Table A.4). 5)
+attempted to improve it: BSL [53] and AdvInfoNCE [61] introduced           SL@ requires a greater number of hyperparameters, considerably
+the DRO framework to enhance SL's robustness. PSL [57] replaced            limiting its practicality.
+the exponential function in SL with other appropriate activation
+functions, serving as a tighter surrogate for NDCG. 2) LLPAUC [43],        6 Conclusion and Future Works
+which evaluates the lower left part of AUC, demonstrates a strong
+correlation with Top- accuracy. Beyond these two types, recent             This work introduces Talos, tailored for optimizing Top- accuracy
+works explored alternative losses [28, 41], but these do not optimize      in recommender systems. Talos incorporates an efficient quantile-
+Top- accuracy.                                                             based technique to handle the ranking-dependent challenge; intro-
+                                                                           duces a constraint optimization term to address the score inflation
+   Notably, Top- optimization has also been investigated in other          issue; and leverage a specific surrogate function to tackle the discon-
+fields, yet these approaches fall short when applied to RS. For in-        tinuity problem, equipping the loss with distributional robustness.
+stance, AATP [2] serves as a surrogate Top- loss by integrating            Our theoretical analysis confirms the close bounded relationship
+quantile. Nevertheless, this loss is heuristically designed, which         between Precision@ and Talos, equivalence to distributionally ro-
+lacks theoretical connections to Top- accuracy. Furthermore, it            bustness optimization, and convergence guarantees. Beyond these
+fails to address the common distribution shifts in RS (cf. Table 3.4). In  strengths, Talos is concise in form and computationally efficient,
+image retrieval, Pre@ [31] and RS@ [34] optimize Precision@                making it practical in RS. Considering Talos still introduces a tem-
+and Recall@, respectively. However, they either integrated the             perature hyperparameter, developing adaptive  mechanisms such
+complicated sampling strategy or rely on nested approximations of          as connecting  to the number of positive interactions or using
+both ranking positions and indicator functions, which exacerbate           meta-learning, is a promising direction for future research.
+errors when aligning with Top- accuracy. In information retrieval,
+SmoothI@ [46] employs the softmax function to approximate                  Acknowledgments
+Top- indicators through a complex recursive estimation process,
+leading to inaccurate approximations particularly in RS with large         This work is supported by the Zhejiang Province "JianBingLingYan+X"
+item sets. As shown in Table 3.1, SmoothI@ underperforms even              Research and Development Plan (2025C02020). We thank the re-
+the basic BPR when applied with the XSimGCL backbone.                      viewers for their valuable and insightful suggestions that improve
+                                                                           the paper.
+   Recently, a contemporaneous and parallel study, SL@ [58],
+focuses on optimizing NDCG@. We emphasize that Talos differs
+Talos: Optimizing Top- Accuracy in Recommender Systems                                                                     WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+References                                                                                        fields. Electronics 11, 1 (2022), 141.
+                                                                                            [25] R Koenker. 2005. Quantile Regression Cambridge, UK: Cambridge Univ.
+ [1] Robert Bell, Yehuda Koren, and Chris Volinsky. 2007. Modeling relationships at
+      multiple scales to improve accuracy of large recommender systems. In Proceedings      [26] Yehuda Koren, Robert Bell, and Chris Volinsky. 2009. Matrix factorization tech-
+      of the 13th ACM SIGKDD international conference on Knowledge discovery and                  niques for recommender systems. Computer 42, 8 (2009), 30­37.
+      data mining. 95­104.
+                                                                                            [27] Siyi Lin, Chongming Gao, Jiawei Chen, Sheng Zhou, Binbin Hu, Yan Feng, Chun
+ [2] Stephen Boyd, Corinna Cortes, Mehryar Mohri, and Ana Radovanovic. 2012.
+      Accuracy at the top. Advances in neural information processing systems 25 (2012).           Chen, and Can Wang. 2025. How do recommendation models amplify popularity
+                                                                                                  bias? An analysis from the spectral perspective. In Proceedings of the Eighteenth
+ [3] Jiawei Chen, Hande Dong, Yang Qiu, Xiangnan He, Xin Xin, Liang Chen, Guli                    ACM International Conference on Web Search and Data Mining. 659­668.
+                                                                                            [28] Zhutian Lin, Junwei Pan, Shangyu Zhang, Ximei Wang, Xi Xiao, Shudong Huang,
+      Lin, and Keping Yang. 2021. AutoDebias: Learning to debias for recommendation.
+      In Proceedings of the 44th International ACM SIGIR Conference on Research and               Lei Xiao, and Jie Jiang. 2024. Understanding the ranking loss for recommendation
+      Development in Information Retrieval. 21­30.                                                with sparse user feedback. In Proceedings of the 30th ACM SIGKDD Conference on
+ [4] Jiawei Chen, Hande Dong, Xiang Wang, Fuli Feng, Meng Wang, and Xiangnan                      Knowledge Discovery and Data Mining. 5409­5418.
+                                                                                            [29] Xiao Liu, Fanjin Zhang, Zhenyu Hou, Li Mian, Zhaoyu Wang, Jing Zhang, and Jie
+      He. 2023. Bias and debias in recommender system: A survey and future directions.            Tang. 2021. Self-supervised learning: Generative or contrastive. IEEE transactions
+      ACM Transactions on Information Systems 41, 3 (2023), 1­39.                                 on knowledge and data engineering 35, 1 (2021), 857­876.
+ [5] Jiawei Chen, Junkang Wu, Jiancan Wu, Xuezhi Cao, Sheng Zhou, and Xiangnan              [30] Phil Long and Rocco Servedio. 2013. Consistency versus realizable H-consistency
+                                                                                                  for multiclass classification. In International conference on machine learning.
+      He. 2023. Adap-: Adaptively modulating embedding magnitude for recommen-                    PMLR, 801­809.
+      dation. In Proceedings of the ACM Web Conference 2023. 1085­1096.
+ [6] Sirui Chen, Jiawei Chen, Sheng Zhou, Bohao Wang, Shen Han, Chanfei Su,                 [31] Jing Lu, Chaofan Xu, Wei Zhang, Ling-Yu Duan, and Tao Mei. 2019. Sampling
+                                                                                                  wisely: Deep image embedding by top-k precision optimization. In Proceedings
+      Yuqing Yuan, and Can Wang. 2024. SIGformer: Sign-aware graph transformer for                of the IEEE/CVF International Conference on Computer Vision. 7961­7970.
+      recommendation. In Proceedings of the 47th international ACM SIGIR conference
+      on research and development in information retrieval. 1274­1284.                      [32] Aaron van den Oord, Yazhe Li, and Oriol Vinyals. 2018. Representation learning
+ [7] Sirui Chen, Shen Han, Jiawei Chen, Binbin Hu, Sheng Zhou, Gang Wang, Yan                     with contrastive predictive coding. arXiv preprint arXiv:1807.03748 (2018).
+
+      Feng, Chun Chen, and Can Wang. 2025. Rankformer: A Graph Transformer for              [33] Rong Pan, Yunhong Zhou, Bin Cao, Nathan N Liu, Rajan Lukose, Martin Scholz,
+      Recommendation based on Ranking Objective. In Proceedings of the ACM on Web                 and Qiang Yang. 2008. One-class collaborative filtering. In 2008 Eighth IEEE
+      Conference 2025. 3037­3048.                                                                 international conference on data mining. IEEE, 502­511.
+ [8] Paul Covington, Jay Adams, and Emre Sargin. 2016. Deep neural networks
+      for youtube recommendations. In Proceedings of the 10th ACM conference on             [34] Yash Patel, Giorgos Tolias, and Jií Matas. 2022. Recall@ k surrogate loss with
+      recommender systems. 191­198.                                                               large batches and similarity mixup. In Proceedings of the IEEE/CVF Conference on
+ [9] Yu Cui, Feng Liu, Jiawei Chen, Canghong Jin, Xingyu Lou, Changwang Zhang,                    Computer Vision and Pattern Recognition. 7502­7511.
+
+      Jun Wang, Yuegang Sun, and Can Wang. 2025. HatLLM: Hierarchical Attention             [35] Qi Pi, Guorui Zhou, Yujing Zhang, Zhe Wang, Lejian Ren, Ying Fan, Xiaoqiang
+
+      Masking for Enhanced Collaborative Modeling in LLM-based Recommendation.                    Zhu, and Kun Gai. 2020. Search-based user interest modeling with lifelong
+      arXiv preprint arXiv:2510.10955 (2025).                                                     sequential behavior data for click-through rate prediction. In Proceedings of the
+[10] Yu Cui, Feng Liu, Jiawei Chen, Xingyu Lou, Changwang Zhang, Jun Wang,                        29th ACM International Conference on Information & Knowledge Management.
+                                                                                                  2685­2692.
+      Yuegang Sun, Xiaohu Yang, and Can Wang. 2025. Field Matters: A lightweight
+      LLM-enhanced Method for CTR Prediction. arXiv preprint arXiv:2505.14057               [36] Yuanhao Pu, Defu Lian, Xiaolong Chen, Jin Chen, Ze Liu, and Enhong Chen.
+      (2025).
+                                                                                                  2025. Understanding the Effect of Loss Functions on the Generalization of Rec-
+[11] Yu Cui, Feng Liu, Pengbo Wang, Bohao Wang, Heng Tang, Yi Wan, Jun Wang, and                  ommendations. In Proceedings of the 31st ACM SIGKDD Conference on Knowledge
+                                                                                                  Discovery and Data Mining V. 1. 1127­1137.
+      Jiawei Chen. 2024. Distillation matters: empowering sequential recommenders           [37] Zhaochun Ren, Xiangnan He, Dawei Yin, Maarten de Rijke, et al. 2024. Informa-
+      to match the performance of large language models. In Proceedings of the 18th               tion Discovery in E-commerce. Foundations and Trends® in Information Retrieval
+      ACM Conference on Recommender Systems. 507­517.                                             18, 4-5 (2024), 417­690.
+[12] Chongming Gao, Kexin Huang, Jiawei Chen, Yuan Zhang, Biao Li, Peng Jiang,
+                                                                                            [38] Steffen Rendle, Christoph Freudenthaler, Zeno Gantner, and Lars Schmidt-Thieme.
+      Shiqi Wang, Zhong Zhang, and Xiangnan He. 2023. Alleviating matthew effect                  2009. BPR: Bayesian personalized ranking from implicit feedback. In Proceedings
+      of offline reinforcement learning in interactive recommendation. In Proceedings             of the Twenty-Fifth Conference on Uncertainty in Artificial Intelligence. 452­461.
+      of the 46th International ACM SIGIR Conference on Research and Development in
+      Information Retrieval. 238­248.                                                       [39] R Tyrrell Rockafellar and Roger JB Wets. 1998. Variational analysis. Springer.
+[13] Lingxin Hao and Daniel Q Naiman. 2007. Quantile regression. Number 149. Sage.          [40] Jun Shao. 2008. Mathematical statistics. Springer Science & Business Media.
+[14] F Maxwell Harper and Joseph A Konstan. 2015. The movielens datasets: History           [41] Xiang-Rong Sheng, Jingyue Gao, Yueyao Cheng, Siran Yang, Shuguang Han,
+      and context. Acm transactions on interactive intelligent systems (tiis) 5, 4 (2015),
+      1­19.                                                                                       Hongbo Deng, Yuning Jiang, Jian Xu, and Bo Zheng. 2023. Joint optimization
+                                                                                                  of ranking and calibration with contextualized hybrid model. In Proceedings
+[15] Ruining He and Julian McAuley. 2016. VBPR: visual bayesian personalized                      of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining.
+      ranking from implicit feedback. In Proceedings of the AAAI conference on artificial         4813­4822.
+      intelligence, Vol. 30.
+                                                                                            [42] Wentao Shi, Jiawei Chen, Fuli Feng, Jizhi Zhang, Junkang Wu, Chongming Gao,
+[16] Xiangnan He, Kuan Deng, Xiang Wang, Yan Li, Yongdong Zhang, and Meng
+                                                                                                  and Xiangnan He. 2023. On the theories behind hard negative sampling for
+      Wang. 2020. LightGCN: Simplifying and powering graph convolution network for                recommendation. In Proceedings of the ACM Web Conference 2023. 812­822.
+      recommendation. In Proceedings of the 43rd International ACM SIGIR conference         [43] Wentao Shi, Chenxu Wang, Fuli Feng, Yang Zhang, Wenjie Wang, Junkang Wu,
+      on research and development in Information Retrieval. 639­648.
+[17] Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu, and Tat-Seng                     and Xiangnan He. 2024. Lower-Left Partial AUC: An Effective and Efficient
+      Chua. 2017. Neural collaborative filtering. In Proceedings of the 26th international        Optimization Metric for Recommendation. In Proceedings of the ACM on Web
+      conference on world wide web. 173­182.                                                      Conference 2024. 3253­3264.
+[18] A Iliev, Nikolay Kyurkchiev, and Svetoslav Markov. 2017. On the approximation          [44] Yue Shi, Martha Larson, and Alan Hanjalic. 2014. Collaborative filtering beyond
+      of the step function by some sigmoid functions. Mathematics and Computers in                the user-item matrix: A survey of the state of the art and future challenges. ACM
+      Simulation 133 (2017), 223­234.                                                             Computing Surveys (CSUR) 47, 1 (2014), 1­45.
+[19] Anton Iliev Iliev, Nikolay Kyurkchiev, and Svetoslav Markov. 2015. On the              [45] Xiaoyuan Su and Taghi M Khoshgoftaar. 2009. A survey of collaborative filtering
+                                                                                                  techniques. Advances in artificial intelligence 2009, 1 (2009), 421425.
+      approximation of the cut and step functions by logistic and Gompertz functions.       [46] Thibaut Thonet, Yagmur Gizem Cinar, Eric Gaussier, Minghan Li, and Jean-Michel
+      Biomath 4, 2 (2015), ID­1510101.
+[20] Ashish Jaiswal, Ashwin Ramesh Babu, Mohammad Zaki Zadeh, Debapriya Baner-                    Renders. 2022. Listwise learning to rank based on approximate rank indicators. In
+                                                                                                  Proceedings of the AAAI Conference on Artificial Intelligence, Vol. 36. 8494­8502.
+      jee, and Fillia Makedon. 2020. A survey on contrastive self-supervised learning.      [47] Bohao Wang, Jiawei Chen, Changdong Li, Sheng Zhou, Qihao Shi, Yang Gao, Yan
+      Technologies 9, 1 (2020), 2.
+[21] Johan Ludwig William Valdemar Jensen. 1906. Sur les fonctions convexes et les                Feng, Chun Chen, and Can Wang. 2024. Distributionally Robust Graph-based
+      inégalités entre les valeurs moyennes. Acta mathematica 30, 1 (1906), 175­193.              Recommendation System. In Proceedings of the ACM on Web Conference 2024.
+[22] Christopher C Johnson et al. 2014. Logistic matrix factorization for implicit                3777­3788.
+      feedback data. Advances in Neural Information Processing Systems 27, 78 (2014),
+      1­9.                                                                                  [48] Bohao Wang, Feng Liu, Jiawei Chen, Xingyu Lou, Changwang Zhang, Jun Wang,
+
+[23] Diederik P Kingma and Jimmy Ba. 2014. Adam: A method for stochastic opti-                    Yuegang Sun, Yan Feng, Chun Chen, and Can Wang. 2025. Msl: Not all tokens
+      mization. arXiv preprint arXiv:1412.6980 (2014).                                            are what you need for tuning llm as a recommender. In Proceedings of the 48th
+                                                                                                  International ACM SIGIR Conference on Research and Development in Information
+[24] Hyeyoung Ko, Suyeon Lee, Yoonseo Park, and Anna Choi. 2022. A survey of                      Retrieval. 1912­1922.
+                                                                                            [49] Bohao Wang, Feng Liu, Changwang Zhang, Jiawei Chen, Yudi Wu, Sheng Zhou,
+      recommendation systems: recommendation models, techniques, and application
+                                                                                                  Xingyu Lou, Jun Wang, Yan Feng, Chun Chen, et al. 2025. Llm4dsr: Leveraging
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates  Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+      large language model for denoising sequential recommendation. ACM Transac-            A Theoretical Proofs
+      tions on Information Systems 44, 1 (2025), 1­32.                                      A.1 Proof of Theorem 3.1
+[50] Wenjie Wang, Xinyu Lin, Fuli Feng, Xiangnan He, Min Lin, and Tat-Seng Chua.
+                                                                                            To prove Theorem 3.1, we first derive Eq.(3.4) as:
+      2022. Causal representation learning for out-of-distribution recommendation. In
+      Proceedings of the ACM Web Conference 2022. 3562­3571.                                - logPrecision@ = log                   I    (    -     )  - log    P  (         -   )
+[51] Xiang Wang, Xiangnan He, Meng Wang, Fuli Feng, and Tat-Seng Chua. 2019.
+      Neural graph collaborative filtering. In Proceedings of the 42nd international ACM                                                                                         
+      SIGIR conference on Research and development in Information Retrieval. 165­174.
+[52] Junkang Wu, Jiawei Chen, Jiancan Wu, Wentao Shi, Xiang Wang, and Xiangnan                                                                                                  (A.1)
+
+      He. 2023. Understanding contrastive learning via distributionally robust optimiza-    We  simplify       notation    (        -   )     and    (   -     )  as     ().  Here,
+      tion. Advances in Neural Information Processing Systems 36 (2023), 23297­23320.
+[53] Junkang Wu, Jiawei Chen, Jiancan Wu, Wentao Shi, Jizhi Zhang, and Xiang                                                                                   
+
+      Wang. 2024. Bsl: Understanding and improving softmax loss for recommendation.         we simply consider   [-1,1] and   [-2,2] following recent
+      In 2024 IEEE 40th International Conference on Data Engineering (ICDE). IEEE,
+      816­830.                                                                              work [53, 57], as cosine similarity is commonly used to generate rec-
+
+[54] Jiancan Wu, Xiang Wang, Xingyu Gao, Jiawei Chen, Hongcheng Fu, and Tianyu              ommendation. Also, the normalization of prediction values has been
+
+      Qiu. 2024. On the effectiveness of sampled softmax loss for item recommendation.      demonstrated essential for RS [5]. By selecting  ()=sigmoid()1/ ,
+      ACM Transactions on Information Systems 42, 4 (2024), 1­26.                           for log( (2+2)sigmoid(-2)/2) , the red term can be bounded up as:
+[55] Shiwen Wu, Fei Sun, Wentao Zhang, Xu Xie, and Bin Cui. 2022. Graph neural
+      networks in recommender systems: a survey. Comput. Surveys 55, 5 (2022), 1­37.                                 log 
+[56] Marek Wydmuch, Kalina Jasinska, Mikhail Kuznetsov, R'obert Busa-Fekete, and
+                                                                                             log  () = log()  log  () + log(1 + 2/2)1/ ,   [-2, 0]
+      Krzysztof Dembczynski. 2018. A no-regret generalization of hierarchical softmax        log  ()  log(1)1/  log  () + log(1 + 2/2)1/ ,   (0, 2]
+      to extreme multi-label classification. Advances in neural information processing
+      systems 31 (2018).                                                                                                                                               (A.2)
+[57] Weiqin Yang, Jiawei Chen, Xin Xin, Sheng Zhou, Binbin Hu, Yan Feng, Chun               For  satisfying   log(1/2) , the blue term can be bounded up as:
+
+      Chen, and Can Wang. 2024. PSL: Rethinking and Improving Softmax Loss from                                                log 
+      Pairwise Perspective for Recommendation. Advances in Neural Information
+      Processing Systems 37 (2024), 120974­121006.                                                  log  ()  log(1/2)1/  log  () ,   [-2, 0]
+[58] Weiqin Yang, Jiawei Chen, Shengjia Zhang, Peng Wu, Yuegang Sun, Yan Feng,
+                                                                                                                                                                                (A.3)
+      Chun Chen, and Can Wang. 2025. Breaking the Top-K Barrier: Advancing Top-K
+      Ranking Metrics Optimization in Recommender Systems. In Proceedings of the                    log  ()  log(1) = log  ()                          ,   (0, 2]
+      31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V. 2.
+      3542­3552.                                                                            Thus, select a proper   [ log( (2+2)sigmoid(-2)/2) , log(1/2) ], we have:
+                                                                                                                                              log                 log 
+[59] Junliang Yu, Xin Xia, Tong Chen, Lizhen Cui, Nguyen Quoc Viet Hung, and
+                                                                                                       - log Precision@  LTalos + log(1 + 2/2)1/ (A.4)
+      Hongzhi Yin. 2023. XSimGCL: Towards extremely simple graph contrastive
+      learning for recommendation. IEEE Transactions on Knowledge and Data Engi-            Theorem 3.1 is proven. Notably, we observe the trade-off in tem-
+      neering 36, 2 (2023), 913­926.                                                        perature setting: 1) a large  contradicting with   log(1/2) renders
+[60] Wenhui Yu and Zheng Qin. 2020. Graph convolutional network for recommen-
+      dation with low-pass collaborative filters. In International Conference on Machine                                                                                            log 
+      Learning. PMLR, 10936­10945.
+[61] An Zhang, Leheng Sheng, Zhibo Cai, Xiang Wang, and Tat-Seng Chua. 2024.                Eq.(A.3) not hold, leading Talos fails to serve as an upper bound; 2)
+
+      Empowering collaborative filtering with principled adversarial contrastive loss.       is set too small would either contradict with Eq.(A.2) or increase
+      Advances in Neural Information Processing Systems 36 (2024).                          the constant log(1 + 2/2)1/ , scaling the gap with Precision@.
+[62] Shengjia Zhang, Jiawei Chen, Changdong Li, Sheng Zhou, Qihao Shi, Yan Feng,
+                                                                                            A.2 Proof of Theorem 3.2
+      Chun Chen, and Can Wang. 2025. Advancing Loss Functions in Recommender
+                                                                                            Given   -    1  |    Plog  (         -      )   as   constants    do  not   affect  opti-
+      Systems: A Comparative Study with a Rényi Divergence-Based Solution. In                          | P
+      Proceedings of the AAAI Conference on Artificial Intelligence, Vol. 39. 13286­13294.                                              
+[63] Shuai Zhang, Huoyu Liu, Aston Zhang, Yue Hu, Ce Zhang, Yumeng Li, Tan-
+                                                                                            mization, the original DRO problem can be simplified as:
+      chao Zhu, Shaojian He, and Wenwu Ou. 2021. Learning user representations
+      with hypercuboids for recommender systems. In Proceedings of the 14th ACM             max E              log  (     -      )     s.t. Q = { : KL ( ^)  } (A.5)
+      international conference on web search and data mining. 716­724.
+[64] Shuai Zhang, Lina Yao, Aixin Sun, and Yi Tay. 2019. Deep learning based recom-          Q                               
+      mender system: A survey and new perspectives. ACM computing surveys (CSUR)                                             
+      52, 1 (2019), 1­38.
+                                                                                            Let  =  ( )/^ ( ) and define a convex function  () =  log  -
+[65] Guorui Zhou, Xiaoqiang Zhu, Chenru Song, Ying Fan, Han Zhu, Xiao Ma, Yanghui
+                                                                                             + 1, then the KL divergence can be written as E^ [ ()]. Let
+      Yan, Junqi Jin, Han Li, and Kun Gai. 2018. Deep interest network for click-through
+      rate prediction. In Proceedings of the 24th ACM SIGKDD international conference       (,   )  =  log  (    -      ),   Eq.(A.5)       can  be    reformulated     as:
+      on knowledge discovery & data mining. 1059­1068.
+[66] Huachi Zhou, Hao Chen, Junnan Dong, Daochen Zha, Chuang Zhou, and Xiao                                             
+
+      Huang. 2023. Adaptive popularity debiasing aggregator for graph collaborative             max E^ [(, )] s.t. E^ [ ()]   and E^ [] = 1 (A.6)
+      filtering. In Proceedings of the 46th International ACM SIGIR Conference on Research
+      and Development in Information Retrieval. 7­17.                                             
+[67] Dixian Zhu, Gang Li, Bokun Wang, Xiaodong Wu, and Tianbao Yang. 2022.
+                                                                                            As a convex optimization problem, we use the Lagrangian function
+      When auc meets dro: Optimizing partial auc for deep learning with non-convex          to solve it:
+      convergence guarantee. In International Conference on Machine Learning. PMLR,
+      27548­27573.                                                                          min max    E^ (, )               -      E^  ()          -  +      E^ [] -1          (A.7)
+
+[68] Ziwei Zhu, Jianling Wang, and James Caverlee. 2019. Improving top-k recommen-           0, 
+      dation via jointcollaborative autoencoders. In The World Wide Web Conference.
+      3483­3482.                                                                            By the theorem of interchange of minimization and integration [39],
+                                                                                            we can interchange maximization and expectation in Eq.(A.7) as:
+
+                                                                                                        min             -  + E^                        (, ) + 
+                                                                                                                                                                     -  ()
+                                                                                            Eq.(A.7)              0,                          max            
+
+                                                                                                                                                
+
+                                                                                                                                                                                (A.8)
+
+                                                                                            Notice that max (, )+  -  () =  ( (, )+ ) is the convex
+                                                                                                                                                           
+                                                                                                               
+
+                                                                                            conjugate function of  (), and we have  () =  - 1. Then:
+
+                                                                                                Eq.(A.8) = min          -  + E^               exp(  (, ) +        )-1
+
+                                                                                                                   0,                                                           (A.9)
+
+                                                                                                                                                         
+Talos: Optimizing Top- Accuracy in Recommender Systems                                                                                          WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+The optimal , which minimizes the preceding expression is  =                                                 Since   LQR-2       ( ;         s   ) - LQR-S     ( ;         s  )     0  and              [-1,   1],    we     have:
+
+                                                                                                                                    -S                            -S                            
+
+- log E^ exp((, )/) . Ultimately, substituting , (, ) =                                                                                                                           2
+
+      (    -         )                                                                                       LQR-2     ( ;       s     )  -   LQR-2  (      ;  s  )                    + 2 ln 2 = O (2) (A.16)
+
+log                     back    into    Eq.(A.9),       we     have:                                                      -S                                                     2
+
+                                                                    (, )                                     Considering            the   sub-gradient         of    LQR-2       w.r.t.   ,       i.e.,  LQR-2        (       ;  s )     =
+
+       Eq.(A.9) = min                 +  log E^             exp(               )                                                                                                                                         
+
+                          0                                                                          (A.10)      -1           , we can analyze the two cases:
+
+                                                                                                                |I| , |I|
+
+                        =  min{         +        log  E^   (          -        )1/     }                     ·                                    ,                                                  = /|I|           
+
+                            0                                                                                                        -S           
+                                                                            
+                                                                                                                 Condition:                            take    the sub-gradient 1                                        0:
+
+Eq.(3.9) is equivalent to optimizing:                                                                           |     -       |           1   LQR-2     ( ;             )  -  LQR-S      (           )   = O () (A.17)
+
+                                                                                                                                                           -S        s                         ;  s
+                                                                                                                  -S  |1 |
+       1                                                                               1/
+-                    log  (          -        )  +                 (        -       )
+                                                      log E^
+                                                                               
+     |P |                                                                         
+
+             P                                                                                               ·         <         ,  take     the   sub-gradient            1     =   (   - 1)/|I|              0:
+
+                                                                                                                  -S        
+
+                  1  1                                   )                                        )1/                               1
+=  ·       -                      log  (             -      + log E^            (         -
+             |P |                                                                                            |      -      |                 LQR-2   (         ;  s  )  -  LQR-S       (    ;  s  )     = O (2)  O ()
+                                                                                                
+                                                                                                                                                                                          
+                                                                                                                -S  |2 |
+                                                                                                                                                         -S
+
+                          P
+
+                                                                                                                                                                                                                          (A.18)
+
+                                                        Talos                                                In all the cases, we have | -  |  O (), indicating that the
+
+A.3 Proof of Theorem 3.3                                                                                                                                   -S 
+
+We begin by calculating the accurate gradient w.r.t. s (the vector                                           surrogate LQR-S does not affect the quantile estimation.
+of all predicted scores) as follows:
+                                                                                                             Step   2:   The        Gradient            bound.             Suppose          |     -         |            for     all  ,
+
+                                                                                                                                                                                                        
+
+                                                                                                             we now bound the gradient norm  as:
+
+                                                        LTalos           LTalos                                                  2|I |1/2  -/                     where              = LTalos                  
+                                                          s                                                             
+                                                                                                                                                                                                                  
+
+           s      LTalos    (  s  ,      (s      ))  =              +                  s                                                      2                                                 s
+
+For simplicity, let               =      LTalos       and      =     LTalos            .  In    practical    (a)  First term.                The LTalos term is bounded, as:
+                                          s                                    s
+                                                                                                                                                       
+
+implementation, we detach the term . In fact, this omission does                                              LTalos                       (       -  ) -                           (  -              )
+                                                                                                                                                                                    N  (
+                                                                                                                                                                                                      
+
+not affect convergence. We prove this with the following four steps:                                                          =                  |P |                                                 -               (      -        )
+Step 1: Approximation of Quantile Regression Loss. Since
+it has been proved in Appendix H.1 that Eq.(3.3) is unbiased, we                                                                                                                                               )         
+
+                                                                                                                                                                                                                          
+
+                                                                                                                                   P                                N            
+
+analyze the original Eq.(H.8) for simplicity. For theoretical rigor,                                                                                                                  (A.19)
+                                                                                                             Since sigmoid function satisfies 0   ()  1, LTalos  2/.
+
+                                                                                                                                                                                              
+
+the following form is used, which is equivalent to Eq.(H.8):                                                 (b) Second term. Given by the first-order optimality condition,
+
+          LQR-2 (; s ) :=             +  1                                                                                  LQR-S         = 0. Take     the gradient w.r.t. s , we have:
+                                               +                    ( - )+                                   we have
+                                         |I| |I|                                                     (A.11)                      
+
+                                                                                                                              
+
+                                                                 I
+
+                                                                                                             0= 2 LQR-S                      2 LQR-S                                                     -1
+
+where  is a sufficiently small constant to ensure the uniqueness of                                                                       +                       s           =-       2       LQR-S           2          LQR-S
+
+                                                                                                                  ( )2 s  s                                                                                           ,s
+
+                                                                                                                                                                         
+
+the  solution.    To    bound ,          we      need   derive      the  term                .  However,                                                                                                                  (A.20)
+                                                                                    s
+
+the non-smooth term (·)+ in Eq.(A.11) hinders the derivation. Since                                          Given  () (-)  0, and set  as , we have:
+
+(·)+ can be approximated by the softplus function  () =  ln(1 +
+
+exp(·/)) as   0, we approximate Eq.(A.11) with:                                                                  2    LQR-S         =     +      1                (        -       )/          (         -   )/               
+
+                                                                                                                                                                                                  
+                                                                                                                                               |I|                               
+
+                         +   1                                                                                                                           I
+
+LQR-S (; s ):=                   + 2 +                          ln (1 + exp(( - )/))                                                                                                                                      (A.21)
+                                    2 |I|
+                        |I|                               I                                                  We derive second-order gradient as:
+
+                                                                                                     (A.12)
+
+where  2 ensures its -strongly convex. We prove that the differ-                                                2        LQR-S         =      1         (         -        )/          (       -   )/             |I|
+
+            2                                                                                                                                                                                                          (A.22)
+
+ence between  (optimal solution of Eq.(A.12)) and  (optimal                                                                                   |I|                                                                  =1
+
+                        -S                                                                                          ,s
+
+solution of Eq.(A.11)) is negligible, which justifies the use of LQR-S.
+
+Proof. Since +   ()  + +  ln 2, we have:                                                                      () (-) is an even function that satisfies  () (-) = (| |) (|-
+
+                                                                                                              |)       exp(| |).             Given     |       -   |              ,    we      have      2            LQR-S           
+LQR-2 (; s )  LQR-S (; s )  LQR-2 (; s ) + 2 + 2 ln 2 (A.13)                                                                                                                                                  
+                                                                                                                                                                                                                ,s
+                                                        2
+                                                                                                              -/ / · 1, where 1 is a vector of ones with length |I|. There-
+
+       =      ( )2      +    2                                                                               fore,  we     have           s             |I |1/2      ·   -/ /2.
+
+Let                             ln 2,   we       have:                                                                                         
+
+           2 
+
+                                                                                                             Given the First term and Second term bound, we conclude:
+
+-LQR-2    (    ;  s )      -LQR-S      (      ;  s )  +        -LQR-S       (       ;  s )   +       (A.14)                            2|I |1/2  -/
+
+                                                                               
+
+                                                                                -S
+
+Thus, we have:                                                                                                                                                 =   0 as   0                                               (A.23)
+
+                                                                                                                                              2
+
+LQR-2  (       ;  s  )-LQR-2      (      ;  s    )    LQR-2    (      ;  s  )-LQR-S       (       ;  s  )+   Step 3: Convergence Guarantee. Let  be the Lipschitz constant
+
+                                                                  -S                         -S
+          -S
+                                                                                                                                         ( )
+                                                                                                     (A.15)  of  L  ,         and             denotes   parameters                 that  are      updated         at  iteration
+                                                                                                                                       
+
+                                                                                                                                         1
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates                                     Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+                       Table A.1: Temporal shift exploration.                                                                Table A.2: Number of negative samples exploration.
+
+             Loss                     Gowalla                                  Games                                   Loss                   Beauty                    MovieLens
+
+             SL@          Precision@20 Recall@20                 Precision@20 Recall@20                                           | | = 8 | | = 16 | | = 32 | | = 8 | | = 16 | | = 32
+             Talos
+             Imp.%            0.0567           0.1559                  0.0091               0.0708                     SL@        0.0167      0.0159  0.0150    0.2242  0.2265     0.2215
+                              0.0574           0.1577                  0.0094               0.0738                     Talos      0.0173      0.0162  0.0156    0.2310  0.2311     0.2266
+
+                              +1.12%           +1.12%                  +2.95%               +4.15%                     Imp.%      +3.67%      +1.96%  +3.50%    +3.01%  +2.02%     +2.28%
+
+Table A.3: Performance comparison with varying  on Movie-                                                              Table A.4: The error between the estimated Top- quantile
+Lens. P@ denotes Precision@.
+                                                                                                                       ^ 20  and  the  ideal  Top-    quantile   20  .
+
+                                                                                                                                                                 
+
+             Loss P@20 P@50 P@80 P@100 P@200 P@400                                                                            Loss Gowalla Beauty Games MovieLens
+
+             SL@          0.2287      0.1557   0.1224         0.1067         0.0685         0.0400                            SL@ 0.1943 0.1948 0.2028                  0.1389
+             Talos        0.2349      0.1600   0.1257         0.1101         0.0700         0.0410                            Talos 0.0131 0.0123 0.0100                0.0059
+
+             Imp.%        +2.70%      +2.76%   +2.65%         +3.21%         +2.16%         +2.26%
+
+ with  detached. For convenience, we simplify notation ( ( ) )                                                         B SL@ Comparison
+                                                                                                           1
+                                                                                                                       We present a comparative study between SL@ [58] and Talos
+as   ( ) ,    ( ( ) )     as   ( ) ,  and    LTalos  ( (   )  )  as    L ( ) .    We      can    derive:               across multiple evaluation scenarios. We also refer to Yang et al.
+                                                                                                                       [58], and conduct additional comparisons on MovieLens dataset to
+                  1                                     1                 Talos                                        extend the evaluation scope.
+
+        L (+1) L ( )             -      ( )  +  ( ),      ( )       +  2 ( ) 2                                            We first argue that NDCG@ also exhibits significant difference
+                                                                                                                       from Top- accuracy. As shown in Table 1.1, optimizing NDCG@
+                                                                                                                       may not always yield better Top- accuracy. This observation
+                                                                                                                       indicates that SL@, while tailored to NDCG@, may fail to de-
+         Talos Talos                                                      2                                            liver proportional improvements in Top- accuracy. Table A.3 also
+                                                                                                                       demonstrates this: With varying , Talos consistently outperforms
+                   =L ( )        -       ( ) ( )        - ( -  2) ( ) 2                                (A.24)          SL@ +2.62% on average in terms of Top- accuracy metric, un-
+                                                                                                                       derscoring the importance of directly optimizing Top- accuracy
+                                        ,                                                                              in practical recommendation scenarios.
+
+                          Talos                                        2                                                  Table A.2 shows that Talos achieves an average improvement of
+                                                                                                                       +2.83%, whereas SL@ shows reduced robustness under limited
+                   L ( ) +  ( )   ( )  - ( -  2) ( ) 2                                                                 negative numbers. In temporal shift scenario, Talos achieves an av-
+                          Talos                                                                                        erage improvement of +2.84% over SL@. This superiority reflects
+                                                                          2                                            the inherent connection between Talos and DRO (cf. Theorem 3.2).
+                                                                                                                       While prior work [52] demonstrates the connection between SL
+Let  =  -  2, take 0 <  < 2 , we have                                             ( )     2         L (0)     +        and Distributionally Robustness Optimization, we attribute the per-
+                   2                                                          =0                                       formance drop to the additional weight term introduced in SL@.
+                                                                                                       Talos           In addition, Talos incorporates a more accurate threshold estima-
+                                                                                                                       tion strategy, resulting in substantially lower estimation error than
+              ( )    ( )      .   With  Young     inequality,          we      have:         ( )     ( )               SL@ (cf. Table A.4).
+         =0
+
+  ( ) 2 + 2  ( ) 2. Therefore, we obtain:
+     2                 2
+
+                           ( ) 2  L (0)                     2              ( )
+
+                                                                 
+
+                                                        +                         2                    (A.25)
+
+                          2                    Talos 2            =0
+
+We have proved in step 2 that   0 as   0, thus we conclude:
+
+        (2 - 2)                  ( ) 2         1 L (0) <  = ( ) 2  0
+                      E                           
+
+              4
+
+                                                                                                       (A.26)
+
+Step 4: Convergence Equivalence. We additionally demonstrate
+
+that omitting  does not affect convergence to the same solutions:
+
+                                  ( )                                                       ( )
+difference between  (updated with  detach) and  (updated
+                                  1                                                         2
+
+by +) is negligible. Given two update schemes, we can derive:
+
+  ( +1)      =    ( )  -  ( ( ) )      and       ( +1)     =  ( ) -               ( ( ) ) +  ( ( ) )                   C Detailed Related Work
+                                                                    2                                  2
+                                                                                                                       In this section, we presnet the detailed related work on recommen-
+  1             1                 1            2                                       2                               dation models and recommendation loss consistency.
+                                                                                                                       Recommendation Models. In the realm of RS, recommendation
+For     convenience,         we   simplify      (    )  -    (   )     as      ,  and     ( (    )  )  as     (  )  .  models play a vital role in anticipating the user preference. Among
+                                                             1                                                         various architectures, collaborative filtering (CF) [9, 45, 68] is widely
+                                                  2                                          2                         adopted to instruct the model design. The primary task of CF-
+                                                                                                                       models is to predict interactions by assessing the similarity between
+Let  denotes the Lipschitz constant of LTalos, we have:                                                                user and item embeddings. Early research focused on Matrix Fac-
+                                                                                                                       torization (MF) [26], which decomposes the user-item interaction
+         +1            +   ( ( ) )      - ( ( ) )          +    ( )                                                    matrix into latent user and item embedding vectors. This approach
+                                                                                                                       act as foundational models like MF [26], SVD [1] and NCF [17].
+                                    2            1                                                                     The more advanced methods, inspired by the efficacy of Graph
+                                                                                                                       Neural Networks (GNNs [6, 7, 51, 55]), including LightGCN [16],
+                 +  +   ( )  = (1 + ) +  ( )                                                           (A.27)          NGCF [51], LCF [60], and APDA [66], have emerged and achieve
+                                                                                                                       great success to address this issue. Recently, some works attempt to
+Note that 0 = 0. Given our conclusion in step 2, we have:                                                              introduce contrastive learning paradigm into LightGCN to augment
+
+            2|I |  -/              -1                   =     2|I |  -/           (1 + )               -1
+                                                                2                        
+                                  
+               2                      (1 + )
+
+                                   =0
+
+Let  denotes the maximum training step.  > 0, take a small  
+
+
+
+    2|I|     (1 + )              -1    /   ,   we    have      (       )   - (    )          ,  indicating
+
+                                                                 1             2
+
+that two update schemes converge to the same optimal solutions.
+Talos: Optimizing Top- Accuracy in Recommender Systems                                WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+graph data such as XSimGCL [59], etc, achieving the state-of-the-                     Table D.1: Dataset statistics.
+art performance. In addition, several recent works utilized large
+language models [11, 48, 49] to enhance RS performance.                  Dataset #Users #Items #Interactions Density
+Recommendation Loss Consistency. Recent studies [30, 36, 56]
+have theoretically demonstrated the loss consistency in terms of         Electronics  150,523  52,024  1,312,545                         0.0007
+recommendation metrics. In particular, Long and Servedio [30],           Gowalla       29,858  40,988  1,027,464                         0.0007
+Wydmuch et al. [56] have demonstrated H-consistency and Bayes-           Games         18,813   8,691                                    0.0009
+consistency for SL w.r.t. Precision@, respectively. Pu et al. [36]       Beauty        15,603   8,693    177,572                         0.0009
+further demonstrate the consistency of SL in two-tower recommen-                                         139,554
+dation model settings. However, practical recommendation tasks
+are inherently complex: distribution shifts, sparse interactions, and    layer), the temperature of InfoNCE is set as 0.1, and the weight of
+limited model capacity mean that the Bayes and H-consistency             the auxiliary InfoNCE loss is searching from {0.01, 0.05, 0.1, 0.2}.
+optimal situation is rarely attainable in practice. Consequently, sub-
+stantial performance disparities among SL-based methods were             D.3 Datasets
+observed in empirical experiments (cf. Tables 3.1 and 3.4). This
+necessitates examining their consistency in practical RS scenarios.      The four benchmark datasets used in our experiments are summa-
+                                                                         rized in Table D.1. Following [15, 51], we use 10-core setting (or
+D Experimental Details                                                   5-core setting) for Gowalla (or Amazon) dataset. Following Yang
+D.1 Inconsistency Simulation Details                                     et al. [57], we further clean the data by excluding interactions with
+                                                                         ratings below 3 (if available). The dataset is randomly split into
+To quantify the inconsistency between LLPAUC/NDCG and Top-               training set, validation set, and test set in a ratio of 7:1:2. The details
+ metrics (i.e., Recall@ and NDCG@), we simulate pair-wise                of datasets are as follows:
+comparisons of ranking lists as follows: We randomly generate two        · Gowalla [16]: A check-in dataset from the location-based social
+ranking lists, in which the elements represent the ranking of posi-
+tive items (  200 for simulating the real-world recommender                 network Gowalla2, which consists of 1M users, 1M locations,
+systems). Afterwards, we compute NDCG, LLPAUC, and Top-                     and 6M check-ins.
+metrics (i.e., Precision@20, NDCG@20) for both lists. An inconsis-       · Movielens [14]: The Movielens dataset is a movie rating dataset
+tency case occurs when one list achieves higher NDCG/LLPAUC                 collected from Movielens3. We use the Movielens-100K version,
+but lower Top-K accuracy compared to the other, i.e., optimizing            which contains 100,000 ratings from 1000 users on 1700 movies.
+LLPAUC/NDCG does not bring benefits for improving Top- met-              · Amazon: Subsets of the 2014 Amazon product review corpus4,
+rics. The ratio of such cases is collected over 10,000 independent          which contains 142.8 million reviews spanning May 1996 to July
+trials (per dataset) to ensure statistical stability.                       2014. We process three widely-used categories: Beauty, Games
+                                                                            and Electronics [57], with interactions ranging from 40K to 1M.
+D.2 Recommendation Backbones
+                                                                         D.4 Recommendation Scenarios
+In our experiments, we implement three popular recommendation
+backbones:                                                               The detailed dataset constructions in IID and distributional shift
+· MF [26]: MF is the most foundational yet effective model that          settings are as follows:
+                                                                         · IID setting. Following the standard recommendation setup [16],
+   factorizes user-item interactions into learnable embeddings (user
+   embedding and item embedding). All the embedding-based rec-              we i.i.d. split training and test sets from the complete dataset,
+   ommendation models use MF as the first layer. Following Wang             maintaining identical distributions between both sets. Specifi-
+   et al. [51], we implement MF with embedding dimension  = 64              cally, the positive items of each user are split into 80% training
+   for all settings.                                                        and 20% test sets. Moreover, the training set is further split into
+· LightGCN [16]: LightGCN is a effective GNN-based recommen-                90% training and 10% validation sets for hyperparameter tuning.
+   dation model that aggregates high-order user-item interactions        · Distributional shift setting. We follow [47], introducing tem-
+   via non-parameterized graph convolution. By eliminating non-             poral bias to construct the test scenario with distribution shifts
+   linear activations and feature transformations in NGCF [51],             -- we divide the training and test dataset according to the in-
+   LightGCN achieves computational efficiency and enhanced per-             teraction time. Specifically, interactions with timestamps in the
+   formance. In our experiments, we adopt 2 graph convolution               earliest 80% constitute the training set, while the latest 20% form
+   layers, which aligns with the original setting in He et al. [16].        the test set. Additionally, we randomly split 10% of the training
+· XSimGCL [59]: XSimGCL is a novel contrastive learning en-                 set as the validation set. The temporal shift is very common
+   hanced [20, 29] variant of 3-layer LightGCN that injects random          in real recommendation systems, as user preferences typically
+   noise into intermediate embeddings, and optimizes an auxiliary           evolve over time [50].
+   InfoNCE loss [32] between the final layer and a selected interme-
+   diate layer (). Following the original Yu et al. [59]'s setting, the  D.5 Hyperparameter Setting
+   modulus of random noise between each layer is set as 0.1, the
+   contrastive layer  is set as 1 (where the embedding layer is 0-th     Following [53], the latent embedding size is set as 64. For model
+                                                                         training, we adopt Adam [23] optimizer with the learning rate
+
+                                                                         2 https://en.wikipedia.org/wiki/Gowalla
+                                                                         3 https://movielens.org/
+                                                                         4 https://cseweb.ucsd.edu/~jmcauley/datasets/amazon/links.html
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates  Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+Table D.2: Overall performance comparison of Talos with other losses. blue indicates the Talos achieves the SOTA performance,
+and the runner-up is underlined. Imp.% indicates the relatively improvements of Talos over the best baselines. The mark `*'
+suggests the improvement is statistically significant with  < 0.05.
+
+Model    Loss        Gowalla                             Beauty                     Games             Electronics
+  MF
+                     MRR@20 NDCG@20 MRR@20 NDCG@20 MRR@20 NDCG@20 MRR@20 NDCG@20
+
+         BPR          0.0340   0.1167                     0.0374            0.0698   0.0339   0.0699   0.0155   0.0303
+         AATP         0.0227   0.0795                     0.0294            0.0558   0.0318   0.0674   0.0065   0.0135
+         RS@          0.0301   0.0972                     0.0223            0.0374   0.0232   0.0458   0.0050   0.0088
+         SmoothI@     0.0449   0.1473                     0.0443            0.0778   0.0492   0.0973   0.0180   0.0329
+         SL           0.0481   0.1585                     0.0470            0.0813   0.0511   0.1027   0.0175   0.0339
+         BSL          0.0481   0.1585                     0.0470            0.0813   0.0514   0.1035   0.0177   0.0341
+         PSL          0.0485   0.1595                     0.0469            0.0820   0.0514   0.1035   0.0183   0.0350
+         AdvInfoNCE   0.0481   0.1582                     0.0468            0.0811   0.0505   0.1027   0.0180   0.0341
+         LLPAUC       0.0444   0.1459                     0.0395            0.0737   0.0450   0.0922   0.0134   0.0285
+         Talos       0.0513   0.1667                     0.0482            0.0851   0.0532   0.1063   0.0190   0.0361
+                     +5.84%   +4.49%                     +2.39%            +3.77%   +3.35%   +2.69%   +3.63%   +3.15%
+         Imp.%
+
+LGCN     BPR          0.0425   0.1398                     0.0412            0.0762   0.0467   0.0952  0.0128    0.0251
+         AATP         0.0153   0.0533                     0.0290            0.0560   0.0262   0.0574  0.0069    0.0144
+         RS@          0.0392   0.1321                     0.0410            0.0695   0.0414   0.0816  0.0103    0.0195
+         SmoothI@     0.0444   0.1472                     0.0456            0.0811   0.0496   0.0981  0.0196    0.0362
+         SL           0.0480   0.1584                     0.0458            0.0810   0.0514   0.1035  0.0176    0.0340
+         BSL          0.0480   0.1584                     0.0458            0.0810   0.0511   0.1031  0.0175    0.0338
+         PSL          0.0490   0.1608                     0.0462            0.0813   0.0514   0.1031  0.0179    0.0343
+         AdvInfoNCE   0.0481   0.1587                     0.0458            0.0811   0.0513   0.1032  0.0175    0.0338
+         LLPAUC       0.0415   0.1367                     0.0447            0.0803   0.0505   0.1012  0.0179    0.0346
+         Talos       0.0517   0.1675                     0.0478            0.0848   0.0528   0.1056   0.0190   0.0363
+                     +5.66%   +4.17%                     +3.55%            +4.20%   +2.71%   +2.00%            +0.13%
+         Imp.%                                                                                          -
+
+XSimGCL  BPR          0.0469   0.1531                     0.0447            0.0812   0.0483   0.0976   0.0177   0.0339
+         AATP         0.0311   0.1108                     0.0396            0.0707   0.0398   0.0833   0.0134   0.0264
+         RS@          0.0364   0.1251                     0.0401            0.0697   0.0402   0.0824   0.0100   0.0195
+         SmoothI@     0.0379   0.1299                     0.0181            0.0312   0.0330   0.0684   0.0118   0.0224
+         SL           0.0475   0.1568                     0.0457            0.0805   0.0503   0.1017   0.0175   0.0338
+         BSL          0.0475   0.1572                     0.0438            0.0788   0.0504   0.1023   0.0168   0.0330
+         PSL          0.0480   0.1583                     0.0463            0.0808   0.0505   0.1019   0.0181   0.0348
+         AdvInfoNCE   0.0475   0.1568                     0.0456            0.0803   0.0502   0.1019   0.0175   0.0337
+         LLPAUC       0.0481   0.1571                     0.0459            0.0820   0.0517   0.1037   0.0181   0.0347
+         Talos       0.0506   0.1645                     0.0489            0.0858   0.0526   0.1057   0.0189   0.0359
+                     +5.18%   +3.88%                     +5.47%            +4.60%   +1.84%   +1.97%   +4.15%   +3.25%
+         Imp.%
+
+in the range {10-1, 10-2, 10-3}, except for BPR which uses an ex-          ensure their optimal performance. We reproduced the following
+tended search lr  {10-1, 10-2, 10-3, 10-4}. The weight decay (wd)
+is searched in {0, 10-4, 10-6, 10-8}, except for BPR which uses an         losses as baselines in our experiments:
+extended search wd  {0, 10-3, 10-4, 10-5, 10-6, 10-8}. The learning        · BPR: No other hyperparameters.
+rate of the quantile estimation in Talos is fixed as 10-3. Compared        · AATP: The quantile regression learning rate:
+
+with SL, Talos preserves simplicity in hyperparameter tuning, re-             lrquantile  {10-1, 10-2, 10-3, 10-4}.
+                                                                           · RS@: The temperature 1, which approximates postive rank-
+quiring only a single temperature parameter . On XSimGCL back-
+bone, we follow [59] tune the weight of the auxiliary InfoNCE (wl)            ing, is searched in the range {0.01, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30}.
+in {0.2, 0.1, 0.05, 0.01}. Following He et al. [16], we adopt early stop-
+ping strategy, in which the training stops if Precision@20 metric             The temperature 2, which approximates the Heaviside function,
+                                                                              is searched in {1, 2, 3, 4, 5}.
+fails to improve for 25 consecutive epochs in validation set. Follow-      · SL: The temperature   {0.05, 0.10, 0.15, 0.2, 0.25, 0.30}.
+                                                                           · SmoothI@: The temperature  is searched in the same space
+ing [53], we uniformly sample 1024 negative items for each positive
+                                                                              as SL. Following the original setting Thonet et al. [46] offset  is
+instance in training (BPR only samples one).                                  searched in the rang {0.05, 0.1, 0.15, 0.2, 0.25, 0.30}.
+Hyperparameter Settings. To maintain the fairness across all               · BSL: The temperatures 1, 2 for positive and negative terms are
+methods, we tune each methods with a very fine granularity to
+                                                                              searched in the same space as SL, respectively.
+Talos: Optimizing Top- Accuracy in Recommender Systems                                    WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+· PSL: The temperature  is searched in the same space as SL.                              Table G.1: Notations for deriving Talos.
+
+   Following Yang et al. [57], the activation function is used as                Notations Descriptions
+    (·) = tanh(·/2) for its uniformly SOTA performance.
+· AdvInfoNCE: The temperature  is searched in the same space                              a user in the user set U
+   as SL. Following the original setting Zhang et al. [61], the other                     an item in the item set I
+                                                                                          the positive item set of user 
+   hyperparameters including: the negative weight is set as 64, the              P        the negative item set of user 
+   adversarial learning interval adv is searched in {5, 10, 15, 20}, the         N        the sampled negative item set of user 
+   total adversarial training times adv is searched in {5, 10, 15, 20, 25, 30},           the similarity score between item  and user 
+   the adversarial learning rate is searched in {10-4, 10-5}.                             the ranking of item  in ranking list of user 
+· LLPAUC: hyperparameters   {0.1, 0.3, 0.5, 0.7, 0.9} and                                 the Top- quantile of user 
+   {0.01, 0.1}, which follows Shi et al. [43]'s setting.                         
+· Talos: The temperatures  are searched in the same space as                              the estimated Top- quantile of user 
+   SL. The learning rate of quantile regression is fixed as 10-3. No                      the unbiased quantile estimation loss
+                                                                                          the Talos loss
+   additional hyperparameters.                                                   ^        the Indicator function
+                                                                                 Q ()     the Heaviside step function
+For all compared methods, we closely follow configurations in                    LTalos   the sigmoid(·) activation function
+                                                                                 I(·)     the sigmoid(·)1/ activation function
+their respective publications to ensure the optimal performance.                  (·)
+
+All experiments are conducted on one NVIDIA GeForce RTX 4090.                    
+
+E NDCG and MRR performance                                                       
+
+NDCG and MRR performance in Table D.2. Since comparable                               Table G.2: Notations for Theorem 3.2 and its Proof
+trends were observed across different backbones, we only report MF
+                                                                                 Notations Descriptions
+
+results for brevity. While Talos targets optimizing Top- accuracy,               Q        the uncertainty set
+it also exhibits superiority on MRR@ and NDCG@. The reason
+can be attributed to the close relations between these Top- metrics,             ^        the uniform distribution of negative item set N
+where NDCG@ and MRR@ is built on Precision@.
+                                                                                          the pertubed distribution of ^
+F Training Efficiency
+                                                                                    Table G.3: Notations for Theorem 3.3 and its Proof
+                                                                                 Notations Descriptions
+
+We evaluate the computational efficiency of Talos on matrix factor-              s        the vector of all predicted scores of user 
+ization (MF) models and compare it with baseline losses. Table F.1               s
+provides the time complexity and practical computational time of                          the Talosgradient w.r.t. s
+Talos and baseline methods. As shown in Table F.1, Talos incurs                  
+comparable overhead to SL (1.00­1.50× runtime), aligning with our                         the Talosgradient w.r.t. 
+complexity analysis in Section 3.2.                                              
+                                                                                                                                   
+                                                                                 
+                                                                                          the abbreviation for   LTalos              term
+                                                                                                                  s
+                                                                                 LQR-2
+                                                                                 LQR-S    the abbreviation for   LTalos                    term
+                                                                                                                  
+                                                                                                                                     
+                                                                                   -S                                                s
+
+                                                                                          the sufficiently small constant
+                                                                                 
+Table F.1: Computational time (s / epoch) on MF. All methods                              the hyperparameter in softplus function
+adopt uniform negative sampling technique, with | | = 1024.                        1
+                                                                                          the equivalent form of quantile regression loss
+Loss    Complexity            Games Beauty Gowalla Electronics                            the convex appximiation form of LQR-2
+                                                                                          the optimal solution of LQR-S
+BPR     O (¯ | U | |^ | )     1.23  0.16  0.14          2.18                       2
+                                                        7.84
+AATP    O (¯ | U | |^ | )     5.38  0.54  0.68          7.30                              the total optimization step
+                                                        10.54
+RS@     O (¯ | U | |^ | )     4.58  0.43  0.37          7.01                              the model parameter updated with 
+                                                        7.17                              the model parameter updated with  + 
+SmoothI@ O (¯ | U | |^ | ) 7.13     0.93  0.63          7.15
+                                                        9.31
+SL      O (¯ | U | |^ | )     4.79  0.42  0.31          6.63                              the fixed step-size in gradient decent
+                                                        7.98                              the Lipschiz constant of LTalos
+BSL     O (¯ | U | |^ | )     4.56  0.43  0.34
+
+PSL     O (¯ | U | |^ | )     4.96  0.42  0.35
+
+AdvInfoNCE O (¯ | U | |^ | )  8.14  0.71  1.00                                        Table G.4: Notations for Quantile Regression
+
+LLPAUC  O (¯ | U | |^ | )     4.82  0.52  0.37                                      Notations Descriptions
+
+Talos   O (2¯ | U | |^ | )    5.37  0.54  0.43
+
+                                                                                     (I)  the uniform distribution of item set I
+
+                                                                                          the random variable of the score of items 
+
+G Notations                                                                               the cumulative distribution function w.r.t. 
+
+We summarize the notations used in this paper as follows:                        · Table G.3 provides notations that are used to demonstrate the
+
+· Table G.1 provides notations that are used to drive the Talos loss               convergence property of Talos and its corresponding proof.
+                                                                                 · Table G.4 provides notations that are used to demonstrate the
+  function.
+· Table G.2 provides notations that are used to demonstrate the                    vanilla quantile regression and the proof in terms of our unbiased
+                                                                                   quantile regression loss.
+  connections between Talos and Distributional Robustness Opti-
+  mization.
+WWW '26, April 13­17, 2026, Dubai, United Arab Emirates              Shengjia Zhang, Weiqin Yang, Jiawei Chen, Peng Wu, Yuegang Sun, Gang Wang, Qihao Shi, and Can Wang
+
+H Quantile Regression                                                                H.1 Proof of Unbiased Eq.(3.3)
+
+Quantile regression method [13, 25] is uniformly used for sam-                       Quantile regression method [13, 25] is uniformly used for sample
+ple quantile estimation. The Top- quantile is estimated by the                       quantile estimation. Typically, the Top- quantile is estimated by
+following loss:                                                                      the following loss:
+
+           1                                                                         1                                             
+                                                                                     LQR () = |I |        (1 - |I | ) ( - ^ )+ + |I | (^ -  )+ (H.8)
+LQR () = |I |           (1 - |I | ) ( - ^ )+ + |I | (^ -  )+ (H.1)                                    I
+                    I
+
+or equivalently:                                                                     With expectation E    (  - ^ ) = (| |)/(|I | - |P |)
+                                                                                        N  (  - ^ ), Eq.(3.3) can be derived as:
+                                                             
+LQR () = E (I) (1 - |I | ) ( - ^ )+ + |I | (^ -  )+
+                                                                                     1                                        
+
+                                                                     (H.2)           E [Q ()]=|I |           ( - ^ ) +  (  - ^ ) = LQR ()
+
+where (·)+ = max(·, 0), and  (I) denotes the uniform distribution                                          P                    N
+on item set I. The Top- quantile is estimated as:
+                                                                                     I Optimal Hyperparameters
+                               =  arg  min     LQR ()                (H.3)
+                                                                                     We report the optimal hyperparameters of each method on each
+                                                                                     dataset and backbone from Tables I.2 and I.3, in the order of the
+                                                                                     hyperparameters listed in Table I.1.
+                            
+
+                                     ^
+
+We show this as follows:
+
+   Proof. Suppose that  is a random variable representing the                        Table I.1: Hyperparameters to be searched for each method.
+score of items  , and  is the c.d.f. of  on R. Since   I is
+uniformly distributed, the quantile regression loss (H.2) can be                     Method Other Hyperparameters
+
+rewritten as the following expectation:                                              BPR                      no other hyperparameters
+                                                                                     AATP                     {lrquantile}
+                                        ^ )+             (^      )+                  RS@                      {inner, outside}
+LQR () = E          (1  -       ) (  -         +             -                       SmoothI@                 {, }
+                            |I|                     |I|                              LLPAUC                   {, }
+                                                                                     SL                       { }
+                                                       ^                             AdvInfoNCE               {adv, adv, lradv, }
+                                                                                     BSL                      {1, 2}
+= ^ (1 - |I | ) ( - ^ )d () + - |I | (^ - )d ()                                      PSL                      { }
+                                                                                     Talos                    { }
+                                                                     (H.4)
+
+Compute the derivative of LQR () with respect to ^ , set it to 0,
+and let  = arg min LQR (), we have:
+
+               ^
+
+                                                    
+                                               
+                        d () = (1 -                )         d ()
+           |I|                                 |I|                   (H.5)
+                                                         
+                    -                                                                Table I.2: Optimal hyperparameters of OOD setting.
+
+Given  is the c.d.f. of  on R, we have:                                                                         Gowalla
+
+                     () = 1, and  (-) = 0                                            Model Loss                 lr   wd wl           others
+
+                                                                     (H.6)                                    10-3 10-8 N/A
+
+                                                                                                    BPR
+
+                                                                                                    AATP      10-3 10-6 N/A          {10-4 }
+
+Then, Eq.(H.5) can be derived as:                                                                             10-2 10-8 N/A
+
+                                                                                                    RS@                              {0.05, 5}
+
+                                                                                                    SmoothI@ 10-3          0  N/A    {0.1, 0.1}
+
+                                                                                                              10-1
+                |I |  ( ) = 1 - |I |           1 -  ( )                              MF SL                                 0  N/A      {0.1}
+                                                                                                BSL                                  {0.1, 0.1}
+                                                                                                              10-1         0  N/A
+
+                                                                     (H.7)                          PSL       10-1         0  N/A    {0.05}
+
+                                                                                                    AdvInfoNCE 10-1        0  N/A {5, 30, 10-5, 0.1}
+                     ( ) = 1 - |I |
+                                                                                                    LLPAUC    10-3 10-6 N/A          {0.7, 0.01}
+
+                                                                                                    TL@       10-1         0  N/A    {0.05}
+
+resulting         d    ( )  =   /|I |,  i.e.,  the  optimal  ^  is   precisely  the                                 Games
+
+            
+
+Top- quantile of scores .                                                            Model Loss                 lr   wd wl           others
+
+                                                                                                    BPR       10-3 10-6 N/A
+
+                                                                                                    AATP      10-3 10-6 N/A          {10-2 }
+
+   However, directly utilize Eq.(H.8) requires to traverse over the                                 RS@       10-1 10-8 N/A          {0.05, 5}
+complete item space. In recommendation scenarios, the complete
+item space is huge, and computational intensive. To address this                                    SmoothI@ 10-1          0  N/A    {0.1, 0.05}
+issue, we propose the efficient quantile estimation in Eq.(3.3), which
+supports sampling negative items to conduct unbiased Top- quan-                      MF SL                    10-2         0  N/A      {0.2}
+tile estimation. Table F.1 shows the training time cost in one epoch,                           BSL                                  {0.1, 0.2}
+indicating our proposed efficient quantile estimation is computa-                                             10-2         0  N/A
+tional efficient.
+                                                                                                    PSL       10-2 10-8 N/A          {0.1}
+
+                                                                                                    AdvInfoNCE 10-2        0  N/A {5, 5, 10-5, 0.2}
+
+                                                                                                    LLPAUC    10-3 10-6 N/A          {0.6, 0.7}
+
+                                                                                                    TL@       10-2 10-6 N/A          {0.1}
+Talos: Optimizing Top- Accuracy in Recommender Systems                                        WWW '26, April 13­17, 2026, Dubai, United Arab Emirates
+
+         Table I.3: Optimal hyperparameters of IID setting.
+
+                                                           Gowalla                            Beauty
+
+ Model       Loss      lr                               wd wl       others             lr  wd wl           others
+    MF
+         BPR         10-3                               10-8 N/A    {10-4 }          10-3  10-6 N/A         {10-3 }
+  LGCN   AATP        10-3                               10-6 N/A                     10-2                   {0.01, 1}
+XSimGCL  RS@         10-1                                                            10-1    0 N/A         {0.2, 0.05}
+         SmoothI@    10-3                               0 N/A       {0.01, 2}        10-1  10-8 N/A          {0.15}
+ Model   SL          10-1                                                            10-3  10-8 N/A
+    MF   BSL         10-1                               0 N/A       {0.1, 0.05}      10-1  10-8 N/A
+         PSL         10-1                                                            10-1
+  LGCN   AdvInfoNCE  10-1                               0 N/A       {0.1}            10-1
+XSimGCL  LLPAUC      10-3                                                            10-2
+         Talos       10-2                               0 N/A       {0.1, 0.1}       10-1  0 N/A           {0.05, 0.15}
+
+         BPR         10-3                               0 N/A       {0.05}           10-3  0 N/A           {0.1}
+         AATP        10-3                                                            10-3
+         RS@         10-2                               0 N/A {15, 25, 10-5, 0.1}    10-3  0 N/A {15, 30, 10-5, 0.15}
+         SmoothI@    10-3                                                            10-3
+         SL          10-1                               10-6 N/A    {0.8, 0.01}      10-1  10-6 N/A        {0.6, 0.9}
+         BSL         10-1                                                            10-1
+         PSL         10-2                                 0 N/A     {0.05}           10-1  10-8 N/A        {0.1}
+         AdvInfoNCE  10-2                               10-8 N/A    {10-2 }          10-1
+         LLPAUC      10-3                                                            10-2  10-6 N/A        {10-4 }
+         Talos       10-2                                 0 N/A                      10-1  10-8 N/A
+
+         BPR         10-3                                 0 N/A      {0.1, 5}        10-2    0 N/A          {0.1, 5}
+         AATP        10-4                               10-8 N/A    {0.1, 0.05}      10-2  10-8 N/A        {0.2, 0.05}
+         RS@         10-2                                                            10-3
+         SmoothI@    10-2                               0 N/A       {0.1}            10-2  0 N/A           {0.2}
+         SL          10-3                                                            10-3
+         BSL         10-2                               0 N/A       {0.05, 0.1}      10-3  0 N/A           {0.15, 0.2}
+         PSL         10-1                                                            10-2
+         AdvInfoNCE  10-3                               0 N/A       {0.05}           10-3    0 N/A           {0.1}
+         LLPAUC      10-3                                                            10-2             {5, 25, 10-5, 0.2}
+         Talos       10-1                               0 N/A {5, 30, 10-5, 0.1}     10-1    0 N/A
+                                                                                           10-6 N/A        {0.1, 0.1}
+             Loss      lr                               10-8 N/A    {0.1, 0.05}        lr
+
+         BPR         10-2                               0 N/A       {0.05}           10-3  0 N/A           {0.1}
+         AATP        10-3                                                            10-2
+         RS@         10-1                                 0 0.05    {10-4 }          10-3  10-4 0.2        {10-3 }
+         SmoothI@    10-2                               10-6 0.05                    10-3  10-8 0.05
+         SL          10-2                                                            10-3
+         BSL         10-1                               0 0.01      {0.1, 5}         10-2  0 0.01          {0.15, 5}
+         PSL         10-1                                                            10-3
+         AdvInfoNCE  10-1                               0 0.01      {0.1, 0.1}       10-2  0 0.01          {0.1, 0.05}
+         LLPAUC      10-2                                                            10-3
+         Talos       10-1                               0 0.01      {0.1}            10-3    0 0.01           {0.2}
+                                                                                           10-8 0.01       {0.15, 0.02}
+         BPR         10-3                               0 0.01      {0.05, 0.1}      10-3
+         AATP        10-1                                                            10-1
+         RS@         10-1                               0 0.01      {0.05}           10-3  0 0.01          {0.1}
+         SmoothI@    10-3                                                            10-3
+         SL          10-1                               0  0.01 {15, 30, 10-5, 0.1}  10-2  0  0.01 {10, 20, 10-5, 0.2}
+         BSL         10-1                                                            10-2
+         PSL         10-1                               10-8 0.01   {0.1, 0.01}      10-3  10-6 0.01       {0.1, 0.01}
+         AdvInfoNCE  10-1                                                            10-2
+         LLPAUC      10-2                               0 0.01      {0.05}           10-3  0 0.01          {0.1}
+         Talos       10-1                                                            10-1
+                                                           Games                              Electronics
+         BPR         10-3                                                            10-3
+         AATP        10-2                               wd wl       others           10-3  wd wl           others
+         RS@         10-3                                                            10-2
+         SmoothI@    10-1                               10-6 N/A                     10-3  10-6 N/A
+         SL          10-2                               10-6 N/A                     10-1
+         BSL         10-2                               10-8 N/A    {10-2 }          10-2  0 N/A           {10-4 }
+         PSL         10-2                                           {0.05, 5}        10-2
+         AdvInfoNCE  10-2                                                            10-3  10-6 N/A        {0.05, 5}
+         LLPAUC      10-3                                                            10-2
+         Talos       10-2                                 0 N/A     {0.15, 0.05}     10-1  10-8 N/A        {0.15, 0.2}
+                                                        10-6 N/A       {0.2}
+                                                                                           10-6 N/A        {0.2}
+
+                                                        0 N/A       {0.05, 0.2}            10-8 N/A        {0.1, 0.2}
+
+                                                        0 N/A       {0.1}                  10-8 N/A        {0.1}
+
+                                                        10-8 N/A {15, 5, 10-5, 0.2}        10-8 N/A {10, 30, 10-5, 0.15}
+
+                                                        10-6 N/A    {0.5, 0.9}             10-6 N/A        {0.6, 0.05}
+
+                                                          0 N/A      {0.1}                 10-6 N/A        {0.1}
+                                                        10-6 N/A    {10-2 }
+                                                                                           10-6 N/A         {10-2 }
+                                                          0 N/A                                             {0.15, 4}
+                                                                                             0 N/A         {0.15, 0.1}
+                                                          0 N/A       {0.1, 5}             10-6 N/A
+                                                        10-8 N/A    {0.15, 0.05}           10-8 N/A
+
+                                                          0 N/A        {0.2}               0 N/A           {0.2}
+                                                        10-8 N/A    {0.05, 0.2}
+                                                                                           0 N/A           {0.1, 0.2}
+
+                                                        0 N/A       {0.1}                  10-8 N/A        {0.1}
+
+                                                        0 N/A {20, 15, 10-5, 0.2}          0 N/A {15, 30, 10-5, 0.2}
+
+                                                        10-6 N/A    {0.1, 0.1}             10-6 N/A        {0.5, 0.01}
+
+                                                          0 N/A       {0.1}                  0 N/A           {0.1}
+
+                                                        10-6 0.1    {10-2 }                10-5 0.2        {10-2 }
+                                                        10-8 0.01   {0.15, 5}              10-8 0.01        {0.1, 4}
+                                                        10-8 0.01                          10-6 0.01       {0.1, 0.1}
+                                                                                           10-8 0.01
+                                                        0 0.01      {0.15, 0.05}
+
+                                                        0 0.01      {0.2}                  0 0.01          {0.2}
+
+                                                        0 0.01      {0.05, 0.2}            0 0.01          {0.25, 0.25}
+
+                                                        0 0.01      {0.1}                  0 0.01          {0.1}
+
+                                                        0  0.01 {15, 20, 10-4, 0.2}        0  0.01 {15, 30, 10-5, 0.2}
+
+                                                        10-6 0.01   {0.6, 0.05}            10-6 0.05       {0.7, 0.01}
+
+                                                        10-8 0.01   {0.1}                  0 0.01          {0.1}
+

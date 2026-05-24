@@ -1,0 +1,1546 @@
+[
+  {
+    "out": "swiss_citation_hybrid_rerank_final_output.md",
+    "name": "swiss_citation_hybrid_rerank_final_output.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final_output.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache/dossier_features.npz",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache/scores_bge.npz",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache/scores_jina.npz",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache/scores_qwen3.npz",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/hybrid_rerank_results.json"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "research/anchor_funnel_val001_v7/snapshot",
+      "research/hybrid_rerank_final",
+      "research/hybrid_rerank_final/cache",
+      "research/hybrid_rerank_final/cache/dossier_features.npz",
+      "research/hybrid_rerank_final/cache/scores_bge.npz",
+      "research/hybrid_rerank_final/cache/scores_jina.npz",
+      "research/hybrid_rerank_final/cache/scores_qwen3.npz",
+      "research/hybrid_rerank_final/hybrid_rerank_results.json"
+    ],
+    "mtime": "2026-05-15 11:46"
+  },
+  {
+    "out": "swiss_citation_hybrid_rerank_final.md",
+    "name": "swiss_citation_hybrid_rerank_final.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_hybrid_rerank_final.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache",
+      "/content/drive/MyDrive/swiss_law/research/hybrid_rerank_final/cache/dossier_features.npz"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "research/anchor_funnel_val001_v7/snapshot",
+      "research/hybrid_rerank_final",
+      "research/hybrid_rerank_final/cache",
+      "research/hybrid_rerank_final/cache/dossier_features.npz"
+    ],
+    "mtime": "2026-05-15 08:34"
+  },
+  {
+    "out": "swiss_citation_legalmalr_cascade_v1_poc.md",
+    "name": "swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_poc.ipynb",
+    "n_cells": 23,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss-citation",
+      "/content/drive/MyDrive/swiss_citation",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot/",
+      "/content/swiss_law"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "research/anchor_funnel_val001_v7/snapshot/"
+    ],
+    "mtime": "2026-05-14 15:27"
+  },
+  {
+    "out": "swiss_citation_legalmalr_cascade_v1_optimized_2.md",
+    "name": "swiss_citation_legalmalr_cascade_v1_optimized (2).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_legalmalr_cascade_v1_optimized (2).ipynb",
+    "n_cells": 23,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss-citation",
+      "/content/drive/MyDrive/swiss_citation",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot/",
+      "/content/swiss_law"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "research/anchor_funnel_val001_v7/snapshot/"
+    ],
+    "mtime": "2026-05-14 15:05"
+  },
+  {
+    "out": "swiss_citation_rerank_only_diagnostic.md",
+    "name": "swiss_citation_rerank_only_diagnostic.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_rerank_only_diagnostic.ipynb",
+    "n_cells": 8,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot",
+      "/content/drive/MyDrive/swiss_law/research/rerank_only_diagnostic"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "research/anchor_funnel_val001_v7/snapshot",
+      "research/rerank_only_diagnostic"
+    ],
+    "mtime": "2026-05-13 18:11"
+  },
+  {
+    "out": "swiss_citation_precision_v1_3.md",
+    "name": "swiss_citation_precision_v1_(3).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_precision_v1_(3).ipynb",
+    "n_cells": 13,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot",
+      "/content/drive/MyDrive/swiss_law/research/precision_v1"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "e:\\n",
+      "research/anchor_funnel_val001_v7/snapshot",
+      "research/precision_v1"
+    ],
+    "mtime": "2026-05-13 08:25"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.md",
+    "name": "swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery_recall_0.89_at_k_50000.ipynb",
+    "n_cells": 25,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "/content/drive/MyDrive/swiss_law/artifacts_v2/court_authority_cards_v5_unified.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights/citation_graph_extracted.sqlite",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/val.csv",
+      "data_insights/citation_graph_extracted.sqlite",
+      "research/anchor_funnel_val001_v7"
+    ],
+    "mtime": "2026-05-13 18:55"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_v7_5_multiquery_11.md",
+    "name": "swiss_citation_anchor_funnel_v7_5_multiquery (11).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_v7_5_multiquery (11).ipynb",
+    "n_cells": 31,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "/content/drive/MyDrive/swiss_law/artifacts_v2/court_authority_cards_v5_unified.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv)",
+      "/content/drive/MyDrive/swiss_law/data_insights/citation_graph_extracted.sqlite",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/val.csv",
+      "data_insights/citation_graph_extracted.sqlite",
+      "e:\\n",
+      "research/anchor_funnel_val001_v7",
+      "research/anchor_funnel_val001_v7/snapshot"
+    ],
+    "mtime": "2026-05-12 23:41"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001_v7_part4_output.md",
+    "name": "swiss_citation_anchor_funnel_val001_v7__part4_output.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7__part4_output.ipynb",
+    "n_cells": 23,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "/content/drive/MyDrive/swiss_law/artifacts_v2/court_authority_cards_v5_unified.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights/citation_graph_extracted.sqlite",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/val.csv",
+      "data_insights/citation_graph_extracted.sqlite",
+      "research/anchor_funnel_val001_v7"
+    ],
+    "mtime": "2026-05-11 13:30"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001_v7_4_4.md",
+    "name": "swiss_citation_anchor_funnel_val001_v7_4 (4).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7_4 (4).ipynb",
+    "n_cells": 23,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "/content/drive/MyDrive/swiss_law/artifacts_v2/court_authority_cards_v5_unified.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights/citation_graph_extracted.sqlite",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/val.csv",
+      "data_insights/citation_graph_extracted.sqlite",
+      "research/anchor_funnel_val001_v7"
+    ],
+    "mtime": "2026-05-11 12:37"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001_v7_2.md",
+    "name": "swiss_citation_anchor_funnel_val001_v7 (2).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_citation_anchor_funnel_val001_v7 (2).ipynb",
+    "n_cells": 22,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "/content/drive/MyDrive/swiss_law/artifacts_v2/court_authority_cards_v5_unified.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights/citation_graph_extracted.sqlite",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/aggregate_summary.json",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/val.csv",
+      "data_insights/citation_graph_extracted.sqlite",
+      "research/anchor_funnel_val001_v7/",
+      "research/anchor_funnel_val001_v7/aggregate_summary.json"
+    ],
+    "mtime": "2026-05-10 21:48"
+  },
+  {
+    "out": "0.7716_scored_notebook.md",
+    "name": "0.7716_scored_notebook.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\0.7716_scored_notebook.ipynb",
+    "n_cells": 9,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-04-29 20:38"
+  },
+  {
+    "out": "enrich_laws_de_qwen3_8b_kaggle_3.md",
+    "name": "enrich_laws_de_qwen3_8b_kaggle (3).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\enrich_laws_de_qwen3_8b_kaggle (3).ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/law_llm_input.jsonl",
+      "/content/drive/MyDrive/swiss_law/models/huggingface",
+      "/content/drive/MyDrive/swiss_law/outputs",
+      "/content/drive/MyDrive/swiss_law/outputs/law_llm_descriptors_0000000_all.jsonl"
+    ],
+    "local_paths": [
+      "data/checkpoints",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/law_llm_input.jsonl"
+    ],
+    "mtime": "2026-05-06 17:35"
+  },
+  {
+    "out": "court_llm_descriptor_extractor_blackwell_optimized_4.md",
+    "name": "court_llm_descriptor_extractor_blackwell_optimized_(4).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized_(4).ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/models/huggingface",
+      "/content/drive/MyDrive/swiss_law/outputs",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999_failures.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999_preview.csv",
+      "/content/scratch_outputs",
+      "/content/scratch_outputs/...).",
+      "/content/scratch_outputs/court_llm_descriptors_0000000_0009999.jsonl"
+    ],
+    "local_paths": [
+      "data/court_considerations.csv"
+    ],
+    "mtime": "2026-05-04 13:42"
+  },
+  {
+    "out": "court_llm_descriptor_extractor_blackwell_optimized_3_1.md",
+    "name": "court_llm_descriptor_extractor_blackwell_optimized__3_ (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_blackwell_optimized__3_ (1).ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/models/huggingface",
+      "/content/drive/MyDrive/swiss_law/outputs",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999_failures.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999_preview.csv",
+      "/content/scratch_outputs",
+      "/content/scratch_outputs/...).",
+      "/content/scratch_outputs/court_llm_descriptors_0000000_0009999.jsonl"
+    ],
+    "local_paths": [
+      "data/court_considerations.csv"
+    ],
+    "mtime": "2026-05-04 21:00"
+  },
+  {
+    "out": "court_llm_descriptor_extractor_colab_10k_optimized_1.md",
+    "name": "court_llm_descriptor_extractor_colab_10k_optimized (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_10k_optimized (1).ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/models/huggingface",
+      "/content/drive/MyDrive/swiss_law/outputs",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_0009999_preview.csv"
+    ],
+    "local_paths": [
+      "data/court_considerations.csv"
+    ],
+    "mtime": "2026-05-03 14:58"
+  },
+  {
+    "out": "court_llm_descriptor_extractor_colab_qwen3_8b_awq.md",
+    "name": "court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_colab_qwen3_8b_awq.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data/"
+    ],
+    "local_paths": [],
+    "mtime": "2026-05-03 14:09"
+  },
+  {
+    "out": "court_llm_descriptor_extractor_kaggle.md",
+    "name": "court_llm_descriptor_extractor_kaggle.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_llm_descriptor_extractor_kaggle.ipynb",
+    "n_cells": 9,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-03 13:17"
+  },
+  {
+    "out": "court_citation_concept_enrichment_minimal_llm.md",
+    "name": "court_citation_concept_enrichment_minimal_llm.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_minimal_llm.ipynb",
+    "n_cells": 10,
+    "drive_paths": [],
+    "local_paths": [
+      "data/court_consideration.csv",
+      "data/court_considerations.csv"
+    ],
+    "mtime": "2026-05-03 13:00"
+  },
+  {
+    "out": "court_citation_concept_enrichment_robust_v5_t4_fixed.md",
+    "name": "court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_robust_v5_t4_fixed.ipynb",
+    "n_cells": 9,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 21:26"
+  },
+  {
+    "out": "court_citation_concept_enrichment_smoke_test_10_v3_local_model.md",
+    "name": "court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_citation_concept_enrichment_smoke_test_10_v3_local_model.ipynb",
+    "n_cells": 10,
+    "drive_paths": [],
+    "local_paths": [
+      "data/court_consideration.csv"
+    ],
+    "mtime": "2026-05-02 20:57"
+  },
+  {
+    "out": "court_citation_enrichment_smoke_test_10.md",
+    "name": "court_citation_enrichment_smoke_test_10.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\court_citation_enrichment_smoke_test_10.ipynb",
+    "n_cells": 11,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 20:28"
+  },
+  {
+    "out": "kaggle-10-test-for-swiss-law_1.md",
+    "name": "kaggle-10-test-for-swiss-law (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\kaggle-10-test-for-swiss-law (1).ipynb",
+    "n_cells": 10,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 21:44"
+  },
+  {
+    "out": "enrich_cards_qwen35_vllm_fast_stable_failure_capture_1.md",
+    "name": "enrich_cards_qwen35_vllm_fast_stable_failure_capture (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_vllm_fast_stable_failure_capture (1).ipynb",
+    "n_cells": 13,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_failed_cards.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_targets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4_enrichment_targets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "local_paths": [
+      "artifacts/court_authority_cards_rag_failed_cards.jsonl",
+      "artifacts/court_authority_cards_rag_targets.jsonl",
+      "artifacts/court_authority_cards_v4_enrichment_targets.jsonl",
+      "artifacts/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "mtime": "2026-05-02 01:23"
+  },
+  {
+    "out": "enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture_1.md",
+    "name": "enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_optimized_failure_capture (1).ipynb",
+    "n_cells": 13,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_failed_cards.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_failed_retry_output.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_targets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4_enrichment_targets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "local_paths": [
+      "artifacts/court_authority_cards_rag_failed_cards.jsonl",
+      "artifacts/court_authority_cards_rag_failed_retry_output.jsonl",
+      "artifacts/court_authority_cards_rag_targets.jsonl",
+      "artifacts/court_authority_cards_v4_enrichment_targets.jsonl",
+      "artifacts/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "mtime": "2026-05-02 00:46"
+  },
+  {
+    "out": "enrich_cards_qwen35_colab_fast_quality_json_v2_2_1.md",
+    "name": "enrich_cards_qwen35_colab_fast_quality_json_v2_(2) (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab_fast_quality_json_v2_(2) (1).ipynb",
+    "n_cells": 12,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/rag_checkpoint.txt"
+    ],
+    "local_paths": [
+      "artifacts/court_authority_cards_rag.jsonl",
+      "artifacts/rag_checkpoint.txt"
+    ],
+    "mtime": "2026-05-01 19:27"
+  },
+  {
+    "out": "fresh_safe_qwen35_card_enrichment_no_vllm.md",
+    "name": "fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\fresh_safe_qwen35_card_enrichment_no_vllm.ipynb",
+    "n_cells": 14,
+    "drive_paths": [
+      "/content/court_authority_cards.jsonl",
+      "/content/drive/MyDrive/qwen35_card_enrichment_output"
+    ],
+    "local_paths": [],
+    "mtime": "2026-05-02 01:01"
+  },
+  {
+    "out": "enrich_cards_qwen35_colab_1.md",
+    "name": "enrich_cards_qwen35_colab (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\enrich_cards_qwen35_colab (1).ipynb",
+    "n_cells": 13,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4.jsonl"
+    ],
+    "local_paths": [
+      "artifacts/court_authority_cards_rag.jsonl",
+      "artifacts/court_authority_cards_v4.jsonl"
+    ],
+    "mtime": "2026-04-30 23:45"
+  },
+  {
+    "out": "exp_A1_bgem3_statutes.md",
+    "name": "exp_A1_bgem3_statutes.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A1_bgem3_statutes.ipynb",
+    "n_cells": 9,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/artifacts/exp_A1_report.json"
+    ],
+    "local_paths": [
+      "data/artifacts/exp_A1_report.json"
+    ],
+    "mtime": "2026-04-21 18:55"
+  },
+  {
+    "out": "exp_A2_hyde_and_enumeration.md",
+    "name": "exp_A2_hyde_and_enumeration.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A2_hyde_and_enumeration.ipynb",
+    "n_cells": 12,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data"
+    ],
+    "local_paths": [],
+    "mtime": "2026-04-21 19:42"
+  },
+  {
+    "out": "exp_A3_qwen32b_enumeration.md",
+    "name": "exp_A3_qwen32b_enumeration.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A3_qwen32b_enumeration.ipynb",
+    "n_cells": 15,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data"
+    ],
+    "local_paths": [],
+    "mtime": "2026-04-21 21:13"
+  },
+  {
+    "out": "exp_A4_rerank.md",
+    "name": "exp_A4_rerank.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A4_rerank.ipynb",
+    "n_cells": 9,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data"
+    ],
+    "local_paths": [],
+    "mtime": "2026-04-21 21:36"
+  },
+  {
+    "out": "exp_A4b_rerank_hyde.md",
+    "name": "exp_A4b_rerank_hyde.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A4b_rerank_hyde.ipynb",
+    "n_cells": 9,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data"
+    ],
+    "local_paths": [],
+    "mtime": "2026-04-21 21:53"
+  },
+  {
+    "out": "exp_A5_court_retrieval.md",
+    "name": "exp_A5_court_retrieval.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A5_court_retrieval.ipynb",
+    "n_cells": 17,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/artifacts/court_bgem3.npy"
+    ],
+    "local_paths": [
+      "data/artifacts/court_bgem3.npy"
+    ],
+    "mtime": "2026-04-22 01:11"
+  },
+  {
+    "out": "exp_A6_legal_roberta_finetune.md",
+    "name": "exp_A6_legal_roberta_finetune.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\exp_A6_legal_roberta_finetune.ipynb",
+    "n_cells": 21,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/artifacts/A6/iob_pairs.json",
+      "/content/drive/MyDrive/swiss_law/data/artifacts/A6/legal_swiss_finetuned",
+      "/content/drive/MyDrive/swiss_law/data/artifacts/A6/legal_swiss_simcse",
+      "/content/drive/MyDrive/swiss_law/data/artifacts/exp_A6_report.json"
+    ],
+    "local_paths": [
+      "data/artifacts/A6/iob_pairs.json",
+      "data/artifacts/A6/legal_swiss_finetuned",
+      "data/artifacts/A6/legal_swiss_simcse",
+      "data/artifacts/exp_A6_report.json"
+    ],
+    "mtime": "2026-04-22 13:11"
+  },
+  {
+    "out": "colab_segment_lattice_funnel_v3_2.md",
+    "name": "colab_segment_lattice_funnel_v3 (2).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\colab_segment_lattice_funnel_v3 (2).ipynb",
+    "n_cells": 11,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts",
+      "/content/drive/MyDrive/swiss_law/artifacts/choice_cards_v3.json",
+      "/content/drive/MyDrive/swiss_law/artifacts/segment_lattice_v3.sqlite",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_candidate_sets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_raw_log.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_stage_recall.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_stage_recall.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data_insights",
+      "/content/drive/MyDrive/swiss_law/scripts"
+    ],
+    "local_paths": [
+      "artifacts/choice_cards_v3.json",
+      "artifacts/segment_lattice_v3.sqlite",
+      "artifacts/val_segment_lattice_v3_candidate_sets.jsonl",
+      "artifacts/val_segment_lattice_v3_candidate_summary.csv",
+      "artifacts/val_segment_lattice_v3_dropped_gold.csv",
+      "artifacts/val_segment_lattice_v3_llm_candidate_summary.csv",
+      "artifacts/val_segment_lattice_v3_llm_dropped_gold.csv",
+      "artifacts/val_segment_lattice_v3_llm_planner_outputs.jsonl",
+      "artifacts/val_segment_lattice_v3_llm_raw_log.jsonl",
+      "artifacts/val_segment_lattice_v3_llm_stage_recall.csv",
+      "artifacts/val_segment_lattice_v3_oracle_candidate_summary.csv",
+      "artifacts/val_segment_lattice_v3_oracle_dropped_gold.csv",
+      "artifacts/val_segment_lattice_v3_oracle_planner_outputs.jsonl",
+      "artifacts/val_segment_lattice_v3_oracle_stage_recall.csv",
+      "artifacts/val_segment_lattice_v3_planner_outputs.jsonl"
+    ],
+    "mtime": "2026-04-30 15:10"
+  },
+  {
+    "out": "colab_recall_preserving_candidate_funnel_2.md",
+    "name": "colab_recall_preserving_candidate_funnel_(2).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\colab_recall_preserving_candidate_funnel_(2).ipynb",
+    "n_cells": 19,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts",
+      "/content/drive/MyDrive/swiss_law/artifacts/choice_cards.json",
+      "/content/drive/MyDrive/swiss_law/artifacts/dropped_gold_diagnostics.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/recall_funnel.duckdb",
+      "/content/drive/MyDrive/swiss_law/artifacts/stage_recall_audit.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_candidate_sets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/data/laws_de.csv",
+      "/content/drive/MyDrive/swiss_law/data/test.csv",
+      "/content/drive/MyDrive/swiss_law/data/train.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_links.json",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_links.json"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "artifacts/choice_cards.json",
+      "artifacts/dropped_gold_diagnostics.csv",
+      "artifacts/recall_funnel.duckdb",
+      "artifacts/stage_recall_audit.csv",
+      "artifacts/val_candidate_sets.jsonl",
+      "artifacts/val_candidate_summary.csv",
+      "artifacts/val_planner_outputs.jsonl",
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/test.csv",
+      "data/train.csv",
+      "data/val.csv",
+      "data_insights/court_considerations_classified_citations.jsonl",
+      "data_insights/court_considerations_links.json",
+      "data_insights/laws_de_classified_citations.jsonl",
+      "data_insights/laws_de_links.json"
+    ],
+    "mtime": "2026-04-27 02:56"
+  },
+  {
+    "out": "colab_dense_embedding_test_2.md",
+    "name": "colab_dense_embedding_test (2).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\colab_dense_embedding_test (2).ipynb",
+    "n_cells": 19,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/artifacts",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/data/laws_de.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_links.json",
+      "/content/drive/MyDrive/swiss_law/data_insights/gold_citation_coverage.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_links.json"
+    ],
+    "local_paths": [
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/val.csv",
+      "data_insights/court_considerations_classified_citations.jsonl",
+      "data_insights/court_considerations_links.json",
+      "data_insights/gold_citation_coverage.csv",
+      "data_insights/laws_de_classified_citations.jsonl",
+      "data_insights/laws_de_links.json"
+    ],
+    "mtime": "2026-04-26 18:16"
+  },
+  {
+    "out": "latest_notebook_fixed_v3_1.md",
+    "name": "latest__notebook_fixed_v3 (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\latest__notebook_fixed_v3 (1).ipynb",
+    "n_cells": 76,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/checkpoints",
+      "/content/drive/MyDrive/swiss_law/checkpoints/bm25_scores_test.json",
+      "/content/drive/MyDrive/swiss_law/checkpoints/reranker_scores_test.json",
+      "/content/drive/MyDrive/swiss_law/checkpoints/stage1_test.json",
+      "/content/drive/MyDrive/swiss_law/checkpoints/stage2_test.json",
+      "/content/drive/MyDrive/swiss_law/checkpoints/stage3_test.json",
+      "/content/drive/MyDrive/swiss_law/checkpoints/stage4_test.json",
+      "/content/drive/MyDrive/swiss_law/checkpoints/stage5_test.json",
+      "/content/drive/MyDrive/swiss_law/configs/threshold.json",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/test.csv",
+      "/content/drive/MyDrive/swiss_law/data/train.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/index",
+      "/content/drive/MyDrive/swiss_law/index/bm25_v2_index.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/citation_graph.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/citation_lookup.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/numbered_cocitation.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/numbered_to_bge.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/numbered_to_statutes.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/statute_to_bge.pkl)",
+      "/content/drive/MyDrive/swiss_law/index/statute_to_numbered.pkl)",
+      "/content/drive/MyDrive/swiss_law/model",
+      "/content/drive/MyDrive/swiss_law/submissions",
+      "/content/drive/MyDrive/swiss_law/submissions/submission_test.csv"
+    ],
+    "local_paths": [
+      "E:\\\\swiss-law-pipeline",
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/agent/llm_backend.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/agent/verifier.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/explicit_citations.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/graph_retriever.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/sparse_retriever.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/scoring/confidence.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage1_query_analysis.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage2_mas_retrieval.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage3_graph_expansion.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage4_llm_reranker.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage5_verify_and_score.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/submit.py",
+      "data/test.csv",
+      "data/train.csv",
+      "data/val.csv"
+    ],
+    "mtime": "2026-04-20 21:20"
+  },
+  {
+    "out": "swiss_law_pipeline_end_to_end_notebook_no_function_imports.md",
+    "name": "swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\swiss_law_pipeline_end_to_end_notebook_no_function_imports.ipynb",
+    "n_cells": 53,
+    "drive_paths": [],
+    "local_paths": [
+      "E:\\\\swiss-law-pipeline",
+      "E:\\swiss-law-pipeline",
+      "data/case_signals.jsonl",
+      "data/citation_signal_schema_v2.json",
+      "data/corpus.parquet",
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/laws_knowledge_base.jsonl",
+      "data/query_translations_trainval.json",
+      "data/statute_signals.jsonl",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/agent/llm_backend.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/agent/verifier.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/indexing/build_bm25_index.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/indexing/build_citation_graph.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/indexing/build_lookup_tables.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/pipeline.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/requirements.txt",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/bm25_artifact.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/explicit_citations.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/graph_retriever.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/sparse_retriever.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/scoring/confidence.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0_build_index.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0d_build_citation_signals.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0e_build_reference_graph_v2.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0f_build_gold_cocitation_prior.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage1_query_analysis.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage2_mas_retrieval.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage3_graph_expansion.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage4_llm_reranker.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage4b_cross_encoder.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage5_verify_and_score.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/submit.py",
+      "data/token_law_freq.json",
+      "data/train.csv",
+      "data/val.csv"
+    ],
+    "mtime": "2026-04-12 16:31"
+  },
+  {
+    "out": "notebook4ae3b3ffc3_stage0_gated.md",
+    "name": "notebook4ae3b3ffc3_stage0_gated.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\notebook4ae3b3ffc3_stage0_gated.ipynb",
+    "n_cells": 53,
+    "drive_paths": [],
+    "local_paths": [
+      "E:\\\\swiss-law-pipeline",
+      "E:\\swiss-law-pipeline",
+      "data/case_signals.jsonl",
+      "data/citation_signal_schema_v2.json",
+      "data/corpus.parquet",
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/laws_knowledge_base.jsonl",
+      "data/query_translations_trainval.json",
+      "data/statute_signals.jsonl",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/agent/llm_backend.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/agent/verifier.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/checkpoints",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/checkpoints/stage1_test.json",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/checkpoints/stage5_test.json",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/data",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/index",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/indexing/build_bm25_index.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/indexing/build_citation_graph.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/indexing/build_lookup_tables.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/pipeline.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/requirements.txt",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/bm25_artifact.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/explicit_citations.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/graph_retriever.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/retrieval/sparse_retriever.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/scoring/confidence.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0_build_index.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0d_build_citation_signals.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0e_build_reference_graph_v2.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage0f_build_gold_cocitation_prior.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage1_query_analysis.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage2_mas_retrieval.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage3_graph_expansion.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage4_llm_reranker.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage4b_cross_encoder.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/stage5_verify_and_score.py",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/submissions",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/submissions/submission_test.csv",
+      "data/swiss_law_pipeline_unzipped/swiss_law_pipeline/submit.py",
+      "data/token_law_freq.json",
+      "data/train.csv",
+      "data/val.csv"
+    ],
+    "mtime": "2026-04-12 16:10"
+  },
+  {
+    "out": "notebook_no_debug_prints.md",
+    "name": "notebook_no_debug_prints.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\notebook_no_debug_prints.ipynb",
+    "n_cells": 11,
+    "drive_paths": [],
+    "local_paths": [
+      "notebooks/andreasbis/aimo-3-utils/wheels.tar.gz"
+    ],
+    "mtime": "2026-04-10 21:03"
+  },
+  {
+    "out": "notebook_qwen3_8b_awq_kaggle_local_batchfix.md",
+    "name": "notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\notebook_qwen3_8b_awq_kaggle_local_batchfix.ipynb",
+    "n_cells": 6,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 05:20"
+  },
+  {
+    "out": "qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.md",
+    "name": "qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\qwen3_8b_awq_vllm_fastest_accurate_text_to_json_kaggle_stable.ipynb",
+    "n_cells": 11,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 05:48"
+  },
+  {
+    "out": "notebookd37248e1eb_1.md",
+    "name": "notebookd37248e1eb (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\notebookd37248e1eb (1).ipynb",
+    "n_cells": 11,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 19:55"
+  },
+  {
+    "out": "notebook3500ee7363_corrected_kaggle_safe.md",
+    "name": "notebook3500ee7363_corrected_kaggle_safe.ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\notebook3500ee7363_corrected_kaggle_safe.ipynb",
+    "n_cells": 10,
+    "drive_paths": [],
+    "local_paths": [
+      "data/court_consideration.csv"
+    ],
+    "mtime": "2026-05-02 21:07"
+  },
+  {
+    "out": "investigate-notebook_1.md",
+    "name": "investigate-notebook (1).ipynb",
+    "path": "C:\\Users\\samiul\\Downloads\\investigate-notebook (1).ipynb",
+    "n_cells": 2,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-04-29 13:11"
+  },
+  {
+    "out": "swiss_citation_hybrid_rerank_final.md",
+    "name": "swiss_citation_hybrid_rerank_final.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_hybrid_rerank_final.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-15 11:21"
+  },
+  {
+    "out": "swiss_citation_legalmalr_cascade_v1.md",
+    "name": "swiss_citation_legalmalr_cascade_v1.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_legalmalr_cascade_v1.ipynb",
+    "n_cells": 22,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss-citation",
+      "/content/drive/MyDrive/swiss_citation",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/snapshot",
+      "/content/swiss_law"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-13 19:25"
+  },
+  {
+    "out": "swiss_citation_rerank_only_diagnostic.md",
+    "name": "swiss_citation_rerank_only_diagnostic.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_rerank_only_diagnostic.ipynb",
+    "n_cells": 8,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-13 16:36"
+  },
+  {
+    "out": "swiss_citation_final_2026.md",
+    "name": "swiss_citation_final_2026.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_final_2026.ipynb",
+    "n_cells": 16,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "notebooks/swiss_citation_precision_v1.ipynb"
+    ],
+    "mtime": "2026-05-13 15:48"
+  },
+  {
+    "out": "swiss_citation_precision_v1.md",
+    "name": "swiss_citation_precision_v1.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1.ipynb",
+    "n_cells": 12,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "e:\\n"
+    ],
+    "mtime": "2026-05-13 08:08"
+  },
+  {
+    "out": "swiss_citation_precision_v1_top_gold_from_50k_candidates.md",
+    "name": "swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_precision_v1_top_gold_from_50k_candidates.ipynb",
+    "n_cells": 13,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001_v7/snapshot",
+      "/content/drive/MyDrive/swiss_law/research/precision_v1"
+    ],
+    "local_paths": [
+      "E:\\swiss_citation_extraction",
+      "e:\\n",
+      "research/anchor_funnel_val001_v7/snapshot",
+      "research/precision_v1"
+    ],
+    "mtime": "2026-05-13 07:51"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001_v6.md",
+    "name": "swiss_citation_anchor_funnel_val001_v6.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v6.ipynb",
+    "n_cells": 20,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-10 12:26"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001_v5.md",
+    "name": "swiss_citation_anchor_funnel_val001_v5.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v5.ipynb",
+    "n_cells": 20,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-09 23:42"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001_v4.md",
+    "name": "swiss_citation_anchor_funnel_val001_v4.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001_v4.ipynb",
+    "n_cells": 19,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-09 22:48"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001.md",
+    "name": "swiss_citation_anchor_funnel_val001.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_anchor_funnel_val001.ipynb",
+    "n_cells": 14,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-09 22:02"
+  },
+  {
+    "out": "swiss_citation_endgame_colab.md",
+    "name": "swiss_citation_endgame_colab.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\swiss_citation_endgame_colab.ipynb",
+    "n_cells": 26,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/eval/endgame_ablation_val.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/eval/endgame_channel_recall.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/eval/endgame_val_per_query.csv"
+    ],
+    "local_paths": [
+      "artifacts/citation_graph_extracted.sqlite",
+      "artifacts/court_authority_cards_v5_unified.jsonl",
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_unified_chunk",
+      "artifacts/embeddings/qwen3_8b_unified_manifest.parquet",
+      "artifacts/eval",
+      "artifacts/eval/endgame_ablation_val.csv",
+      "artifacts/eval/endgame_ablation_val.csv.",
+      "artifacts/eval/endgame_channel_recall.csv",
+      "artifacts/eval/endgame_val_per_query.csv",
+      "artifacts/law_authority_cards_v2_unified.jsonl",
+      "artifacts/unified_retrieval.sqlite",
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/test.csv",
+      "data/train.csv",
+      "data/val.csv",
+      "e:\\n",
+      "research/Untitled75.ipynb"
+    ],
+    "mtime": "2026-05-09 16:26"
+  },
+  {
+    "out": "encode_queries_qwen3_8b_colab.md",
+    "name": "encode_queries_qwen3_8b_colab.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\encode_queries_qwen3_8b_colab.ipynb",
+    "n_cells": 5,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings",
+      "/content/drive/MyDrive/swiss_law/data"
+    ],
+    "local_paths": [
+      "artifacts/embeddings"
+    ],
+    "mtime": "2026-05-08 09:52"
+  },
+  {
+    "out": "retrieve_unified_corpus_qwen3_8b_colab.md",
+    "name": "retrieve_unified_corpus_qwen3_8b_colab.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\retrieve_unified_corpus_qwen3_8b_colab.ipynb",
+    "n_cells": 12,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/metadata"
+    ],
+    "local_paths": [
+      "artifacts/embeddings",
+      "artifacts/eval",
+      "artifacts/retrieval_metadata.zip"
+    ],
+    "mtime": "2026-05-08 00:45"
+  },
+  {
+    "out": "embed_unified_corpus_qwen3_8b_blackwell_colab.md",
+    "name": "embed_unified_corpus_qwen3_8b_blackwell_colab.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\embed_unified_corpus_qwen3_8b_blackwell_colab.ipynb",
+    "n_cells": 11,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation/embeddings",
+      "/content/drive/MyDrive/swiss_citation/unified_embedding_input.parquet"
+    ],
+    "local_paths": [],
+    "mtime": "2026-05-06 23:48"
+  },
+  {
+    "out": "court_citation_concept_enrichment.md",
+    "name": "court_citation_concept_enrichment.ipynb",
+    "path": "E:\\swiss_citation_extraction\\notebooks\\court_citation_concept_enrichment.ipynb",
+    "n_cells": 3,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-03 12:38"
+  },
+  {
+    "out": "retrieve_unified_corpus_v3.md",
+    "name": "retrieve_unified_corpus_v3.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\retrieve_unified_corpus_v3.ipynb",
+    "n_cells": 12,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/embeddings/qwen3_8b_query_val.npy",
+      "/content/drive/MyDrive/swiss_law/artifacts/eval/val_candidate_sets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/eval/val_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/eval/val_summary.json",
+      "/content/metadata"
+    ],
+    "local_paths": [
+      "artifacts/embeddings",
+      "artifacts/embeddings/qwen3_8b_query_val.npy",
+      "artifacts/eval",
+      "artifacts/eval/val_candidate_sets.jsonl",
+      "artifacts/eval/val_dropped_gold.csv",
+      "artifacts/eval/val_summary.json",
+      "artifacts/retrieval_metadata.zip"
+    ],
+    "mtime": "2026-05-08 21:11"
+  },
+  {
+    "out": "Untitled75.md",
+    "name": "Untitled75.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\Untitled75.ipynb",
+    "n_cells": 7,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition",
+      "/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition/retrieval/article_translations_de_en.json",
+      "/content/drive/MyDrive/Omnilex-Agentic-Retrieval-Competition/retrieval/faiss_index_v2.bin"
+    ],
+    "local_paths": [
+      "e:\\n"
+    ],
+    "mtime": "2026-05-08 12:15"
+  },
+  {
+    "out": "enrich_laws_de_qwen3_8b_kaggle.md",
+    "name": "enrich_laws_de_qwen3_8b_kaggle.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [],
+    "mtime": "2026-05-06 01:00"
+  },
+  {
+    "out": "investigate_laws_de_token_optimization.md",
+    "name": "investigate_laws_de_token_optimization.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\investigate_laws_de_token_optimization.ipynb",
+    "n_cells": 11,
+    "drive_paths": [
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [
+      "e:\\\\swiss_citation_extraction"
+    ],
+    "mtime": "2026-05-06 14:07"
+  },
+  {
+    "out": "enrich_cards_qwen3_8b_kaggle.md",
+    "name": "enrich_cards_qwen3_8b_kaggle.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_kaggle.ipynb",
+    "n_cells": 5,
+    "drive_paths": [],
+    "local_paths": [],
+    "mtime": "2026-05-02 05:02"
+  },
+  {
+    "out": "enrich_cards_qwen3_8b_colab_fast_stable.md",
+    "name": "enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen3_8b_colab_fast_stable.ipynb",
+    "n_cells": 13,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_failed_cards.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_rag_targets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4_enrichment_targets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "local_paths": [
+      "artifacts/court_authority_cards_rag_failed_cards.jsonl",
+      "artifacts/court_authority_cards_rag_targets.jsonl",
+      "artifacts/court_authority_cards_v4_enrichment_targets.jsonl",
+      "artifacts/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "mtime": "2026-05-02 04:31"
+  },
+  {
+    "out": "enrich_cards_qwen35_colab.md",
+    "name": "enrich_cards_qwen35_colab.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\enrich_cards_qwen35_colab.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law"
+    ],
+    "local_paths": [],
+    "mtime": "2026-04-30 19:22"
+  },
+  {
+    "out": "colab_segment_lattice_funnel_v3.md",
+    "name": "colab_segment_lattice_funnel_v3.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\colab_segment_lattice_funnel_v3.ipynb",
+    "n_cells": 11,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts",
+      "/content/drive/MyDrive/swiss_law/artifacts/choice_cards_v3.json",
+      "/content/drive/MyDrive/swiss_law/artifacts/segment_lattice_v3.sqlite",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_candidate_sets.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_raw_log.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_llm_stage_recall.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_dropped_gold.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_oracle_stage_recall.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_segment_lattice_v3_planner_outputs.jsonl",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data_insights",
+      "/content/drive/MyDrive/swiss_law/scripts"
+    ],
+    "local_paths": [
+      "artifacts/choice_cards_v3.json",
+      "artifacts/segment_lattice_v3.sqlite",
+      "artifacts/val_segment_lattice_v3_candidate_sets.jsonl",
+      "artifacts/val_segment_lattice_v3_candidate_summary.csv",
+      "artifacts/val_segment_lattice_v3_dropped_gold.csv",
+      "artifacts/val_segment_lattice_v3_llm_candidate_summary.csv",
+      "artifacts/val_segment_lattice_v3_llm_dropped_gold.csv",
+      "artifacts/val_segment_lattice_v3_llm_planner_outputs.jsonl",
+      "artifacts/val_segment_lattice_v3_llm_raw_log.jsonl",
+      "artifacts/val_segment_lattice_v3_llm_stage_recall.csv",
+      "artifacts/val_segment_lattice_v3_oracle_candidate_summary.csv",
+      "artifacts/val_segment_lattice_v3_oracle_dropped_gold.csv",
+      "artifacts/val_segment_lattice_v3_oracle_planner_outputs.jsonl",
+      "artifacts/val_segment_lattice_v3_oracle_stage_recall.csv",
+      "artifacts/val_segment_lattice_v3_planner_outputs.jsonl"
+    ],
+    "mtime": "2026-04-30 15:10"
+  },
+  {
+    "out": "colab_recall_preserving_candidate_funnel.md",
+    "name": "colab_recall_preserving_candidate_funnel.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\colab_recall_preserving_candidate_funnel.ipynb",
+    "n_cells": 20,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts",
+      "/content/drive/MyDrive/swiss_law/artifacts/choice_cards.json",
+      "/content/drive/MyDrive/swiss_law/artifacts/dropped_gold_diagnostics.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/stage_recall_audit.csv",
+      "/content/drive/MyDrive/swiss_law/artifacts/val_candidate_summary.csv",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/data/laws_de.csv",
+      "/content/drive/MyDrive/swiss_law/data/test.csv",
+      "/content/drive/MyDrive/swiss_law/data/train.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_links.json",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_links.json"
+    ],
+    "local_paths": [
+      "artifacts/choice_cards.json",
+      "artifacts/dropped_gold_diagnostics.csv",
+      "artifacts/stage_recall_audit.csv",
+      "artifacts/val_candidate_summary.csv",
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/test.csv",
+      "data/train.csv",
+      "data/val.csv",
+      "data_insights/court_considerations_classified_citations.jsonl",
+      "data_insights/court_considerations_links.json",
+      "data_insights/laws_de_classified_citations.jsonl",
+      "data_insights/laws_de_links.json"
+    ],
+    "mtime": "2026-04-27 01:22"
+  },
+  {
+    "out": "colab_dense_embedding_test.md",
+    "name": "colab_dense_embedding_test.ipynb",
+    "path": "E:\\swiss_citation_extraction\\research\\colab_dense_embedding_test.ipynb",
+    "n_cells": 19,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law/artifacts",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/court_considerations.csv",
+      "/content/drive/MyDrive/swiss_law/data/laws_de.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/court_considerations_links.json",
+      "/content/drive/MyDrive/swiss_law/data_insights/gold_citation_coverage.csv",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_classified_citations.jsonl",
+      "/content/drive/MyDrive/swiss_law/data_insights/laws_de_links.json"
+    ],
+    "local_paths": [
+      "data/court_considerations.csv",
+      "data/laws_de.csv",
+      "data/val.csv",
+      "data_insights/court_considerations_classified_citations.jsonl",
+      "data_insights/court_considerations_links.json",
+      "data_insights/gold_citation_coverage.csv",
+      "data_insights/laws_de_classified_citations.jsonl",
+      "data_insights/laws_de_links.json"
+    ],
+    "mtime": "2026-04-26 18:08"
+  },
+  {
+    "out": "enrich_laws_de_qwen3_8b_kaggle.md",
+    "name": "enrich_laws_de_qwen3_8b_kaggle.ipynb",
+    "path": "E:\\swiss_citation_extraction\\law_json_llm_output\\enrich_laws_de_qwen3_8b_kaggle.ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/law_llm_input.jsonl",
+      "/content/drive/MyDrive/swiss_law/models/huggingface",
+      "/content/drive/MyDrive/swiss_law/outputs",
+      "/content/drive/MyDrive/swiss_law/outputs/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/law_llm_descriptors_0000000_all_failures.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/law_llm_descriptors_0000000_all_preview.csv"
+    ],
+    "local_paths": [
+      "data/checkpoints",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/law_llm_input.jsonl"
+    ],
+    "mtime": "2026-05-06 20:59"
+  },
+  {
+    "out": "court_llm_descriptor_extractor_blackwell_optimized_3_1.md",
+    "name": "court_llm_descriptor_extractor_blackwell_optimized__3__(1).ipynb",
+    "path": "E:\\swiss_citation_extraction\\outputs_from_363k_run\\court_llm_descriptor_extractor_blackwell_optimized__3__(1).ipynb",
+    "n_cells": 10,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/data",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/court_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/court_authority_cards_v4_target_cards.jsonl",
+      "/content/drive/MyDrive/swiss_law/models/huggingface",
+      "/content/drive/MyDrive/swiss_law/outputs",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_all_failures.jsonl",
+      "/content/drive/MyDrive/swiss_law/outputs/court_llm_descriptors_0000000_all_preview.csv",
+      "/content/scratch_outputs",
+      "/content/scratch_outputs/...)."
+    ],
+    "local_paths": [
+      "data/checkpoints",
+      "data/checkpoints/court_llm_descriptors_0000000_all.jsonl",
+      "data/court_authority_cards_v4_target_cards.jsonl"
+    ],
+    "mtime": "2026-05-05 01:39"
+  },
+  {
+    "out": "swiss_citation_anchor_funnel_val001.md",
+    "name": "swiss_citation_anchor_funnel_val001.ipynb",
+    "path": "E:\\swiss_citation_extraction\\swiss_citation_anchor_funnel_val001.ipynb",
+    "n_cells": 15,
+    "drive_paths": [
+      "/content/drive",
+      "/content/drive/MyDrive/swiss_citation_extraction",
+      "/content/drive/MyDrive/swiss_law",
+      "/content/drive/MyDrive/swiss_law/artifacts_v2/court_authority_cards_v5_unified.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "/content/drive/MyDrive/swiss_law/data/train.csv",
+      "/content/drive/MyDrive/swiss_law/data/train_granularity_expanded.csv",
+      "/content/drive/MyDrive/swiss_law/data/val.csv",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001/val_001_per_channel_recall.json",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001/val_001_per_gold_trace.tsv",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001/val_001_query_targets.json",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001/val_001_summary.md",
+      "/content/drive/MyDrive/swiss_law/research/anchor_funnel_val001/val_001_top1000_pool.txt",
+      "/content/swiss_citation_extraction"
+    ],
+    "local_paths": [
+      "E:/swiss_citation_extraction",
+      "data/checkpoints/law_llm_descriptors_0000000_all.jsonl",
+      "data/train.csv",
+      "data/train_granularity_expanded.csv",
+      "data/val.csv",
+      "research/anchor_funnel_val001/val_001_per_channel_recall.json",
+      "research/anchor_funnel_val001/val_001_per_gold_trace.tsv",
+      "research/anchor_funnel_val001/val_001_query_targets.json",
+      "research/anchor_funnel_val001/val_001_summary.md",
+      "research/anchor_funnel_val001/val_001_top1000_pool.txt"
+    ],
+    "mtime": "2026-05-09 20:28"
+  }
+]

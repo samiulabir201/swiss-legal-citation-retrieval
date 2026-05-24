@@ -1,0 +1,577 @@
+{
+  "7B_12/2025 E. 2.2": {
+    "citation": "7B_12/2025 E. 2.2",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal law and criminal procedure",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "collusion risk",
+        "criminal procedure",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "kollusionsgefahr",
+        "verdunkelungsgefahr"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 221 Abs. 1 Bst. b StPO"
+      ],
+      "case_anchors": [
+        "7B_687/2024 12.07.2024 E. 4.1",
+        "BGE 137 IV 122 E. 4.2"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "2.2. Der Haftgrund der Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass der Beschuldigte Personen beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Strafprozessuale Haft wegen Kollusions- bzw. Verdunkelungsgefahr soll verhindern, dass die beschuldigte Person die wahrheitsgetreue Abklärung des Sachverhalts vere"
+  },
+  "1B_90/2021 E. 2.1": {
+    "citation": "1B_90/2021 E. 2.1",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal procedure and coercive measures",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "collusion risk",
+        "criminal procedure",
+        "evidence assessment",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "kollusionsgefahr",
+        "verdunkelungsgefahr",
+        "sachverstandige",
+        "zeuge",
+        "untersuchungshaft"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 221",
+        "Art. 221 Abs. 1 Bst. b StPO"
+      ],
+      "case_anchors": [
+        "BGE 137 IV 122 E. 4.2",
+        "1B_406/2016 22.11.2016 E. 2.4-2.6",
+        "BGE 128 I 149 E. 3.4",
+        "BGE 132 I 21 E. 3.2.1",
+        "BGE 132 I 21 E. 3.4"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "2.1. Der Haftgrund der Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass der oder die Beschuldigte Personen beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Verdunkelung kann nach der bundesgerichtlichen Praxis insbesondere in der Weise erfolgen, dass sich die beschuldigte Person mit Zeugen, Auskunftspersonen,"
+  },
+  "1B_15/2023 E. 3.1": {
+    "citation": "1B_15/2023 E. 3.1",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal procedure and coercive measures",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "collusion risk",
+        "criminal procedure",
+        "evidence assessment",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "kollusionsgefahr",
+        "kollusionsrisiko",
+        "verdunkelungsgefahr",
+        "sachverstandige",
+        "zeuge",
+        "untersuchungshaft"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 212 Abs. 2 Bst. c",
+        "Art. 221 Abs. 1 Bst. b StPO"
+      ],
+      "case_anchors": [
+        "BGE 137 IV 122 E. 4.2",
+        "1B_357/2022",
+        "1B_357/2022 22.07.2022 E. 3.1",
+        "1B_558/2021 03.11.2021 E. 3.2",
+        "BGE 132 I 21 E. 3.2.1",
+        "BGE 140 IV 74 E. 2.2"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": [
+        "22. Juli 2022"
+      ]
+    },
+    "text_excerpt_original": "3.1. Der besondere Haftgrund der Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass der oder die Beschuldigte Personen beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Verdunkelung kann nach der bundesgerichtlichen Praxis insbesondere in der Weise erfolgen, dass sich die beschuldigte Person mit Zeugen, Auskunft"
+  },
+  "1B_210/2023 E. 4.1": {
+    "citation": "1B_210/2023 E. 4.1",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal procedure and coercive measures",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "ECHR and fundamental rights",
+        "collusion risk",
+        "criminal procedure",
+        "evidence assessment",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "cedu",
+        "danger de collusion",
+        "risque de collusion",
+        "moyens de preuve",
+        "detention provisoire"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "legal_standard",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "art. 221 al. 1 let. b CPP",
+        "Art. 221 Abs. 1"
+      ],
+      "case_anchors": [],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "4.1. Conformément à l'art. 221 al. 1 let. b CPP, la détention provisoire ou pour motifs de sûreté ne peut être ordonnée que lorsque le prévenu est fortement soupçonné d'avoir commis un crime ou un délit et qu'il y a sérieusement lieu de craindre qu'il compromette la recherche de la vérité en exerçant une influence sur des personnes ou en altérant des moyens de preuve. Selon la jurisprudence, il pe"
+  },
+  "1B_536/2018 E. 5.1": {
+    "citation": "1B_536/2018 E. 5.1",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal procedure and coercive measures",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "ECHR and fundamental rights",
+        "collusion risk",
+        "criminal procedure",
+        "evidence assessment",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "cedu",
+        "risque de collusion",
+        "moyens de preuve",
+        "detention provisoire"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 5 Abs. 2 CPP"
+      ],
+      "case_anchors": [
+        "ATF 137 IV 122"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "5.1. Conformément à cette disposition, la détention provisoire ne peut être ordonnée que lorsque le prévenu est fortement soupçonné d'avoir commis un crime ou un délit et qu'il y a sérieusement lieu de craindre qu'il compromette la recherche de la vérité en exerçant une influence sur des personnes ou en altérant des moyens de preuves. Pour retenir l'existence d'un risque de collusion au sens de ce"
+  },
+  "7B_496/2025 E. 3.2": {
+    "citation": "7B_496/2025 E. 3.2",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal law and criminal procedure",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "drug offences",
+        "inheritance and testament",
+        "police and public security",
+        "pretrial detention"
+      ],
+      "terms_original": [
+        "betaubungsmittel",
+        "drogen",
+        "will",
+        "uberwachung",
+        "untersuchungshaft"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "procedural_history",
+      "outcome_signal": "none",
+      "statute_anchors": [],
+      "case_anchors": [],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "3.2. Die Vorinstanz sieht weiterhin Kollusionsmöglichkeiten für den Beschwerdeführer. Zwar sei die Strafuntersuchung bereits weit fortgeschritten. Dennoch seien die zwei Mobiltelefone des Beschwerdeführers noch immer versiegelt und das Entsiegelungsverfahren sei noch im Gang. Bei einem der zwei Telefone handle es sich um ein Krypto-Handy, also ein speziell gesichertes Mobiltelefon, das eine abhörs"
+  },
+  "1B_90/2021 E. 2.4": {
+    "citation": "1B_90/2021 E. 2.4",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal procedure and coercive measures",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "administrative procedure",
+        "collusion risk"
+      ],
+      "terms_original": [
+        "verfugung",
+        "kollusionsgefahr",
+        "verdunkelungsgefahr"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "reasoning",
+      "outcome_signal": "none",
+      "statute_anchors": [],
+      "case_anchors": [],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "2.4. Dass die kantonalen Instanzen den Haftgrund der Kollusionsgefahr im jetzigen Untersuchungsstadium bejahen, hält vor dem Bundesrecht stand. Als Anhaltspunkte für Verdunkelungsgefahr durften die kantonalen Strafbehörden insbesondere mitberücksichtigen, dass die kollusionsgefährdeten Beweisaussagen hier von hoher Bedeutung sind und ein grosses öffentliches Interesse an einer unbeeinflussten Unte"
+  },
+  "7B_231/2025 E. 4.1": {
+    "citation": "7B_231/2025 E. 4.1",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal law and criminal procedure",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "collusion risk",
+        "criminal procedure",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "kollusionsgefahr",
+        "verdunkelungsgefahr"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 221 Abs. 1 Bst. b StPO"
+      ],
+      "case_anchors": [
+        "7B_12/2025 22.01.2025 E. 2.2",
+        "BGE 137 IV 122 E. 4.2"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": []
+    },
+    "text_excerpt_original": "4.1. Strafprozessuale Haft wegen Kollusions- bzw. Verdunkelungsgefahr (Art. 221 Abs. 1 lit. b StPO) soll verhindern, dass die beschuldigte Person die wahrheitsgetreue Abklärung des Sachverhalts vereitelt oder gefährdet. Die theoretische Möglichkeit, dass der Beschuldigte kolludieren könnte, genügt indessen nicht, um Haft unter diesem Titel zu rechtfertigen. Es müssen vielmehr konkrete Indizien für"
+  },
+  "7B_69/2024 E. 3.3.2": {
+    "citation": "7B_69/2024 E. 3.3.2",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal law and criminal procedure",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "collusion risk",
+        "criminal procedure",
+        "evidence assessment",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "kollusionsgefahr",
+        "verdunkelungsgefahr",
+        "sachverstandige",
+        "zeuge",
+        "untersuchungshaft"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 113 StPO",
+        "Art. 221 Abs. 1 Bst. b StPO"
+      ],
+      "case_anchors": [
+        "BGE 137 IV 122 E. 4.2",
+        "7B_1028/2023",
+        "7B_417/2023",
+        "7B_1028/2023 12.01.2024 E. 8.1",
+        "7B_474/2023 06.09.2023 E. 4.2.2",
+        "BGE 132 I 21 E. 3.2.2"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": [
+        "12. Januar 2024",
+        "4. September 2023"
+      ]
+    },
+    "text_excerpt_original": "3.3.2. Der besondere Haftgrund der Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass die beschuldigte Person jemanden beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Verdunkelung kann gemäss der Rechtsprechung insbesondere in der Weise erfolgen, dass sich die beschuldigte Person mit Zeugen, Auskunftspersonen,"
+  },
+  "7B_301/2024 E. 2.4": {
+    "citation": "7B_301/2024 E. 2.4",
+    "enrichment_source": "static",
+    "rag_enrichment": {
+      "legal_area": "criminal law and criminal procedure",
+      "primary_domain": "",
+      "secondary_domain": "",
+      "topic": "",
+      "subtopic": "",
+      "micro_topic": "",
+      "doctrinal_rule": "",
+      "legal_test": "",
+      "procedural_context": "",
+      "legal_topic": "",
+      "legal_rule": "",
+      "court_holding": "",
+      "factual_context": "",
+      "legal_domain_path": [],
+      "concepts_en": [
+        "collusion risk",
+        "criminal procedure",
+        "evidence assessment",
+        "pretrial detention",
+        "procedural rights"
+      ],
+      "terms_original": [
+        "kollusionsgefahr",
+        "verdunkelungsgefahr",
+        "sachverstandige",
+        "zeuge",
+        "untersuchungshaft"
+      ],
+      "fact_pattern_tags": [],
+      "authority_role": [
+        "unpublished_federal_decision",
+        "reasoning_consideration",
+        "multi_consideration_decision"
+      ],
+      "english_legal_concepts": [],
+      "search_keywords": [],
+      "specificity_score": 0.0,
+      "paragraph_role": "facts",
+      "outcome_signal": "none",
+      "statute_anchors": [
+        "Art. 221 Abs. 1 lit. b StPO",
+        "Art. 221 Abs. 1 Bst. b StPO"
+      ],
+      "case_anchors": [
+        "BGE 137 IV 122 E. 4.2",
+        "7B_69/2024",
+        "7B_1028/2023 12.01.2024 E. 8.1",
+        "7B_69/2024 21.02.2024 E. 3.3.2",
+        "BGE 132 I 21 E. 3.2.2"
+      ],
+      "legal_source_anchors": [],
+      "secondary_sources": [],
+      "document_or_plan_anchors": [],
+      "event_anchors": [
+        "21. Februar 2024"
+      ]
+    },
+    "text_excerpt_original": "2.4. Kollusionsgefahr liegt vor, wenn ernsthaft zu befürchten ist, dass die beschuldigte Person jemanden beeinflusst oder auf Beweismittel einwirkt, um so die Wahrheitsfindung zu beeinträchtigen (Art. 221 Abs. 1 lit. b StPO). Verdunkelung kann gemäss der Rechtsprechung insbesondere in der Weise erfolgen, dass sich die beschuldigte Person mit Zeugen, Auskunftspersonen, Sachverständigen oder Mitbesc"
+  }
+}

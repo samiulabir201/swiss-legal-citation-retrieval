@@ -1,0 +1,780 @@
+A Generalised and Adaptable Reinforcement Learning Stopping
+
+Method
+
+           Reem Bin-Hezam ,                                                                     Mark Stevenson
+
+             rybinhezam@pnu.edu.sa                                                         mark.stevenson@sheffield.ac.uk
+     Department of Information Systems                                                        School of Computer Science
+College of Computer and Information Sciences                                                    Faculty of Engineering
+Princess Nourah Bint Abdulrahman University                                                      University of Sheffield
+                                                                                              Sheffield, United Kingdom
+               Riyadh, Saudi Arabia
+
+arXiv:2505.01907v2 [cs.IR] 7 Jul 2025Abstract                                                                                                                                              Environment    0.5
+                                                                                                                               Reward R(Si)                                                 Action A(Si)
+                                                                                                                                        PolicyThis paper presents a Technology Assisted Review (TAR) stopping[Stop, Cont.]0.25
+                                                                                                                                                                                observationapproach based on Reinforcement Learning (RL). Previous such
+approaches offered limited control over stopping behaviour, such as                                                                                                                           State Si    0.1
+fixing the target recall and tradeoff between preferring to maximise                                                                                                                           Agent
+recall or cost. These limitations are overcome by introducing a novel                                                                                                                                     0 ranking
+RL environment, GRLStop, that allows a single model to be applied
+to multiple target recalls, balances the recall/cost tradeoff and inte-                                                                                                                                   ...
+grates a classifier. Experiments were carried out on six benchmark
+datasets (CLEF e-Health datasets 2017-9, TREC Total Recall, TREC                                                                                                                                          0
+Legal and Reuters RCV1) at multiple target recall levels. Results
+showed that the proposed approach to be effective compared to                                                                                                                                             0
+multiple baselines in addition to offering greater flexibility.
+                                                                                                                                                                                                          1     i of Si
+CCS Concepts
+                                                                                                                                                                                                          0.8 recallt
+· Information systems  Retrieval effectiveness; Retrieval
+efficiency.                                                                                Figure 1: RL Environment for TAR Stopping
+
+Keywords                                                                                   processes, including stopping rules which help reviewers to de-
+                                                                                           cide when to stop assessing documents, thereby reducing the effort
+Reinforcement Learning, Deep Reinforcement Learning, Technol-                              required to screen a collection for relevance. TAR stopping rules
+ogy Assisted Review, TAR, Stopping Methods                                                 aim to identify when a desired level of recall (the target recall) has
+                                                                                           been reached during document review, while also minimising the
+ACM Reference Format:                                                                      number of documents examined. The problem is challenging since
+Reem Bin-Hezam and Mark Stevenson. 2025. A Generalised and Adaptable                       these two objectives are in opposition; increasing the number of
+Reinforcement Learning Stopping Method. In Proceedings of the 48th Inter-                  documents examined provides more information about whether
+national ACM SIGIR Conference on Research and Development in Information                   the target has been reached.
+Retrieval (SIGIR '25), July 13­18, 2025, Padua, Italy. ACM, New York, NY,
+USA, 10 pages. https://doi.org/10.1145/3726302.3729879                                        A wide range of approaches have been applied to the problem,
+                                                                                           including examination of the rate at which relevant documents
+1 Introduction                                                                             are observed [10, 37], estimating the number of remaining rele-
+                                                                                           vant documents by sampling or classification [8, 11, 25, 36] and
+Identifying all, or a significant proportion of, the relevant docu-                        analysis of ranking scores [13, 17]. A recent approach is based on
+ments in a collection has applications in multiple areas including                         Reinforcement Learning (RL) (see Figure 1). RLStop uses deep RL to
+development of systematic reviews [16, 20­22], satisfying legal dis-                       train a model to make stopping decisions which were found to per-
+closure requirements [3, 15, 28], social media content moderation                          form well in comparison with a wide range of alternative stopping
+[45] and test collection development [27]. These problems often                            models [6]. However, RLStop suffers from a range of limitations,
+involve large collections where manually reviewing all documents                           the most significant being that each model is trained for a specific
+would be prohibitively time-consuming. Technology Assisted Re-                             target recall, limiting their generalisability. Also, in common with
+view (TAR) develops techniques to support these document review                            many other stopping methods, it does not provide a mechanism to
+                                                                                           adapt behaviour to balance the two stopping objectives: maximising
+                               This work is licensed under a Creative Commons Attribution
+                               International 4.0 License.
+
+SIGIR '25, Padua, Italy
+© 2025 Copyright held by the owner/author(s).
+ACM ISBN 979-8-4007-1592-1/2025/07
+https://doi.org/10.1145/3726302.3729879
+SIGIR '25, July 13­18, 2025, Padua, Italy                                                                                       Reem Bin-Hezam and Mark Stevenson
+
+the likelihood of reaching target recall and minimising the num-        RLStop was the first application to stopping in TAR. RLStop was
+ber of documents examined. Finally, RLStop only uses information        found to identify suitable stopping points at a range of target re-
+from documents that have already been examined, despite work            call levels and outperformed other approaches on a range of TAR
+demonstrating the value of incorporating predictions about likely       problems.
+relevance of unexamined documents [5, 43, 46].
+                                                                           Despite its strong performance, RLStop suffers from several lim-
+   Inspired by RLStop, this paper proposes an alternative RL-based      itations. Each model is trained using a single target recall and is
+stopping algorithm which overcomes these limitations and im-            intended to make stopping decisions for that recall alone. This lim-
+proves performance. In particular, it proposes a new reward func-       its the generalisability of each model and multiple models would
+tion for use within the RL algorithm which allows the creation of a     need to be trained in any cases where different target recalls are of
+single stopping model that can be used with a range of target recall    interest. This limitation is unusual within stopping methods, for
+levels and also provides control over whether proposed stopping         example it is straightforward for approaches based on estimating
+points prefer to maximise the number of relevant documents iden-        the total number of relevant documents to adjust the target recall
+tified or minimise the number of documents examined. In addition,       and target methods account of the target recall in the formulae
+it demonstrates how information from unexamined documents can           used to determine the number of relevant documents that need to
+be incorporated within the RL framework. Experiments on six data        be observed before stopping.
+sets commonly used in TAR evaluation demonstrate that these ex-
+tensions improve performance. Further analysis explores the effect         Applications of TAR stopping rules may have different require-
+of ranking quality.                                                     ments in terms of the balance between ensuring that the target
+                                                                        recall is achieved and minimising the number of documents ex-
+   This work makes the following contributions: (1) introduces a        amined. For example, ensuring that a high proportion of relevant
+RL-based stopping model that can be applied to multiple target          documents are identified is a priority for systematic reviews in the
+recalls and adapted for different stopping preferences (e.g. max-       medical domain [16], while stopping as close to the target recall as
+imising reaching target recall or minimising number of documents        possible is more likely to be important in the legal domain where
+examined), (2) integrates a classifier within the RL environment to     minimising cost and unnecessary disclosure are important factors
+provide information about the unexamined documents, (3) demon-          [14]. Some stopping methods, notably target methods [10, 23], do
+strates that this approach provides state-of-the-art performance        provide this functionality by incorporating the probability that
+through evaluation using multiple benchmark data sets, and (4)          the target recall is reached within the stopping decision. However,
+investigates the effect of a ranking quality on these approaches.1      RLStop does not allow behaviours to be adapted in this way.
+
+2 Background                                                               These limitations are addressed in this work by making use of an
+                                                                        alternative reward function within the RL algorithm which allows a
+A wide range of approaches have been proposed for TAR stopping          single model to be trained and then applied to multiple target recalls.
+methods. The most common is to estimate the total number of             This reward function also allows the balance between ensuring that
+relevant documents in the collection and use this information to        target recall is achieved and number of documents examined to be
+determine whether enough documents have been observed for the           considered during training, allowing different models to be created.
+target recall to have been achieved. The total number of relevant
+documents has been estimated in a range of ways including sam-             In addition, RLStop examines the documents in the order in
+pling the unexamined documents [7, 8, 11, 19, 25, 30, 36], training a   which they are ranked and bases its stopping decisions only on
+classifier using relevance judgments from the examined documents        information from the documents that have been examined so far.
+and applying it to those yet to be examined to estimate the number      Although this approach has the advantage of prioritising the doc-
+that are relevant [43, 44, 46], applying score distribution approaches  uments that are more likely to be relevant, information about the
+that make use of the scores assigned by the ranking algorithm [17]      unexamined documents has been demonstrated to be useful for
+and by applying counting processes [5, 37].                             this problem [5, 44, 46]. This paper also demonstrates how infor-
+                                                                        mation about unexamined documents can be integrated into the RL
+   Other approaches identify a stopping point without explicitly es-    approach by training a classifier on the documents for which rele-
+timating the total number of relevant documents. The knee method        vance judgments are available and applying it to the unexamined
+examines the gain curve produced as relevant documents are en-          documents.
+countered to identify an inflection point where these become less
+frequent [10], while target methods apply sampling theory to ran-       3 Reinforcement Learning Approach
+domly sample documents until a pre-specified number of relevant
+documents have been observed [10, 23, 44].                              In RL an agent interacts with an environment and receives rewards
+                                                                        depending upon its actions. The environment consists of a state
+   RLStop also identifies a stopping point without explicitly esti-     space, , which defines the set of possible states that the agent can
+mating the total number of relevant documents [6]. RLStop treats        occupy and an action space, , that lists the set of possible actions
+the stopping problem as a sequential decision-making problem and        that the agent can take at each state. The goal of RL is to learn a
+employs RL to make repeated decisions to either stop or continue        policy,  (, ) where    and   , which defines the value of
+examining documents, in contrast with the more common approach          choosing action  given states  and thereby guides the agent's be-
+of treating stopping as an estimation problem. Although RL has          haviour. A reward function, (), assigns a score to each state and is
+been widely applied within Information Retrieval [1, 31, 33, 42],       used to train the policy. An RL algorithm explores the environment
+                                                                        by making sequential choices of action through trial-and-error with
+1Code available from https://github.com/ReemBinHezam/GRLStop
+A Generalised and Adaptable Reinforcement Learning Stopping Method                                          SIGIR '25, July 13­18, 2025, Padua, Italy
+
+the goal of maximising the reward obtained. Each choice of action       state, two hidden layers and a binary output layer indicating the
+may affect not only the immediate reward obtained but also the          chosen action, which is converted to a probability distribution over
+rewards obtained following subsequent actions. RL algorithms must       the two possible actions by a softmax activation function.
+balance exploitation and exploration, that is maximising the reward     Reward function: The policy is trained using a reward function,
+obtained at each step by exploiting what it has already experienced     ( ), which assigns a score to each state indicating its desirability
+versus maximising cumulative future rewards by exploring the            to the agent. A suitable reward function should have the following
+environment by taking new actions [38].                                 properties 1) encourages the agent to continue examining docu-
+                                                                        ments until the target recall has been reached, 2) penalises further
+3.1 Stopping RL environment                                             examination after it has been reached, 3) have the same range for
+                                                                        different document rankings and target positions, and 4) can be
+This section describes how a stopping algorithm is implemented          adapted to offer control over the balance between undershooting
+within an RL environment. The agent examines a ranked list of           and overshooting of target recall.
+documents in batches, starting with the highest ranked documents.
+After each batch the agent decides to either continue examining            Note that the third property is necessary for to develop a single
+documents or stop.                                                      model that can be applied to multiple target recalls since it is difficult
+State Space: The state space represents the document ranking            for RL algorithms to learn good policies when reward function
+and target recall. A ranking is split into  fixed size batches, each    values across the state space cannot be compared directly.
+containing  documents for a collection of  documents. The agent
+                                                                           A function that meets these properties is:
+                 
+                                                                                                 - ( -1)              if   
+examines batches sequentially and obtains relevance judgments for                             
+all documents in the batch simultaneously. The initial state for each                            
+ranking, 1, occurs when the first batch (but none of the subsequent
+batches) has been examined by the agent. Additional batches are                        ( ) =                                  (1)
+examined in subsequent states, i.e. in the th state, , the first 
+batches have been examined. The final state, , represents the                                   ( -  )  -  ( - +1 )   if  > 
+situation in which the entire ranking has been examined.                                      
+                                                                                              
+   States are represented by a fixed size vector of length +2 where                                  (- )
+each of the first  elements represent a single batch and the final two
+represent the number of batches that have been examined so far ()          where  is the current state (i.e. th batch),  is the number of
+and the target recall. The way in which the values representing each    batches into which the ranking is split and  is the batch at which
+batch are computed depends on whether or not the batch has been         the target recall is reached. (Note that while the value of  is known
+examined by the agent. For examined batches, i.e. batches 1 . . . ,     while the algorithm is being trained, it is not known when it is
+the value shows the proportion of relevant documents within the         applied.) In addition,  and  are parameters allowing the function
+batch. However, since the remaining batches, i.e.  + 1 . . .  , have    to be adapted between preferring to maximise the likelihood of
+not yet been examined, the number of relevant documents within          reaching the target recall and minimising the number of documents
+each is not known. For these batches a classifier is trained using      examined.
+the relevance judgments from the examined batches and applying
+it to each of the unexamined batches to provide an estimate of the         This function assigns a positive reward for states at, or below,
+number of relevant documents it contains.                               the target recall and a negative reward for states after it has been
+                                                                        exceeded, thereby meeting the first two properties for a suitable
+   Note that the state representation used by RLStop only included      reward function.
+information about relevant documents within examined batches.
+This work integrates estimates of the number of relevant documents         Other properties of Equation 1 are best understood by consider-
+in unexamined batches produced by a classifier, information that        ing the cumulative reward produced for an RL episode, i.e. the sum
+has previously been demonstrated to be useful [43, 46], into the RL     of rewards for all states visited by the agent during that episode. In
+approach.                                                               this application an episode consists of examining a ranking from
+Action Space: At each point in the ranking, the agent has a choice      the first batch until a stopping decision is made. The cumulative
+between two discrete actions: STOP and CONTINUE. The first              reward for an episode that ends at  , ( ), is given by:
+action is chosen when the agent (informed by the policy) judges
+that the target recall has been reached. The stopping point returned                                       
+is the end of the last batch that has been examined so far. If the
+agent does not stop, it continues to examine the ranking, i.e. moves                                           if   
+from state  to +1. The last possible agent step is to state  since                              
+this represents the end of the ranking and all documents have been                                   
+examined.
+Policy: A neural network is an appropriate choice of policy when                                
+the number of potential states is large, such as the state space                       ( ) = 
+encoding used here [2]. The policy used is a feed-forward network                                                             (2)
+consisting of an input layer of length  + 2, representing the current
+                                                                                                         -   
+                                                                                                
+                                                                                                               if  > 
+                                                                                                 -
+                                                                                                
+
+                                                                           The maximum value for this function, which occurs when the
+                                                                        target recall has been reached (i.e.  =  ) is always 1. The function's
+
+                                                                        value decreases for values below or above  with a minimum pos-
+                                                                        sible value of 0 reached when  =  (provided   ). The range
+
+                                                                        of the cumulative reward is therefore invariant to the point in the
+
+                                                                        ranking at which the target recall is reached, so the third property
+
+                                                                        is satisfied.
+
+                                                                        The properties of the reward function, and therefore the cu-
+
+                                                                        mulative reward, can be controlled by varying the values of the
+
+                                                                        parameters  and . The value of  determines the reward for states
+                                                                        before the target recall has been reached. Setting it < 1 increases
+
+                                                                        this reward while it is reduced for values > 1. Similarly, varying
+SIGIR '25, July 13­18, 2025, Padua, Italy                                                                                                                        Reem Bin-Hezam and Mark Stevenson
+
+                   1.0                                                          Balanced-Objective       4 Experiments
+                                                                                Recall-Objective
+                                                                                Cost-Objective           4.1 Datasets
+
+                   0.8                                                                                   Performance was evaluated on six datasets from multiple domains
+                                                                                                         that are widely used in high recall retrieval studies. The datasets
+Cumulative Reward  0.6                                                                                   are highly imbalanced, with a very low percentage of relevant doc-
+                                                                                                         uments for each topic.
+                   0.4                                                                                   CLEF Technology-Assisted Review in Empirical Medicine
+                                                                                                         (CLEF 2017/2018/2019) [20­22]: A collection of systematic re-
+                   0.2                                                                                   views from the Conference and Labs of the Evaluation Forum (CLEF)
+                                                                                                         2017, 2018, and 2019 e-Health lab Task 2: Technology-Assisted Re-
+                   0.0                                                                                   views in Empirical Medicine. The CLEF 2017 dataset contains 42
+                                                                                                         reviews, CLEF 2018 contains 30 and CLEF 2019 contains 31. The
+                        0     20           40 steps (i) 60                  80                  100      training dataset consists of 12 reviews from CLEF2017.
+                                                                                                         TREC Total Recall (TR) [15]: A collection of 290,099 emails related
+Figure 2: Example cumulative reward functions produced by                                                to Jeb Bush's eight-year tenure as Governor of Florida (athome4).
+varying parameters  and . In this example, the target recall                                             The collection contains 34 topics. Each topic is labelled with a short
+is achieved at batch 40 of 100 in this example (i.e.  = 40 and                                           title and based on an issue associated with Jeb Bush's governorship.
+ = 100). The solid blue line shows the function produced                                                 The training dataset is (athome1) which consists of 10 topics from
+when  =  = 1. The dashed orange line, produced when  = 4                                                 the same collection.
+and  = 0.25, shows a function that assigns less reward before                                            TREC Legal (Legal) [12]: A collection of 685,592 Enron emails
+the target recall is achieved and more after it. Similarly, the                                          made available by the Federal Energy Review Commission during
+dotted green line,  = 0.25 and  = 4, assigns more reward                                                 their investigation into the company's collapse. Two topics were
+before and less after.                                                                                   used for testing and two for training.
+                                                                                                         RCV1: [24] A collection of Reuters news articles labelled with cat-
+ changes the reward after the target recall has been exceeded.                                           egories. Following [43, 44], 45 categories were used to represent
+                                                                                                         a range of topics at different prevalence and difficulty levels, and
+Choosing appropriate values for  and  provides a mechanism                                               the collections downsampled to 20% for efficiency. The remaining
+                                                                                                         unused 94 topics in the collection were used for training.
+to control the balance between ensuring the target recall has been
+                                                                                                            To ensure fair comparison, all stopping methods are applied to
+reached and minimising the number of documents examined. For                                             the same rankings. AutoTAR [9] is a greedy Active Learning ap-
+                                                                                                         proach that represents state-of-the-art performance on total recall
+example, setting  = 4 and  = 0.25 alters the function to increase                                        tasks and is commonly used within work on stopping methods.
+                                                                                                         It allows comparison with a range of alternative approaches [25].
+the reward when the target recall is exceeded and reduce the re-                                         AutoTAR rankings for each dataset were created using a reference
+                                                                                                         implementation and default parameters.2 These rankings were used
+ward when it is not met, thereby encouraging policies that ensure                                        for all experiments, except those reported in Section 5.4 which ex-
+                                                                                                         plore the effect of varying ranking quality.
+enough documents have been identified to achieve the target recall
+                                                                                                         4.2 Baselines
+even at the expense of examining more documents than necessary.
+                                                                                                         Multiple stopping methods representing a range of approaches
+Similarly, setting  < 1 and  > 1 reverses this to increase reward                                        were used as baselines, including those widely used in previous
+                                                                                                         work.
+for minimising the number of documents examined, even when the                                           RLStop [6] is the existing RL-based approach described previously.
+                                                                                                         Separate models are trained for each dataset and target recall.
+target recall has not been achieved (see Figure 2).                                                      SCAL [11] estimates the number of relevant documents in the col-
+                                                                                                         lection by sampling across the entire ranking.
+Note that a reward function could be created using a single                                              AutoStop [25] employs a similar approach to SCAL. Sampling is
+                                                                                                         carried out using unbiased estimators [18, 39] to account for the
+parameter to control the balance between maximising recall or                                            decreasing prevalence of relevant documents.
+                                                                                                         SD-training/SD-sampling [17] make use of the scores assigned
+minimising workload, and such a function would be adequate for                                           by the ranking algorithm to estimate the total number of relevant
+                                                                                                         documents. They differ in how they identify relevant documents
+the majority of applications. However, we chose to include two                                           needed to model ranking scores. SD-training from the training data
+
+parameters to increase the possible reward functions available.                                          2 https://github.com/dli1/auto- stop- tar
+
+The reward function presented here can be compared against
+
+the one used by RLStop. That function met the first two properties
+
+by assigning positive reward until the target recall was reached
+
+and then negative reward thereafter. However, the maximum and
+
+minimum cumulative reward varied depending on the batch at
+
+which the target recall was reached (i.e. value of  ) with higher
+
+maximum values when this batch occurred later in the rankings.
+
+(The               maximum    cumulative   reward        for   RLStop       is   -1  while          the
+                                                                                  2
+                           2  - -2
+minimum,                       2    ,  is  negative  in  some  cases.)  In  addition,  RLStop's
+
+reward function did not offer any mechanism to adapt the policy
+
+to prefer to overshoot or undershoot the target recall.
+A Generalised and Adaptable Reinforcement Learning Stopping Method                                                               SIGIR '25, July 13­18, 2025, Padua, Italy
+
+and SD-sampling by sampling documents to obtain relevance judg-           information about whether the target recall has been reached and
+ments from a simulated user.                                              number of documents examined within a single metric.
+IP-H [37] examines the rate at which relevant documents are ob-
+served and uses this information within a statistical model (counting     4.4 Implementation
+process) to estimate the total number of relevant documents.
+Knee [10] examines the "gain curve" produced by plotting the              Proximal Policy Optimization (PPO) [35] is used as the RL algorithm.
+cumulative total of relevant documents identified against rank. A         PPO is a policy gradient approach that directly learn the policy
+"knee detection" algorithm [34] is used to examine this curve's           that maps states to actions rather than indirectly extracting it from
+gradient to determine when the frequency of relevant documents            state-action pairs. It is an actor-critic RL algorithm that combines
+decreases.                                                                policy-based (actor) and value-based (critic) RL, where the actor
+TM-adapted [10] randomly samples from the collection until a              network decides the actions, and the critic network evaluates them
+pre-specified number of relevant documents have been found. An            to optimise the value function (i.e. reward value). PPO is based on
+extension of this approach that allows this figure to be adapted for      the REINFORCE [41] algorithm but with several enhancements, and
+different target recalls is used [37].                                    most importantly in our case, collects trajectories from different
+QBCB [23] similar to the previous approach but relies on a set of         environments simultaneously from independent parallel actors,
+known relevant documents. Sampling continues until all documents          which allows a policy to be trained using rankings from multiple
+in the set have been found.                                               topics. PPO employs a clipping mechanism limiting policy updates
+                                                                          within a specific range and leading to more stable training which
+   Baselines are computed using reference implementations from            is important when training the agent with multiple environments.
+previous work [25, 37] where possible. Otherwise, previously re-
+ported results are used and are directly comparable since they are           PPO is more suitable than alternative approaches like DQN [29]
+also based on AutoTAR rankings. However, some baselines are               which relies on Q-values to map actions to specific states and does
+not available for the RCV1 dataset since we were unable to run            not easily generalise across different environments such as multiple
+the reference code and results have not been provided in previous         rankings. PPO is also more sample-efficient than some alternative
+work.                                                                     methods, thereby reducing the amount of data required to learn
+                                                                          effective policies.
+   Performance was also compared against an Oracle method                 Classifier: The classifier applied to the unexamined portion of the
+(OR) which examines documents in ranking order and stops when             ranking was implemented using logistic regression with a TF-IDF
+the target recall level has been achieved (or exceeded). The oracle       document representation. Despite its simplicity, this approach has
+represents the behaviour of an ideal stopping method but is not           proved successful for TAR problems and has commonly been used
+useful in practise since it requires full information about the ranking.  by previous approaches [5, 25, 43, 44, 46]. The classifier was im-
+Note that in some cases the oracle can only achieve a recall higher       plemented using the scikit-learn library with LogisticRegression
+than the target when it is not possible to stop exactly at target,        and TF-IDF scores generation using TfidfVectorizer and default
+e.g. given a target recall of 0.8 and collection containing 7 relevant    configurations, which proved to work well in previous work [5, 25].
+documents, the oracle will stop after 6 relevant documents have           Documents features used were title and abstract for the CLEF 2017-
+been found, i.e. recall 0.86.                                             19 datasets, title and content of emails for TREC TR and Legal and
+                                                                          the entire news article for RCV1. Cost sensitive learning was used to
+4.3 Evaluation Metrics                                                    mitigate class imbalance during classifier training by using a weight
+                                                                          of 1 for the minority class (i.e. relevant) and weighing the minority
+Approaches were evaluated using metrics commonly used in previ-           class (i.e. not relevant) as the ratio of the number of documents in
+ous work on TAR stopping criteria, e.g. [10, 25], calculated using        the minority and majority classes [26].
+the tar_eval open-source evaluation script.3                              Implementation and Hyperparameters: The RL environment
+Recall: Proportion of relevant documents within the collection            was created using the Gymnasium library [40] with vector environ-
+identified before the method stops examining documents.                   ments, which allows multiple independent environments to be
+Reliability (Rel.): Percentage of topics where the desired target         stacked together, thereby allowing simultaneous training on multi-
+recall was reached (or exceeded). For each topic, the reliability         ple topics. The Stable-Baseline3 [32] implementation of PPO was
+is 1 if the target recall is reached before the stopping examining        used.
+documents, and 0 otherwise.
+Cost: Percentage of documents examined.                                      Following previous work, the number of batches, , was set to
+Cost Difference (CostDiff): In addition to the above metrics,             100 to ensure a reasonable number of possible stopping positions
+the cost difference score is also introduced. This is the difference      without the environment becoming too sparse [6].
+between the proportion of documents that were examined and
+would have been examined by the oracle method (i.e. stopping                 Experiments were carried out exploring multiple configurations
+immediately upon reaching the target recall). It is computed as           which required different hyperparameters due to the changes to
+ () - (). Positive scores indicate that the target                        the environment and reward behaviour. The best values for each
+recall has been reached and negative that it was not while the            setting were identified using a grid search. For all configurations,
+absolute value indicates the proportion of the collection by which        the number of epochs, discount factor, learning rate, and neural
+the ideal stopping point was missed. Cost difference combines             network hidden layers nodes were set to their default values of 10,
+                                                                          0.99, 0.0003 and 64, which also proved to provide the best results.
+3 https://github.com/CLEF-TAR/tar                                         The number of steps per environment at each rollout was set to 10,
+SIGIR '25, July 13­18, 2025, Padua, Italy                                                                                          Reem Bin-Hezam and Mark Stevenson
+
+the entropy coefficient to 0.1 and the clipping range to 0.1. Early           These results demonstrate that GRLStop is comparable with
+stopping callback [32] was applied when there was no improvement           state-of-the-art approaches for TAR stopping and is often able to
+in the policy for ten consecutive rollouts to help avoid overfitting,      achieve performance closer to the optimal oracle than alternative
+save training time and ensure fair comparison.                             methods.
+
+   Section 5.2 describes a configuration in which the classifier was       5.1 Fixed vs Varying Target Recall
+not included. For this configuration, the number of steps per envi-
+ronment at each rollout was increased to 100 since the environment         A key feature of GRLStop is its ability to train a single model that can
+is less informative and more steps are required for to explore it          be used to identify stopping points for different target recalls. This
+fully. The entropy coefficient was also set to 0.001 to encourage          is in contrast with RLStop where a different model has to be trained
+a balance between the number of steps and exploration, thereby             for each target recall, limiting their flexibility. This also provides
+introducing more stable policy updates.                                    RLStop with an advantage in the results shown in Figure 3 since
+                                                                           all GRLStop results for a dataset are produced by a single model,
+   The reward function parameters  and  were set to 1 for all              while the RLStop ones are produced by three separate models.
+experiments except those in Section 5.3 which explore the effect of
+altering the objectives.                                                      To explore this further, an experiment was carried out in which
+                                                                           GRLStop was compared against versions of RLStop trained for
+5 Results                                                                  two target recalls: RLStop7 for target recall 0.7 and RLStop9 for
+                                                                           target recall 0.9. Each model was then applied in scenarios with for
+The first experiment compares the proposed approach, referred to           different target recalls (0.7, 0.8, 0.9 and 1.0). The difference between
+as GRLStop, with the alternative methods (baselines and oracle)            this experiment and the one reported in Figure 3 is that the RLStop7
+described in Section 4.2. Results are reported using recall and cost,      and RLStop9 models are applied to all target recalls, rather than
+averaged across all topics in each collection. (Note that the reliability  just the one that they have been trained for.
+and CostDiff scores for GRLStop are also available in Table 1.) Recall
+and cost metrics were chosen because they provide information                 Results are shown in Table 1 where recall, reliability, cost and
+about how well the stopping algorithm has achieved its two key             CostDiff metrics are reported for each approach. Note that the recall
+objectives: identifying relevant documents and minimising the total        and cost metrics for the RLStop7 and RLStop9 models are the same
+number of documents examined. Suitable stopping methods need               for all target recalls, since these models only aim to achieve the tar-
+to take account of both objectives so Pareto efficient approaches          get recall they were trained for. The reliability and CostDiff scores
+(i.e. those that reach the highest recall for a particular cost) are       for these models do change since these metrics consider the target
+identified for each setting.                                               recall. However, for GRLStop, results for all metrics vary depend-
+                                                                           ing on the target recall, demonstrating the models generalisability
+   Results are shown in Figure 3 for all datasets with target recalls      across target recalls.
+set to 0.8, 0.9 and 1.0. (Target recall 0.7 is also included for subse-
+quent experiments but not for this one since it was not possible to           Unsurprisingly, the RLStop7 and RLStop9 models perform best
+obtain scores for several of the baseline approaches.) Each dataset        when applied to the target recall they had been trained for. But
+is represented in a single column and each target recall in a single       the performance of these models tends to degrade when they are
+row. Grey lines in each sub-figure indicate the Pareto front (i.e. set     applied to different target recalls. For example, performance of RL-
+of Pareto efficient approaches).                                           Stop7 reduces as it is applied to increasingly higher target recalls. In
+                                                                           these cases the models tends to undershoot the target, as indicated
+   The variation in relative performance across the range of con-          by the drop in reliability and CostDiff scores. Similarly, RLStop9
+figurations included in the experiment demonstrates the difficulty         overshoots when applied to lower target recalls, as demonstrated
+of selecting a single approach that is optimal in all circumstances.       by the high cost and cost difference figures in comparison with the
+However, GRLStop is Pareto optimal in almost every case. The sin-          other two approaches.
+gle exception is for the TR dataset for target recall 1.0 (subfigure (p))
+where GRLStop is very close to being Pareto optimal. The approach             The costDiff scores for GRLStop are consistently lower than
+was consistently able to reach the target recall level with lower cost     those for RLStop7 and RLStop9, even in the cases where it was
+compared to the baselines in almost all non-total recall scenarios         more costly (such as target recall 1.0), demonstrating its ability to
+when the target recall is 0.8 or 0.9. It is also consistently closer to    adapt the stopping decision to the target recall being sought.
+the optimal Oracle results than other approaches.
+                                                                           5.2 Classifier Effect
+   GRLStop often fails to meet the target recall when it is set to
+1.0 (bottom row of Figure 3), most noticeably for the CLEF 2018            A further analysis was carried out to determine the effect of includ-
+and 2019 datasets. However, the cost is substantially lower than           ing the classifier to predict relevance of unobserved documents on
+for other approaches (several of which examine the majority of the         overall performance. A version of GRLStop that did not employ the
+collection) and achieves a good balance between cost and recall.           classifier was created by adapting the RL environment described
+                                                                           by Section 3.1 so that the classifier-predicted values for each unob-
+   The knee and IP-H approaches are also Pareto optimal in sev-            served document (i.e. all batches from  + 1 . . .  ) are replaced by
+eral cases. However, their cost is generally higher then GRLStop           a dummy value -1, an approach similar to the one used by RLStop.
+(indicating that they require more documents to be examined) and
+they tend to be further from the oracle. The remaining approaches             The box plot in Figure 4 compares the results obtained with and
+are not Pareto optimal under any scenario, or only occasionally.           without the classifier over all topics. CostDiff scores are reported
+                                                                           since to allows per-topic differences to be represented. It can be
+A Generalised and Adaptable Reinforcement Learning Stopping Method                                                                                      SIGIR '25, July 13­18, 2025, Padua, Italy
+
+              OR         AutoStop           Knee          SCAL                            SD-sampling  SD-training   TM-adapted               QBCB      IP-H                 RLStop         GRLStop
+
+        (a) recallt = 0.8 | CLEF2017 (b) recallt = 0.8 | CLEF2018 (c) recallt = 0.8 | CLEF2019                       (d) recallt = 0.8 | TR       (e) recallt = 0.8 | Legal        (f) recallt = 0.8 | RCV1
+
+        1.00                          1.00                            1.00                                     1.00                           1.00
+                                                                                                                                              0.80
+                                      0.95                                                                                                    0.60                           0.95
+                                                                                                                                              0.40
+        0.95                                                          0.95                                     0.95                           0.20                           0.93
+                                                                                                                                              0.00 0.0 0.2 0.4 0.6 0.8 1.0
+recall  0.90                          0.90                            0.90                                     0.90                                                          0.90
+        0.85                                                                                                   0.85                               (k) recallt = 0.9 | Legal
+        0.80                          0.85                                                                     0.80                                                          0.88
+                                                                                    0.85                       0.75 0.0 0.2 0.4 0.6 0.8 1.0   1.00
+                0.1 0.2 0.3 0.4 0.5                                                                                                           0.80                           0.85
+                                      0.80                                                                                                    0.60
+                                                                                                                                              0.40                           0.83
+                                                                      0.80                                                                    0.20
+                                      0.75                                                                                                    0.00 0.0 0.2 0.4 0.6 0.8 1.0   0.80
+                                            0.1 0.2 0.3 0.4 0.5 0.6                       0.2 0.4 0.6                                                                                0.05   0.10     0.15
+                                                                                                                                                  (q) recallt = 1.0 | Legal
+        (g) recallt = 0.9 | CLEF2017    (h) recallt = 0.9 | CLEF2018    (i) recallt = 0.9 | CLEF2019                 (j) recallt = 0.9 | TR                                        (l) recallt = 0.9 | RCV1
+                                                                                                                                              1.00
+        1.00                          1.00                            1.00                                     1.00                           0.80
+                                      0.98                            0.98                                     0.98                           0.60
+        0.98                          0.96                            0.96                                     0.96                           0.40                           0.96
+                                      0.94                            0.94                                     0.94                           0.20                           0.94
+recall  0.96                          0.92                            0.92                                     0.92                           0.00 0.0 0.2 0.4 0.6 0.8 1.0   0.92
+                                      0.90                            0.90                                     0.90 0.0 0.2 0.4 0.6 0.8 1.0                                  0.90
+        0.94                          0.88                            0.88                                                                                  cost
+                                      0.86                            0.86                                                                                                             0.05 0.10 0.15 0.20
+        0.92                                                          0.84
+                                                  0.2 0.4 0.6                                                                                                                    (r) recallt = 1.0 | RCV1
+        0.90                                                                     0.2 0.4 0.6 0.8
+                                                                                                                                                                             1.00
+        0.88  0.2 0.4 0.6                                                                                                                                                    0.99
+                                                                                                                                                                             0.98
+        (m) recallt = 1.0 | CLEF2017 (n) recallt = 1.0 | CLEF2018 (o) recallt = 1.0 | CLEF2019                       (p) recallt = 1.0 | TR                                  0.97
+                                                                                                                                                                             0.96
+        1.00                          1.00                            1.00                                     1.00
+                                                                                                                                                                                 0.0 0.2 0.4 0.6 0.8
+        0.99                          0.98                            0.98                                     1.00
+                                                                                                               0.99                                                                        cost
+        0.99
+recall  0.98                          0.96                            0.96                                     0.99
+        0.98                          0.94                            0.94                                     0.98
+        0.97                          0.92                            0.92                                     0.98
+        0.97                                                          0.90                                     0.97
+                                                                                                               0.97
+              0.2 0.4 0.6 0.8 1.0           0.2 0.4 0.6 0.8 1.0                           0.2 0.4 0.6 0.8 1.0  0.96  0.0 0.2 0.4 0.6 0.8 1.0
+
+                       cost                          cost                                         cost                          cost
+
+Figure 3: Recall vs cost. Target recall indicated by horizontal blue dashed line and Pareto front as grey line. Note that scale of
+y-axis varies across sub-figures.
+
+                                      Table 1: Comparison of GRLStop and RLStop trained on target recalls 0.7 and 0.9
+
+                                      Target Recall = 1.0                                 Target Recall = 0.9                      Target Recall = 0.8                       Target Recall = 0.7
+
+Dataset           Model    Recall  Rel.  Cost  CostDiff Recall  Rel.  Cost  CostDiff Recall Rel. Cost CostDiff Recall  Rel.  Cost  CostDiff
+
+                RLStop7 0.851               0.500  0.050   -0.084 0.851                   0.667        0.050         -0.009 0.851  0.733 0.050          0.004 0.851          0.767   0.050         0.014
+CLEF2017 RLStop9 0.933                      0.600  0.090   -0.044 0.933                   0.767        0.090          0.031 0.933  0.800 0.090          0.044 0.933          0.933   0.090         0.054
+                                            0.767  0.165    0.032 0.935                   0.767        0.065          0.006 0.869  0.700 0.045          0.000 0.791          0.733   0.031        -0.006
+                GRLStop 0.992
+
+                RLStop7 0.803               0.333  0.050   -0.110 0.803                   0.500        0.050         -0.019 0.803  0.667 0.050          -0.004 0.803         0.700   0.050         0.006
+CLEF2018 RLStop9 0.913                      0.500  0.090   -0.070 0.913                   0.767        0.090          0.021 0.913  0.867 0.090           0.036 0.913         0.867   0.090         0.046
+                                            0.700  0.149   -0.012 0.870                   0.700        0.073          0.003 0.796  0.633 0.047          -0.007 0.732         0.667   0.034        -0.010
+                GRLStop 0.913
+
+                RLStop7 0.811               0.500  0.050   -0.062 0.811                   0.600        0.050         -0.018 0.811  0.633 0.050          -0.005 0.811         0.667   0.050         0.004
+CLEF2019 RLStop9 0.912                      0.633  0.090   -0.022 0.912                   0.767        0.090          0.022 0.912  0.800 0.090           0.035 0.912         0.900   0.090         0.044
+                                            0.633  0.099   -0.013 0.842                   0.700        0.056         -0.012 0.809  0.667 0.045          -0.010 0.743         0.633   0.034        -0.011
+                GRLStop 0.896
+
+Legal             RLStop7 0.504             0.000  0.010   -0.320 0.504                   0.000        0.010         -0.035 0.504  0.000 0.010          -0.025 0.504         0.000   0.010        -0.015
+                  RLStop9 0.931             0.500  0.520    0.190 0.931                   0.500        0.520          0.475 0.931  1.000 0.520           0.485 0.931         1.000   0.520         0.495
+                  GRLStop 0.942             0.500  0.180   -0.150 0.908                   0.500        0.045          0.000 0.872  1.000 0.035           0.000 0.836         1.000   0.030         0.005
+
+                  RLStop7 0.965 0.324 0.039                -0.010 0.965 0.971 0.039                                  0.027 0.965 0.971 0.039            0.028 0.965 0.971 0.039                   0.028
+
+TR                RLStop9 0.971 0.324 0.039                -0.010 0.971 0.971 0.039                                  0.028 0.971 0.971 0.039            0.028 0.971 0.971 0.039                   0.028
+
+                  GRLStop 0.997 0.618 0.046                -0.004 0.950 0.941 0.010                                  -0.002 0.950 0.941 0.010 -0.001 0.950 0.941 0.010                            -0.001
+
+RCV1              RLStop7 0.850             0.156  0.034   -0.229 0.850                   0.533        0.034          0.012 0.850  0.689 0.034           0.017 0.850         0.800   0.034        0.020
+                  RLStop9 0.888             0.200  0.080   -0.182 0.888                   0.578        0.080          0.058 0.888  0.778 0.080           0.064 0.888         0.911   0.080        0.067
+                  GRLStop 0.984             0.356  0.153   -0.109 0.916                   0.644        0.018         -0.004 0.890  0.778 0.015          -0.002 0.877         0.889   0.014        0.000
+
+seen that including classifier prediction labels moves the CostDiff                                            1.0, removing the classifier results in an increased failure to meet
+score closer to the optimal score of 0 in the majority of scenarios. In                                        the target recall (as indicated by increased negative CostDiff).
+the majority of circumstances, particularly for target recalls 0.7 and
+0.8 and the CLEF data sets, removing the classifier leads to more                                                 The differences between the results obtained with and without
+documents being examined than necessary, indicated by the overall                                              the classifier for each metric were compared across all target recalls
+increase in CostDiff. However, in other cases such as target recall                                            and found to be statistically significant for all target recalls except
+                                                                                                               0.9 (paired t-test with Bonferroni correction,  < 0.05).
+SIGIR '25, July 13­18, 2025, Padua, Italy                                                      Reem Bin-Hezam and Mark Stevenson
+
+                                                                 GRLStop - without classifier  GRLStop - with classifier
+                                           Target_Recall = 0.7                                                Target_Recall = 0.8
+
+0.05                                                                       0.05
+
+0.00                                                                       0.00
+0.05                                                                       0.05
+0.10
+0.15                                                                       0.10
+                                                                           0.15
+
+                                                                           0.20
+
+      CLEF2017 CLEF2018 CLEF2019 RCV1                           TR  Legal  0.25 CLEF2017 CLEF2018 CLEF2019 RCV1                    TR  Legal
+
+                                           Target_Recall = 0.9                                      Target_Recall = 1.0
+                                                                           0.4
+
+0.2                                                                        0.2
+0.1                                                                        0.0
+0.0
+0.1                                                                        0.2
+0.2                                                                        0.4
+
+      CLEF2017 CLEF2018 CLEF2019 RCV1                           TR  Legal  0.6
+                                                                           0.8
+
+                                                                               CLEF2017 CLEF2018 CLEF2019 RCV1 TR Legal
+
+Figure 4: Effect of including/excluding classifier on CostDiff. Green dashed horizontal line indicates optimal value (i.e. 0).
+
+   These results demonstrate that integrating the classifier's pre-        TR dataset and RCV1 with lower target recalls). The improvement in
+dictions into the RL environment improves stopping decision per-           recall and reliability is particularly noticeable for the Legal dataset,
+formance.                                                                  although it only consists of two topics which limits the possible
+                                                                           reliability scores. In this case, GRLStop-recall-obj is always able to
+5.3 Adapting Objectives                                                    achieve the target recall for both topics with a cost that does not
+                                                                           exceed 20%. Examination of the learning process revealed that the
+GRLStop allows the reward function to be varied to achieve different       RL algorithm needed more training steps to converge on a policy
+objectives such as encouraging the policy to meet the target recall        for the GRLStop-recall-obj objective, although these policies had
+or to minimise the number of documents examined. The effect                higher cumulative rewards than the ones learned using the other
+of doing so was explored in an experiment comparing versions               two objectives.
+of GRLStop developed using different reward functions. The first,
+GRLStop-recall-obj, is designed to encourage a policy that ensures            On the other hand, the cost for GRLStop-cost-obj is consistently
+the target recall is achieved, even if this requires more documents        lower than the other two models, often considerably so. This reduc-
+to be examined. Its reward function was created by setting  = 4            tion in the number of documents examined comes at the expense of
+and  = 0.25, values chosen to encourage the intended behaviour             lower recall, which often fails to reach the target. However, the re-
+without being too extreme. The second, GRLStop-cost-obj, aims to           ward function used to train GRLStop-cost-obj is designed to prefer
+minimise the number of documents examined, even if raises the risk         minimising effort over ensuring the target recall has been reached
+that the target recall is not met. It was created by setting  = 0.25       so, in that sense, it has met its objective.
+and  = 4. These approaches are compared against the standard
+GRLStop ( =  = 1) which balances these objectives (GRLStop-                   These results demonstrate that adapting the reward function
+cost-balanced). The classifier predictions were not included in this       used by GRLStop provides a mechanism to control the balance
+experiment since it was found that the impact of varying the reward        between preferring to ensure that target recall is achieved and
+function was more pronounced when it was not included.                     minimising the number of documents examined.
+
+   Table 2 shows the performance of the three approaches for a             5.4 Ranking Quality
+range of target recalls over each data set. These results demonstrate
+that GRLStop-recall-obj consistently reached higher recall levels          Results for the majority of stopping methods have only been re-
+than GRLStop and GRLStop-cost-obj, normally at the expense of an           ported for a single ranking, despite previous work demonstrating
+increase in cost although this is sometimes quite limited (e.g. for the    the ranking quality can affect stopping method performance [37].
+                                                                           GRLStop's performance across ranking qualities was explored by
+A Generalised and Adaptable Reinforcement Learning Stopping Method                                                                   SIGIR '25, July 13­18, 2025, Padua, Italy
+
+                                                        Table 2: Effect of Varying Reward Function
+
+                                          Target Recall = 1.0                Target Recall = 0.9                Target Recall = 0.8                Target Recall = 0.7
+
+Dataset Model                Recall  Rel.  Cost  CostDiff Recall  Rel.  Cost  CostDiff Recall  Rel.  Cost  CostDiff Recall  Rel.  Cost  CostDiff
+
+                GRLStop-recall-obj 0.967  0.700  0.129         -0.005 0.952  0.867  0.126          0.067 0.944  0.900  0.124          0.078 0.937  0.967  0.116          0.080
+CLEF2017 GRLStop-balanced 0.942           0.533  0.067         -0.066 0.925  0.733  0.064          0.005 0.914  0.867  0.062          0.016 0.883  0.900  0.051          0.015
+                                          0.267  0.026         -0.108 0.616  0.267  0.019         -0.040 0.514  0.267  0.010         -0.036 0.514  0.367  0.010         -0.026
+                GRLStop-cost-obj 0.685
+
+                GRLStop-recall-obj 0.969  0.667  0.164          0.003 0.960  0.833  0.156          0.086 0.942  0.900  0.140          0.086 0.941  0.967  0.136          0.092
+CLEF2018 GRLStop-balanced 0.928           0.367  0.084         -0.076 0.924  0.700  0.081          0.012 0.898  0.900  0.073          0.019 0.887  0.900  0.070          0.025
+                                          0.167  0.033         -0.128 0.605  0.200  0.026         -0.043 0.436  0.267  0.010         -0.044 0.436  0.300  0.010         -0.034
+                GRLStop-cost-obj 0.686
+
+                GRLStop-recall-obj 0.971  0.767  0.158          0.046 0.966  0.900  0.147          0.079 0.957  0.933  0.139          0.084 0.952  0.967  0.136          0.090
+CLEF2019 GRLStop-balanced 0.933           0.533  0.081         -0.031 0.926  0.833  0.077          0.009 0.915  0.867  0.074          0.019 0.899  0.833  0.068          0.022
+                                          0.367  0.029         -0.083 0.620  0.367  0.025         -0.042 0.459  0.267  0.010         -0.045 0.459  0.267  0.010         -0.036
+                GRLStop-cost-obj 0.661
+
+Legal  GRLStop-recall-obj 0.998           0.000  0.200         -0.130 0.998  1.000  0.200          0.155 0.998  1.000  0.200          0.165 0.998  1.000  0.200          0.175
+       GRLStop-balanced 0.504             0.000  0.010         -0.320 0.504  0.000  0.010         -0.035 0.504  0.000  0.010         -0.025 0.504  0.000  0.010         -0.015
+       GRLStop-cost-obj 0.504             0.000  0.010         -0.320 0.504  0.000  0.010         -0.035 0.504  0.000  0.010         -0.025 0.504  0.000  0.010         -0.015
+
+       GRLStop-recall-obj 0.971 0.324 0.011                    -0.038 0.970 0.971 0.011           -0.001 0.970 0.971 0.011           -0.001 0.964 0.971 0.010           -0.001
+
+TR     GRLStop-balanced 0.971 0.324 0.016                      -0.033 0.970 0.971 0.011           -0.001 0.970 0.971 0.011           -0.001 0.964 0.971 0.010           -0.001
+
+       GRLStop-cost-obj 0.950             0.294 0.010          -0.039 0.950  0.941 0.010          -0.002 0.950 0.941 0.010           -0.001 0.950 0.941 0.010           -0.001
+
+RCV1   GRLStop-recall-obj 0.992           0.578  0.189         -0.074 0.956  0.822  0.060          0.038 0.922  0.844  0.023          0.007 0.888  0.911  0.015          0.002
+       GRLStop-balanced 0.976             0.222  0.066         -0.197 0.898  0.578  0.017         -0.005 0.872  0.733  0.013         -0.003 0.850  0.800  0.012         -0.002
+       GRLStop-cost-obj 0.870             0.156  0.016         -0.247 0.842  0.511  0.013         -0.010 0.802  0.556  0.010         -0.006 0.802  0.733  0.010         -0.004
+
+                                                 Table 3: Performance on Range of Ranking Qualities
+
+       Ranking               Target Recall = 1.0                     Target Recall = 0.9                 Target Recall = 0.8                       Target Recall = 0.7
+
+Dataset Quality Recall  Rel.  Cost  CostDiff Recall  Rel.  Cost  CostDiff Recall  Rel.  Cost CostDiff Recall  Rel.  Cost  CostDiff
+
+                Low   0.941  0.567 0.423                0.005 0.898  0.667 0.235           0.079 0.856          0.733 0.133          0.051 0.767   0.767 0.061           0.005
+CLEF2017 Mid          0.961  0.700 0.228                0.002 0.935  0.833 0.071           0.015 0.885          0.800 0.048          0.005 0.837   0.833 0.037           0.002
+                      0.989  0.767 0.226                0.066 0.957  0.833 0.067           0.008 0.890          0.767 0.048          0.002 0.809   0.767 0.035          -0.002
+                Good
+
+                Low   0.988  0.633 0.498           0.078 0.942       0.833 0.259            0.110 0.897         0.900 0.141           0.057 0.805  0.800 0.091           0.029
+CLEF2018 Mid          0.973  0.700 0.235          -0.011 0.892       0.700 0.073           -0.007 0.842         0.800 0.054           0.002 0.822  0.833 0.046           0.002
+                      0.954  0.733 0.191          -0.018 0.876       0.667 0.066           -0.002 0.832         0.733 0.050          -0.005 0.734  0.600 0.034          -0.011
+                Good
+
+                Low   0.911  0.600 0.493           0.081 0.848       0.633 0.321            0.083 0.798         0.633 0.175           0.017 0.732  0.633 0.120           0.002
+CLEF2019 Mid          0.866  0.567 0.192          -0.080 0.842       0.700 0.077           -0.024 0.802         0.667 0.058          -0.015 0.811  0.800 0.054          -0.012
+                      0.882  0.600 0.168          -0.074 0.854       0.733 0.067           -0.022 0.789         0.667 0.048          -0.028 0.750  0.667 0.037          -0.031
+                Good
+
+generating three sets of rankings with different levels of effective-                      However, there is a general trend for the CostDiff scores to in-
+ness. These were produced using AutoTAR with low, mid-range and                            crease as ranking quality decreases, indicating that the approach is
+good rankings being created by stopping the active learning pro-                           forced to examine more documents than necessary before stopping.
+cess after assessing 25%, 50% and 75% of the collection respectively.                      This is probably because lower quality rankings represent a more
+Quality of the rankings produced was measured by computing the                             noisy environment and therefore a more challenging one for the
+area under recall curve (AURC) and found to average 0.87, 0.92                             RL algorithm to learn a good policy for.
+and 0.96 for the low, mid and good rankings. For comparison, the
+equivalent score for the rankings used in the previous experiments                         6 Conclusion
+was 0.97.
+                                                                                           This paper introduces a generalised and adaptable RL-based stop-
+   Table 3 shows the results of GRLStop on the CLEF datasets. Re-                          ping method for TAR stopping approach. Unlike previous RL-based
+sults for other data sets display similar trends but are not included                      approaches, the proposed approach allows a single model to be
+for brevity. These results indicate that, as expected, GRLStop's per-                      applied to multiple target recall levels and the balance between
+formance is affected by the ranking quality. The most noticeable                           minimising cost versus achieving target recall to be controlled. It
+difference is in the cost scores which increase as the ranking qual-                       also demonstrates how the output from a text classifier can be used
+ity declines, with a particular jump between mid and low quality                           within an RL-based stopping framework.
+rankings. For example, for the CLEF2017 data set with target recall
+1.0 the cost increases from 0.226 to 0.228 when moving from high to                           Results on several benchmark datasets showed that the proposed
+mid quality rankings but then to 0.423 for low quality. The reason                         approach proved to be effective compared to multiple baselines in-
+for this increase is that the relevant documents occur later in poorer                     cluding a previous RL-based method. Further experiments demon-
+rankings, forcing GRLStop to progress further down the ranking                             strated that the approach achieved its goals of being applicable to
+before stopping.                                                                           multiple target recall levels and controlling objectives. The integra-
+                                                                                           tion of text classification was also found to be beneficial.
+   GRLStop displays some robustness to ranking quality since this
+does not appear to affect reliability scores which, although they                             Possibilities for future work include making use of curriculum
+vary with ranking quality, do not always decrease for lower qual-                          learning to reduce the time required to train RL models [4] and
+ity rankings (e.g. CLEF2018 dataset for target recalls 0.9 and 0.8).                       experimenting with LLMs to produce relevance judgments for the
+                                                                                           unexamined batches as an alternative to training a text classifier.
+SIGIR '25, July 13­18, 2025, Padua, Italy                                                                                                          Reem Bin-Hezam and Mark Stevenson
+
+References                                                                                       & Knowledge Management (2021)
+                                                                                           [24] Lewis, D.D., Yang, Y., Russell-Rose, T., Li, F.: RCV1: A New Benchmark Collection
+ [1] Afsar, M.M., Crump, T., Far, B.: Reinforcement Learning Based Recommender
+      Systems: A Survey. ACM Computing Surveys 55(7), 1­38 (2022)                                for Text Categorization Research. Journal of Machine Learning Research 5, 361­
+                                                                                                 397 (2004). https://doi.org/10.5555/1005332.1005345
+ [2] Arulkumaran, K., Deisenroth, M.P., Brundage, M., Bharath, A.A.: Deep Reinforce-       [25] Li, D., Kanoulas, E.: When to Stop Reviewing in Technology-Assisted Reviews:
+      ment Learning: A Brief Survey. IEEE Signal Processing Magazine 34(6), 26­38                Sampling from an Adaptive Distribution to Estimate Residual Relevant Docu-
+      (2017). https://doi.org/10.1109/MSP.2017.2743240                                           ments. ACM Trans. on Information Systems 38(4), 1­36 (2020), https://doi.org/
+                                                                                                 10.1145/3411755
+ [3] Baron, J.R., Sayed, M.F., Oard, D.W.: Providing More Efficient Access To Gov-         [26] Ling, C.X., Sheng, V.S.: Cost-Sensitive Learning and the Class Imbalance Problem.
+      ernment Records: A Use Case Involving Application of Machine Learning to                   Encyclopedia of machine learning 2011, 231­235 (2008)
+      Improve FOIA Review for the Deliberative Process Privilege. arXiv preprint           [27] Losada, D.E., Parapar, J., Barreiro, A.: When to Stop Making Relevance Judgments?
+      arXiv:2011.07203 (2020)                                                                    A Study of Stopping Methods for Building Information Retrieval Test Collections.
+                                                                                                 Journal of the Association for Information Science and Technology 70(1), 49­60
+ [4] Bengio, Y., Louradour, J., Collobert, R., Weston, J.: Curriculum Learning. In:              (2019)
+      Proceedings of the 26th Annual International Conference on Machine Learning.         [28] Mcdonald, G., Macdonald, C., Ounis, I.: How the Accuracy and Confidence of
+      pp. 41­48 (2009)                                                                           Sensitivity Classification Affects Digital Sensitivity Review. ACM Transactions
+                                                                                                 on Information Systems (TOIS) 39(1), 1­34 (2020)
+ [5] Bin-Hezam, R., Stevenson, M.: Combining Counting Processes and Classifi-              [29] Mnih, V., Kavukcuoglu, K., Silver, D., Graves, A., Antonoglou, I., Wierstra, D.,
+      cation Improves a Stopping Rule for Technology Assisted Review. In: Find-                  Riedmiller, M.: Playing Atari with Deep Reinforcement Learning (2013)
+      ings of the Association for Computational Linguistics: EMNLP 2023. pp.               [30] Molinari, A., Esuli, A.: SAL: Efficiently Stopping TAR by Improving Priors
+      2603­2609. Association for Computational Linguistics, Singapore (Dec 2023).                Estimates. Data Mining and Knowledge Discovery pp. 1­34 (2023)
+      https://doi.org/10.18653/v1/2023.findings-emnlp.171                                  [31] Montazeralghaem, A., Zamani, H., Allan, J.: A Reinforcement Learning Frame-
+                                                                                                 work for Relevance Feedback. In: Proceedings of the 43rd International ACM
+ [6] Bin-Hezam, R., Stevenson, M.: RLStop: A Reinforcement Learning Stopping                     SIGIR Conference on Research and Development in Information Retrieval. pp.
+      Method for TAR. In: Proceedings of the 47th International ACM SIGIR Conference             59­68 (2020)
+      on Research and Development in Information Retrieval (2024)                          [32] Raffin, A., Hill, A., Gleave, A., Kanervisto, A., Ernestus, M., Dormann, N.: Stable-
+                                                                                                 Baselines3: Reliable Reinforcement Learning Implementations. Journal of Ma-
+ [7] Bron, M.P., van der Heijden, P.G., Feelders, A.J., Siebes, A.P.: Using Chao's Esti-         chine Learning Research 22(268), 1­8 (2021), http://jmlr.org/papers/v22/20-
+      mator as a Stopping Criterion for Technology-Assisted Review. arXiv preprint               1364.html
+      arXiv:2404.01176 (2024)                                                              [33] Ren, Z., Huang, N., Wang, Y., Ren, P., Ma, J., Lei, J., Shi, X., Luo, H., Jose, J.,
+                                                                                                 Xin, X.: Contrastive State Augmentations for Reinforcement Learning-Based
+ [8] Callaghan, M.W., Müller-Hansen, F.: Statistical Stopping Criteria for Automated             Recommender Systems. In: Proceedings of the 46th International ACM SIGIR
+      Screening in Systematic Reviews. Systematic Reviews 9(1), 1­14 (2020)                      Conference on Research and Development in Information Retrieval. pp. 922­931
+                                                                                                 (2023)
+ [9] Cormack, G., Grossman, M.: Autonomy and Reliability of Continuous Active              [34] Satopaa, V., Albrecht, J., Irwin, D., Raghavan, B.: Finding a "Kneedle" in a Haystack:
+      Learning for Technology-Assisted Review. arXiv preprint arXiv:1504.06868 (apr              Detecting Knee Points in System Behavior. In: Proceedings of the 31st Interna-
+      2015)                                                                                      tional Conference on Distributed Computing Systems workshops. pp. 166­171.
+                                                                                                 IEEE (2011)
+[10] Cormack, G.V., Grossman, M.R.: Engineering Quality and Reliability in                 [35] Schulman, J., Wolski, F., Dhariwal, P., Radford, A., Klimov, O.: Proximal Policy
+      Technology-Assisted Review. In: Proceedings of the 39th International ACM                  Optimization Algorithms. arXiv preprint arXiv:1707.06347 (2017)
+      SIGIR conference on Research and Development in Information Retrieval. pp.           [36] Shemilt, I., Simon, A., Hollands, G.J., Marteau, T.M., Ogilvie, D., O'Mara-Eves, A.,
+      75­84 (2016)                                                                               Kelly, M.P., Thomas, J.: Pinpointing needles in giant haystacks: use of text mining
+                                                                                                 to reduce impractical screening workload in extremely large scoping reviews.
+[11] Cormack, G.V., Grossman, M.R.: Scalability of Continuous Active Learning for                Research Synthesis Methods 5(1), 31­49 (2014)
+      Reliable High-Recall Text Classification. In: Proceedings of the 25th ACM interna-   [37] Stevenson, M., Bin-Hezam, R.: Stopping Methods for Technology-assisted Re-
+      tional on conference on information and knowledge management. pp. 1039­1048                views Based on Point Processes. ACM Transactions on Information Systems
+      (2016)                                                                                     42(3), 1­37 (2023), https://doi.org/10.1145/3631990
+                                                                                           [38] Sutton, R.S., Barto, A.G.: Reinforcement Learning: An Introduction. The MIT
+[12] Cormack, G.V., Grossman, M.R., Hedin, B., Oard, D.W.: Overview of the TREC                  Press, Cambridge (2018)
+      2010 Legal Track. In: Proceedings of The Nineteenth Text REtrieval Conference,       [39] Thompson, S.: Sampling. John Wiley & Sons, Hoboken, New Jersey (2012)
+      TREC 2010, Gaithersburg, Maryland, USA, November 16-19, 2010. NIST Special           [40] Towers, M., Terry, J.K., Kwiatkowski, A., Balis, J.U., Cola, G.d., Deleu, T., Goulão,
+      Publication, vol. 500-294. National Institute of Standards and Technology (NIST)           M., Kallinteris, A., KG, A., Krimmel, M., Perez-Vicente, R., Pierré, A., Schulhoff,
+      (2010)                                                                                     S., Tai, J.J., Shen, A.T.J., Younis, O.G.: Gymnasium (Mar 2023), https://zenodo.org/
+                                                                                                 record/8127025
+[13] Di Nunzio, G.M.: A Study of an Automatic Stopping Strategy for Technologically        [41] Williams, R.J.: Simple Statistical Gradient-Following Algorithms for Connection-
+      Assisted Medical Reviews. In: European Conference on Information Retrieval.                ist Reinforcement Learning. Machine Learning 8, 229­256 (1992)
+      pp. 672­677. Springer (2018)                                                         [42] Xin, X., Karatzoglou, A., Arapakis, I., Jose, J.M.: Self-Supervised Reinforcement
+                                                                                                 Learning for Recommender Systems. In: Proceedings of the 43rd International
+[14] Gray, L., Lewis, D.D., Pickens, J., Yang, E.: High Recall Retrieval Via Technology-         ACM SIGIR Conference on Research and Development in Information Retrieval.
+      Assisted Review. In: Proceedings of the 47th International ACM SIGIR Conference            pp. 931­940 (2020)
+      on Research and Development in Information Retrieval. pp. 2987­2988 (2024)           [43] Yang, E., Lewis, D., Frieder, O.: Heuristic Stopping Rules for Technology-Assisted
+                                                                                                 Review. In: Proceedings of the 21st ACM Symposium on Document Engineering
+[15] Grossman, M.R., Cormack, G.V., Roegiest, A.: TREC 2016 Total Recall Track                   2021 (DocEng '21). pp. 1­10 (2021). https://doi.org/10.1145/3469096.3469873
+      Overview. In: Proceedings of The Twenty-Fifth Text REtrieval Conference, TREC        [44] Yang, E., Lewis, D.D., Frieder, O.: On Minimizing Cost in Legal Document Review
+      2016. NIST Special Publication, vol. 500-321. National Institute of Standards and          Workflows. In: Proceedings of the 21st ACM Symposium on Document Engineer-
+      Technology (NIST) (2016)                                                                   ing 2021 (DocEng '21). pp. 1­10 (2021). https://doi.org/10.1145/3469096.3469872
+                                                                                           [45] Yang, E., Lewis, D.D., Frieder, O.: TAR on Social Media: A Framework for Online
+[16] Higgins, J.P., Thomas, J., Chandler, J., Cumpston, M., Li, T., Page, M.J., Welch,           Content Moderation. In: 2nd International Conference on Design of Experimental
+      V.A.: Cochrane Handbook for Systematic Reviews of Interventions. John Wiley                Search & Information REtrieval Systems (DESIRES 2021). pp. 147­155 (2021)
+      & Sons (2019)                                                                        [46] Yu, Z., Menzies, T.: FAST2: An Intelligent Assistant for Finding Relevant Papers.
+                                                                                                 Expert Systems with Applications 120, 57­71 (2019)
+[17] Hollmann, N., Eickhoff, C.: Ranking and Feedback-based Stopping for Recall-
+      Centric Document Retrieval. In: Working Notes of CLEF 2017 - Conference and
+      Labs of the Evaluation Forum. pp. 7­8 (2017)
+
+[18] Horvitz, D.G., Thompson, D.J.: A Generalization of Sampling without Replace-
+      ment from a Finite Universe. Journal of the American Statistical Association
+      47(260), 663­685 (1952)
+
+[19] Howard, B.E., Phillips, J., Tandon, A., Maharana, A., Elmore, R., Mav, D., Sedykh,
+      A., Thayer, K., Merrick, B.A., Walker, V., Rooney, A., Shah, R.R.: SWIFT-Active
+      Screener: Accelerated Document Screening through Active Learning and Inte-
+      grated Recall Estimation. Environment International 138, 105623 (2020), https:
+      //www.sciencedirect.com/science/article/pii/S0160412019314023
+
+[20] Kanoulas, E., Li, D., Azzopardi, L., Spijker, R.: CLEF 2017 Technologically Assisted
+      Reviews in Empirical Medicine Overview. In: CEUR workshop proceedings.
+      vol. 1866 (2017)
+
+[21] Kanoulas, E., Li, D., Azzopardi, L., Spijker, R.: CLEF 2018 Technologically Assisted
+      Reviews in Empirical Medicine Overview. In: CEUR workshop proceedings.
+      vol. 2125 (2018)
+
+[22] Kanoulas, E., Li, D., Azzopardi, L., Spijker, R.: CLEF 2019 Technology Assisted
+      Reviews in Empirical Medicine Overview. In: CEUR workshop proceedings.
+      vol. 2380 (2019)
+
+[23] Lewis, D., Yang, E., Frieder, O.: Certifying One-Phase Technology-Assisted Re-
+      views. In: Proceedings of the 30th ACM International Conference on Information
+

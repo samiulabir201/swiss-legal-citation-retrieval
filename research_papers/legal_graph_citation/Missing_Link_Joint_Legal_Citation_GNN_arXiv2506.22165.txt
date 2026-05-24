@@ -1,0 +1,730 @@
+arXiv:2506.22165v1 [cs.SI] 27 Jun 2025  The Missing Link: Joint Legal Citation Prediction
+                                               using Heterogeneous Graph Enrichment
+
+                                        Lorenz Wendlinger 1, Simon Alexander Nonn 1, Abdullah Al Zubaer 1, and
+                                                                             Michael Granitzer 1,2
+
+                                                                       1 Universität Passau, Passau, Germany
+                                                    2 Interdisciplinary Transformation University Austria, Linz, Austria
+
+                                                     lorenz.wendlinger@uni-passau.de, simon.nonn@uni-passau.de
+                                                abdullahal.zubaer@uni-passau.de, michael.granitzer@uni-passau.de
+
+                                                 Abstract. Legal systems heavily rely on cross-citations of legal norms
+                                                 as well as previous court decisions. Practitioners, novices and legal AI
+                                                 systems need access to these relevant data to inform appraisals and
+                                                 judgments. We propose a Graph-Neural-Network (GNN) link prediction
+                                                 model that can identify Case-Law and Case-Case citations with high pro-
+                                                 ficiency through fusion of semantic and topological information. We in-
+                                                 troduce adapted relational graph convolutions operating on an extended
+                                                 and enriched version of the original citation graph that allow the topo-
+                                                 logical integration of semantic meta-information. This further improves
+                                                 prediction by 3.1 points of average precision and by 8.5 points in data
+                                                 sparsity as well as showing robust performance over time and in chal-
+                                                 lenging fully inductive prediction. Jointly learning and predicting case
+                                                 and norm citations achieves a large synergistic effect that improves case
+                                                 citation prediction by up to 4.7 points, at almost doubled efficiency.
+
+                                                 Keywords: Legal Tech · Link Prediction · Graph Neural Networks.
+
+                                        1 Introduction
+
+                                        To prepare any legal argument and especially an appraisal, the relevant norms
+                                        for the specific circumstances of the case must be found, checked, and referenced
+                                        with concurring or dissenting opinions in the literature and court judgments to
+                                        support one's (legal) argumentation. For experienced legal practitioners, who
+                                        specialize in one area of the law, this context information is available through
+                                        convention and memorization or by consulting the relevant commentaries. How-
+                                        ever, for novice legal practitioners and students, the relevant references can be
+                                        challenging to research; especially the initial norms for a case can be hard to find.
+                                        Some conventions are not obvious without intimate knowledge of the relevant
+                                        law and legal opinions as well as court decisions in a specific domain.
+
+                                            While legal reference extraction ([14,18]) can make this data available, it can-
+                                        not extrapolate missing references. The prediction of references exceeds the pure
+                                        retrieval of similar documents, as it utilizes and extends the reference corpus of a
+                                        legal text that is inexorably linked to its outcome and logical framework. It can
+2  L. Wendlinger et al.
+
+help legal students and practitioners by suggesting suitable references or indi-
+cating incorrect citations for their argumentation. Furthermore, the so-extracted
+context can be used for further processing in generative models, making link pre-
+diction an essential task for building effective legal tech systems.
+
+    Recent advances in LLMs make this problem tractable with generative mod-
+els, which are more versatile than discriminative models, but can be less robust
+and tend to hallucinate. Recent work [24] suggests that they require resource-
+intensive compute and natural language inference, making them unsuited to
+resource-constrained and real-time applications.
+
+    We solve this task by predicting legal norm and case references for documents
+with missing references based on semantics and topology to provide a missing
+link between these data. This fusion enables us to include rich meta-information
+into document representation by modelling them in a joint citation graph. This
+meta-data implicitly encodes relevant details about the relevant law domain and
+makes this important context available even if other data is missing. Specifically,
+our contributions are:
+
+ ­ We effectively and efficiently predict case and law references in a large cita-
+     tion network composed of real cases and laws by leveraging semantic text-
+     based and topological information
+
+ ­ We incorporate semantically relevant categorical meta-information via graph
+     enrichment without the need for separate feature extraction
+
+ ­ We modify the original relational graph convolution with a general residual
+     for better representation learning in large sparse graphs
+
+ ­ We jointly learn and predict two types of references, drastically improving
+     efficiency and results on smaller graphs
+
+ ­ We propose a realistic evaluation method that is temporally cohesive and
+     tailored to a wide range of possible applications
+
+2 Related Work
+
+There is a large catalogue of work on graph learning and related tasks. While
+many rule-based approaches to link prediction have been explored in the past [2],
+they are not easily adaptable to heterogeneous graphs. We therefore focus on
+deep learning techniques that can be extended to handle such data, which are
+commonly known as Graph Neural Networks (GNN).
+
+    A link prediction model can be considered a graph auto-encoder as it learns to
+reconstruct the original graph from representations generated by the encoder. A
+popular choice for the decoder is the dot product for its computational efficiency.
+This makes the decoder completely static, while the encoder is learned via back-
+propagation on the reconstruction task, i.e. binary link classification.
+
+    Most GNN encoders are built around the graph convolution (GCN) devel-
+oped by Kipf et al. in [9]. They use topological information to compute node-level
+features in each layer by propagation along graph edges, effectively leveraging
+the representations of neighbouring nodes.
+                                         The Missing Link   3
+
+    The Variational Graph Auto Encoder (VGAE) [10] is an extension that pre-
+dicts the target distribution and is trained using the Kullback­Leibler divergence
+in conjunction with the reconstruction loss.
+
+    Velickovi et al. [19] propose the graph attention mechanism (GAT) which
+computes attention scores along edges. This includes a learnable notion of node
+importance into the neighbourhood aggregation.
+
+    Schlichtkrull et al. introduce the relational RGCN [17] for relational graphs
+that propagates all relations using separate learned weights and then take their
+normalized sum as the node representation.
+
+    However, Wang et al. [21] show that, in a fair comparison, GCN outperforms
+these three adaptations in the most common link prediction task. This partially
+negates that purported progress of link prediction models and emphasizes the
+importance of realistic evaluation.
+
+    Wang et al. explore Heterogeneous Attention Networks (HAN) for node
+classification on small heterogeneous graphs in [20]. They operate on reachable
+graphs induced on the original network via tuples of relations, so-called metap-
+aths. This method is not directly adaptable to link prediction, as it removes the
+original edges, losing valuable information.
+
+    Dhani et al. explore legal knowledge graphs for link prediction and document
+similarity in [5]. Their employ an RGCN with LegalBERT [3] features on 2 286
+Indian law documents. In their link prediction experiments, document embed-
+dings outperform both hand-crafted and bag-of-words node features.
+
+    Palmer et al. [13] compare various semantic embedding methods for to Case-
+Case citation prediction. They rephrase this task on a paragraph level and show
+that it is challenging to solve.
+
+3 Joint Link Prediction with Heterogeneous Graph
+     Enrichment
+
+Our Heterogeneous Graph Enrichment Model (HGE) expands on previous work
+regarding link prediction on relational data and utilization of meta-features.
+
+    We focus on citation networks, a heterogeneous graph structure G = (V, E),
+composed of Nodes V that represent the topology of documents and the citations
+E between them. Specifically, V = {VC , VL} contains both Cases VC and Laws
+VL, with relations, or edge types, Te = {rCC , rCL}. Cases can reference cases via
+rCC : VC  VC and laws via rCC : VC  VL. An example is given in Figure 2.
+
+3.1 Heterogeneous Graph Convolution
+
+Like the relational Graph Convolution of [17], we use separate weight matrices,
+i.e. GCN layers, for each relation type r  Te. For node i in layer l, the original
+RGCN with activation  and normalization constant ci,j computes
+
+hi(l) =               1    Wr(l)  hj(l)  + W0(l)h(il-1)  ,  (1)
+                     ci,r
+          rTe J Nir
+4  L. Wendlinger et al.
+
+    where Wr is a learnable parameter for each relation and Nir is the neighbour-
+hood of i under r. Unlike [17], we do not model the residual self-loop separately,
+
+but instead add a general residual as the self-loop is contained in the enriched
+graph relation types Te in our model:
+
+   hi(l) =               h(il-1)  +                1    Wr(l)h(jl)  ,  (2)
+                                                  ci,r
+                                      rTe  J Nir
+
+   Aggregation is still performed for each layer as the sum over all relevant
+
+relation types for each node type, c.f. Figure 1. This can help derive useful fea-
+
+tures for sparse graphs, such as those of a scale-free nature, by making short
+
+feature paths available through residual modelling alongside the long dependen-
+
+cies computed by stacking multiple GNN layers, while alleviating the issue of
+
+over-smoothing that plagues deeper GNNs.
+
+Fig. 1: Heterogeneous Graph Enrichment model with L layers including and node
+embedding for Cases and Laws. All learned parameters are contained in the
+encoder. Asymmetric decoding, activation and residuals are omitted for visual
+clarity.
+
+3.2 Joint Modelling
+
+In contrast to previous work, we investigate link prediction of two distinct edge
+types. By jointly learning prediction for both edge types, we can condition the
+model to produce representations that are informative for both tasks, as Case
+nodes are used in both relations. In many graphs, but in our multi-faceted case
+especially, shortcuts can lead to suboptimal training results that do not gener-
+alize well. Joint learning achieves a regularizing effect that prevents collapse to
+the trivial solution.
+
+3.3 Graph Enrichment
+
+We perform metafeature-based graph enrichment to accurately model the re-
+lationship between cases and laws. Like in [17], we also add reverse edges and
+self-loops, though they are processed as regular relations, c.f. Equation 2.
+                         The Missing Link  5
+
+Exposed Meta-Features Descriptive and structural meta-data can provide rele-
+vant information about the data itself, as document semantics go beyond just the
+text. Especially for a complex legal system, the level of jurisdiction, type of case,
+or area of law can drastically change how and which references are made. We
+want to include these additional semantics in the node representation, though,
+unlike the initial text-based node features, this meta-information is categorical
+and therefore not natively compatible with the node feature space. However,
+we can include the meta-information about nodes into their representation via
+the citation network topology by exposing it as discrete nodes for each feature
+expression. For a meta-feature m : V  {0, 1}M with M possible expressions,
+we modify the relational graph G = (V, E) such that
+
+V = V  {f : u  V : m(u) = f }              (3)
+
+E = E  {(u, m(u)) u  V}
+
+    This does not require additional features for the categories, e.g. courts or
+law areas. Moreover, it directly models how nodes that share meta-information
+are related. In this extensional model, a meta-feature is exclusively defined by
+the nodes that express it, such as an area of law is defined by the laws that
+govern it via a specific law book, c.f. Figure 2. In contrast to latent aggregation
+over relevant node representations, we propose dynamically generating it via the
+same GNN propagation rule. They are finally aggregated via the same sum rule
+for heterograph convolution, c.f. Equation 2.
+
+Fig. 2: Original and fully enriched graph with dynamic Case and static Law
+nodes and directed original edges. The enriched graph adds Law Book and Case
+Court State nodes with corresponding feature edges and s.e.l.f.-.lo. .o.p. .s for all nodes.
+
+    Intuitively, this serves two purposes: it collects salient representations for
+exposed features from their respective nodes and propagates them back to the
+original nodes for contextualizing. We experiment with multiple ways of exposing
+this information, such as metapath modelling (c.f. [20]) and direct normalization,
+but we find that including them as discrete nodes offers the most versatility.
+6  L. Wendlinger et al.
+
+    We choose the meta-features Case Court Type, Law Code and Case Court
+State for graph enrichment. The Case Court Type is especially informative, as
+it is composed of both the court level of appeal and jurisdiction. Together, these
+meta-features encode information about the most important legal context, i.e.
+the type of case, area of the law and the local regulations, and make it available
+explicitly through our graph enrichment.
+
+3.4 Initial Node Features
+
+Based on the work by Milz et al. [11], who find strong links between graph
+and text expression, we propose a fusion of topological and semantic informa-
+tion by integrating textual features into our graph neural network. We use a
+BERT-based [4] sentence transformer model to generate latent embeddings for
+the text-based Case and Law nodes. All legal references are removed via pattern-
+matching to prevent shortcutting and data leakage. More specifically, documents
+are split into context-window size chunks with a small overlap via recursive
+splitting on white space and then aggregated via their mean. This ensures max-
+imum context size while maintaining consistency over breakpoints. We use Jina
+V2 Embeddings [6] for their large context window of 8192 and availability of
+German-specific jina-v2-base-de embeddings1.
+
+    We compare the effect of different overlaps and the multilingual Siamese
+BERT encoder all-mpnet-base-v22[15,16] in subsection 5.5.
+
+3.5 Training Procedure and Parameter Setting
+
+To generate link likelihoods from node representations, we use the asymmetric
+inner product decoder from [23]. HGE is trained by optimizing the cross-entropy
+reconstruction loss via adaptive momentum [8] gradient descent for 200 epochs
+with a learning rate of 10-4. Random dropout [7] is applied to the node repre-
+sentations to prevent co-adaptation and promote robustness with a probability
+of 0.2. We use 3 layers of size 256 for all models and 2 attention heads for GAT.
+
+4 Datasets
+
+We empirically verify our method on legal citation graphs from [12] and [11],
+and label them according to their Case counts as OLD36k3 and OLD201k4.
+
+    Ostendorff et al. [12] propose the Open Legal Data platform for facilitating
+open access to legal data. They collect data for more than 250k German laws
+and court decisions up to 12/2022 by crawling government websites and trusted
+services. They perform reference extraction, named entity recognition and topic
+extraction for some of them and publish the resulting graph, OLD36k.
+
+1 https://huggingface.co/jinaai/jina-embeddings-v2-base-de
+2 https://huggingface.co/sentence-transformers/all-mpnet-base-v2
+3 https://static.openlegaldata.io/dumps/de/refs/; March 30, 2025
+4 https://osf.io/8d2v4/; March 30, 2025
+                                      The Missing Link                      7
+
+Type Name OLD36k OLD201k              meta-information
+
+       Case        36 113    201 823  type, date
+       Law         10 304
+Node                         50 814 law book code, law book title, section
+      Court*              -
+                             1 119    name, type, slug, city, description
+                                      state, jurisdiction, level of appeal
+
+      Case-Case 17 065 90 189         -
+
+Edge Case-Law 424 862 971 625         -
+
+      Case-Court*  - 201 823          -
+
+Table 1: Dataset statistics for OLD36k and OLD201k. *: not directly used, only
+
+for graph enrichment, c.f. subsection 3.3, : edge counts differ from those reported
+[11], which were generated on preliminary data and have been updated5.
+
+    Milz et al. [11] analyse a German citation network based on data from [12].
+They use an improved reference extraction and linking method to construct the
+larger OLD201k citation network. They further show their data to be scale-free
+and find node similarity to correlate with text similarity. They identify reference
+linking as a pertinent issue for Case-Case citations, as only 16.3% of extracted
+references could be added to the network due to missing data.
+
+    As OLD36k and OLD201k are extracted from Open Legal Data dumps, they
+have full text available for all cases and laws.In addition, both datasets con-
+tain meta-information about the cases, laws and courts (directly modelled for
+OLD201k, indirectly for OLD36k).
+
+    Because both graphs are generated from different data bases with different
+extraction method, and none of the included identifiers is fully unique, losslessly
+mapping between the two citation networks is not possible and we treat them
+as separate samplings from the same domain.
+
+    As OLD201k is slightly newer with a cutoff date of 2020-12-10, while OLD36k
+was created on 2019-02-19, and because it is more complete (c.f. Table 1), we use
+it for the bulk of our experiments. OLD36k is an almost subgraph of OLD201k
+with a mismatch of only 28 Cases and elucidates behaviour in scenarios with
+more limited reference sets or missing data.
+
+    Their data distributions are similar (c.f. Figure 3), though the case library
+of OLD201k stretches back much further, with some cases from 1970. OLD201k
+also contains slightly longer Cases and Laws, with both distributions showing
+less positive skew. Consequently, 85% of OLD201 cases fit within one embedding
+context window, c.f. Figure 3b, but 88.9% of OLD36k cases do.
+
+5 Experiments
+
+We first report full link prediction results on OLD201k and OLD36k in sub-
+section 5.2 and contrast them with separate prediction in subsection 5.3. An
+ablation study investigates the effect of various model components in subsec-
+tion 5.4. The influence of initial node embedding, i.e. text embedding models
+8  L. Wendlinger et al.
+
+(a) Case date with cutoffs for date splitting (b) Document Length with embedding
+
+indicated for OLD201k and OLD36k  context window marked
+
+   Fig. 3: OLD201k and OLD36k Dataset Distributions.
+
+and chunking parameters, are explored in subsection 5.5. Finally, subsection 5.6
+investigates model robustness and sensitivity in the context of time-based influ-
+ences and data availability.
+
+    We implement all models in DGL 2.4.06 using pytorch 2.6.07 compiled
+with CUDA 12.4 and run experiments on an Nvidia A100 GPU. All code, exper-
+iment setups, final and intermediate results are available at https://github.
+com/wendli01/missing_link.
+
+5.1 Methodology
+
+Graph splitting is challenging as graphs are a cohesive data structure from which
+samples cannot be drawn independently. For link prediction, two main scenarios
+can be differentiated. In transductive settings, the node set is the same for train-
+ing and testing, i.e. all nodes are known at training time, whereas for inductive
+splitting, predictions are made for new nodes.
+
+    Naive random splitting may introduce artifacts by removing nodes that leave
+their neighbours in an invalid state. To control this effect, we employ time-based
+splitting, which ensures a valid training graph for each split, as suggested in
+[22]. This produces a training graph, a semi-inductive inference graph including
+training data that representations for the test predictions are generated on, and
+the indicator graph that contains node pairs for prediction, c.f. Figure 4b.
+
+    For OLD36k we treat laws as static nodes, while cases are split into equal-
+sized splits via a cut-off date based on their associated date, c.f. Figure 4b. This
+automatically results in valid Case-Case edges, as only cases that are already
+published can be referenced.
+
+    By default, we perform cumulative training and testing by training on all old
+nodes and evaluating on all new nodes, c.f. Figure 4a. This varies the train/test
+proportion for each split and adds an estimate of data efficiency as well as ro-
+bustness to concept drift over time. We evaluate these effects separately in 5.6.
+
+6 https://www.dgl.ai/, March 30, 2025
+7 https://pytorch.org/, March 30, 2025
+                          The Missing Link                             9
+
+(a) Time-based splitting with (b) Time-based graph splitting with dynamic Case and
+
+(non-)cumulative training static Law nodes including real edges and training / test
+
+and testing.  negatives.
+
+              Fig. 4: Time-based splitting modes and graph splitting.
+
+    By subsampling on both edge types, we can create an incomplete inference
+graph and a test graph. This represents a scenario in which complete training
+data is available, but the current data is missing references. By default, we create
+5 such test splits with a test ratio of 90% for each time split. Varying the test
+ratio allows us to gauge how much information the model can recover without
+requiring retraining, which we exploit to assess the effects of data sparsity in
+5.6. For simplicity, we employ balanced negative sampling for both training and
+testing. We use uniform per-source sampling, which generates a negative edge
+(u, v)  E for each real edge (u, v)  E.
+
+    For each experiment we report the average precision (AP) as well as the area
+under the Receiver-Operator-Characteristic curve (AUC-ROC). While AUC-
+ROC mostly measures the ranking quality of predictions, AP puts a larger em-
+phasis on the positive performance. These measures are more impactful than
+metrics that evaluate at a threshold of 0.5, as they assess performance across all
+possible threshold values. This is especially relevant in our study, as applications
+might focus on top-end performance, like recommending the top-n references to
+a user, or across the whole spectrum, i.e. for retrieval-augmented generation, or
+at the bottom end for rejecting erroneous user citations.
+
+    Scores are calculated separately for the two edge types as well as combined
+into a micro and macro score. For imbalanced datasets, macro-averaging ensures
+that performance on all edge types is adequate, instead of the score being dom-
+inated by the majority class, i.e. Case-Law citations, especially as the majority
+type is usually easier to predict. This is representative of the application case,
+where a case citation can be as impactful as a law citation.
+10  L. Wendlinger et al.
+
+5.2 Link Prediction
+
+We evaluate the joint link prediction capabilities of our model and previous ap-
+proaches on both OLD versions in Table 2. Performance is generally high, owed
+to the potent fusion of semantic and topological information in our GNN models.
+A purely semantic SGD classifier operating only on text embeddings cannot com-
+pete. While for OLD201k homogeneous methods still perform adequately, they
+cannot recover from the information loss incurred on the homogenized OLD36k.
+Their performance is also inconsistent across the two datasets, with VGAE show-
+ing promising results on OLD201k but not on OLD36k.
+
+    Among the heterogeneous models, our novel HGE out-performs RGCN by
+a large margin on OLD201k, 2.2 and 3.1 points of average precision and AUC-
+ROC respectively. Only HGE can effectively utilize heterogeneous information
+for improved ranking, while RGCN does not offer AUC-ROC improvements over
+VGAE. In the data sparsity of OLD36k, the margin is higher still at 7.2 and 8.5
+points respectively. At the same time, HGE does not add a large performance
+penalty, with run-time comparable to RGCN8, as this method also processes
+each edge type separately, and faster than VGAE, which requires extra standard
+deviation estimation and loss propagation. As HGE scales well with increased
+graph size, it is comparatively more efficient for OLD201k.
+
+Data          OLD201k                  OLD36k
+          AP
+              AUC-        time(s)      AUC-    time(s)
+
+              ROC test train       AP  ROC test train
+
+ SGD 72.1±0.88 72.6±1.11 4.2±1.25 21.8±16.3 64.4±0.22 64.0±0.29 1.5±0.6 14.9±6.6
+ GAT 79.6±2.75 81.2±2.04 2.3±1.1 45.0±30.3 73.0±0.83 73.0±0.72 0.7±0.9 19.9±2.5
+ GCN 80.4±1.8 81.7±1.62 2.3±1.1 44.9±30.5 73.3±0.95 73.3±0.94 0.8±01.0 20.5±2.6
+ VGAE 82.9±1.04 82.7±1.21 3.3±1.1 111.8±69.4 71.0±0.85 71.7±1.0 1.0±1.0 30.3±3.9
+ RGCN 85.9±1.46 82.8±1.99 0.3±0.18 39.2±15.9 80.3±1.4 77.3±1.27 0.1±0.08 27.1±4.9
+ HGE 88.1±1.33 85.9±1.55 3.3±0.9 76.7±33.9 87.5±1.05 85.8±1.34 1.3±1.1 46.4±5.3
+
+Table 2: Link prediction results in 5 folds with date-based splitting and evalu-
+ation on 5 90% test splits. Results ± are reported in % with macro-averaging
+over the edge types, for per-edgetype results see Table 3. GAT, GCN and VGAE
+operate on the fully homogeneous bi-directed graph.
+
+    The promising AP and AUC-ROC scores of HGE on both OLD graphs show
+that our relational modelling and enrichment is effective and make it suitable for
+link prediction across a variety of possible thresholds and application scenarios.
+
+5.3 Joint Prediction
+As we predict jointly by default, we compare the efficacy and effectiveness to
+separate prediction here. The input data is the same for both scenarios, only the
+8 The large test time difference is due to the optimized RGCN implementation in DGL
+                                                The Missing Link             11
+
+prediction target changes - separate models therefore have access to all edges for
+propagation. For joint prediction, CC and CL are learned and predicted by the
+same model, while separate models are just that.
+
+dataset training Average Precision ROC-AUC           time (s)
+                                                train test
+                   CC         CL        CC  CL
+
+OLD201k  joint     78.2±2.63  98.0±0.1  73.8±3.03 98.0±0.12 76.7±34 3.3±0.9
+         separate  77.6±3.12  98.0±0.1  73.4±3.18 98.0±0.1 137.4±63 7.1±1.1
+
+OLD36k   joint 79.8±2.03 95.2±0.18 76.8±2.56 94.7±0.25 46.4±5.3 1.3±1.1
+         separate 75.1±1.2 95.1±0.22 69.4±1.36 94.7±0.26 60.3±3.4 1.6±1.2
+
+Table 3: Edge type scores for HGE in joint vs. separate prediction.
+
+    Regardless of dataset, CC edges are more challenging to predict than CL,
+though for OLD201k the difference is more pronounced. While this may have
+inherent reasons, such as higher heterogeneity and time-sensitivity of case ci-
+tations, it can also be explained by the significant linking issues for CC edges
+reported in [11], c.f. section 4.
+
+    We find that joint prediction offers regularization that prevents short-cutting
+and substantially improves results for the minority edge type, CC. This is espe-
+cially pronounced for OLD36k, where fewer data is available and joint learning
+increases AP and ROC-AUC by 4.7 and 7.4 points, c.f. Table 3. For OLD201k
+the improvement is still measurable at 0.6 and 0.4 points. More importantly, due
+to the joint nature, training is sped up by a factor of 1.79x and 2.15x respectively,
+with testing scaling similarly.
+
+5.4 Ablation Studies
+
+We also evaluate the precise impact of different HGE components on link predic-
+tion on OLD201k in Table 4, while holding all other hyper-parameters constant.
+
+    We find that type information has the greatest impact on average precision,
+though HGE operating on the homogeneous graph still out-performs all other
+approaches, including the RGCN (Table 2), as it can recover a portion of the
+type information through the semantic node features. The effect of reverse edges
+is comparatively small, and at 0.5 points macro AP, comparable to the 0.7 points
+macro ROC-AUC difference of omitting residuals (c.f. Table 4). Not exposing
+meta-features lowers AP and ROC-AUC scores by 0.7 and 1 point(s).
+
+    We can deduce that reverse edges and type information mostly benefit the
+identification of positives, while skip connections and exposed meta-features also
+help with finding representations that can encode negatives.
+
+    With everything else equal, as per the HGE results without exposed features,
+our adapted heterograph convolution still outperforms the original RGCN by 4.6
+and 2.9 points of AP and ROC-AUC respectively (c.f. Tables 4 and 2).
+12  L. Wendlinger et al.
+
+                 Average Precision ROC-AUC            time (s)
+
+                 micro macro micro macro test train
+
+    HGE          97.1±0.12 88.1±1.32 97.0±0.12 85.9±1.54 3.2±0.9 74.7±31.4
+
+    w/o reverse edges 96.1±0.27 87.6±1.69 95.8±0.28 85.9±2.31 2.8±0.9 49.8±20.4
+
+    w/o skip connections 96.9±0.1 87.6±1.44 96.8±0.13 85.2±1.84 3.2±0.9 75.4±32.5
+
+    w/o exposed features 96.9±0.09 87.4±1.5 96.8±0.15 84.9±1.8 2.9±1.8 51.5±24.6
+
+    homogeneous  97.0±0.07 85.7±1.43 97.0±0.06 85.9±0.96 2.6±0.9 34.5±10.6
+
+Table 4: HGE ablation study for OLD201k link prediction in 5 folds with date-
+
+based splitting and evaluation on 5 90% test splits.
+
+5.5 Node Embeddings
+
+We investigate the impact of the initial node embedding method, as it generates
+the representation space that nodes are mapped into for all our experiments.
+
+                            context overlap Average Precision ROC-AUC
+                                                 micro macro micro macro
+
+    all-mpnet-base-v2 [16]   384     16 96.6±0.2 86.8±1.47 96.5±0.22 84.3±1.96
+    jina-V2-base-de [6]     4096   512 97.1±0.08 88.0±1.4 97.0±0.09 85.7±1.67
+                            2048   256 97.0±0.12 88.0±1.44 96.9±0.13 85.7±1.79
+                            8192  1024 97.1±0.09 88.1±1.34 97.0±0.12 85.9±1.56
+
+    Table 5: Node Embedding study on OLD201k using the full HGE.
+
+    Overall, we observe the impact of the semantic node embedding method to be
+small, with chunking parameters showing no significant effect (c.f. Table 5). The
+over-smoothing usually encountered when aggregating over many embeddings
+is not detrimental. Even with the substantially smaller embedding and context
+window of all-mpnet-base-v2, most relevant information can be recovered by
+HGE. While we did experiment fine-tuning with Attention over Sentence Em-
+beddings [1], it did not improve results and could not easily be scaled to our
+data. This confirms our decision of using latent initial node embeddings.
+
+5.6 Robustness and Sensitivity
+
+In the time-based evaluation scenario we have chosen, multiple aspects can be
+varied to gauge robustness and sensitivity to temporal and data changes.
+
+    While performance does improve over time, c.f. Figure 5a, this is mostly due
+to the low data quality of the earliest cases that include only very few extracted
+citations. Conversely, this low-quality data does not poison the cumulative train-
+ing set, as non-cumulative training performance is worse, and HGE does not ex-
+perience degradation due to drifts. Non-cumulative testing confirms that there
+is some temporal dependency in the data, though it is not well-behaved.
+The Missing Link  13
+
+(a) Time and Quantity via date splitting (b) Data Sparsity via test graph edge ratio.
+from 1970 to 2022 with (non) cumulative At 1.0 prediction is fully inductive.
+training and testing.
+
+Fig. 5: Robustness of HGE on OLD201k over time and varying data availability.
+
+    We estimate the model to be somewhat sensitive to data sparsity in the avail-
+ability of inference edges, c.f. Figure 5b. With lower test sizes than the default
+of 0.9, and correspondingly more inference edges available, model performance
+is improved. In the fully inductive setting without any inference links (i.e. test
+size at 100%), HGE can still recover information with scores above 80%, by
+leveraging the topology induced through our meta-feature graph enrichment.
+
+6 Conclusion & Future Work
+
+We solve the task of legal reference prediction on two large real-world cita-
+tion networks with a semantic-topology fusion GNN approach that outperforms
+semantic methods by a large margin. We further present a novel method for het-
+erogeneous citation prediction that can effectively and efficiently exploit meta-
+information and synergies in joint learning. It is robust over a large temporal
+range and handles data sparsity well. While it operates on full text features, these
+are latent and the model is discriminative, which results in promising scalability.
+
+    We believe that this can be an effective tool for the writing and assessing of
+legal documents for both legal practitioners and novices by lowering the barrier
+of entry for finding norm and case citations for a relevant case. Moreover, it
+can help identify even obscure relevant precedent, which is an important step in
+building legal tech systems.
+
+    Though our system is effective, robust and scalable, there are limitations
+to its applicability, such as the availability of new legal data. Integrating new
+knowledge requires embedding cases, extracting references and re-training the
+model, which we estimate at a runtime of less than one hour (c.f. Table 3). Pre-
+dicting the references of one case requires encoding it and querying all possible
+targets, i.e. computing the dot-product with all other nodes, which we measure
+to take less than 5s for OLD201k, though with an optimized implementation, or
+reference set partitioning, this could be reduced even further.
+14  L. Wendlinger et al.
+
+    Both considered citation graphs have missing links due to imperfect reference
+extraction and linking, which, we believe, could be improved by applying new
+Natural Language Inference methods and limiting the reference set to disjoint
+graph components. Identifying them is feasible along jurisdiction and geographic
+lines with the help of legal experts and would also improve link prediction effec-
+tiveness and efficiency by limiting the considered reference pool.
+
+    Our reference prediction is limited to the document level throughout, while
+for legal practitioners, it might be valuable to know which part of their opinion
+should reference which legal paragraph or case detail, as this can drastically
+change the outcome of a legal appraisal. Re-framing this along the lines of [13]
+would require either a separate fine-grained prediction model or modelling as
+paragraph nodes, with corresponding sentence-level attention, and might only
+be tractable with a limited reference set, as mentioned above.
+
+    As a simplification, we have treated the law as a static document set, though
+in practice it is ever-changing. Collecting and integrating previous versions into
+our reference set could improve performance on and transfer from historic cases.
+
+Acknowledgements The paper has been partially funded by COMET K1-
+Competence Center for Integrated Software and AI Systems (INTEGRATE)
+within the Austrian COMET Program and by the German Federal Ministry
+of Education and Research (BMBF) within the project DeepWrite (Grant. No.
+16DHBKI059).
+
+References
+
+ 1. Abdaoui, A., Dutta, S.: Attention over pre-trained sentence embeddings for long
+     document classification. arXiv preprint arXiv:2307.09084 (2023)
+
+ 2. Arrar, D., Kamel, N., Lakhfif, A.: A comprehensive survey of link prediction meth-
+     ods. The journal of supercomputing 80(3), 3902­3942 (2024)
+
+ 3. Chalkidis, I., Fergadiotis, M., Malakasiotis, P., Aletras, N., Androutsopou-
+     los, I.: Legal-bert: The muppets straight out of law school. arXiv preprint
+     arXiv:2010.02559 (2020)
+
+ 4. Devlin, J., Chang, M.W., Lee, K., Toutanova, K.: BERT: Pre-training of deep
+     bidirectional transformers for language understanding. In: Burstein, J., Doran,
+     C., Solorio, T. (eds.) Proceedings of the 2019 Conference of the North Ameri-
+     can Chapter of the Association for Computational Linguistics: Human Language
+     Technologies, Volume 1 (Long and Short Papers). pp. 4171­4186. Association for
+     Computational Linguistics, Minneapolis, Minnesota (Jun 2019)
+
+ 5. Dhani, J.S., Bhatt, R., Ganesan, B., Sirohi, P., Bhatnagar, V.: Similar cases recom-
+     mendation using legal knowledge graphs. arXiv preprint arXiv:2107.04771 (2021)
+
+ 6. Günther, M., Ong, J., Mohr, I., Abdessalem, A., Abel, T., Akram, M.K., Guzman,
+     S., Mastrapas, G., Sturua, S., Wang, B., Werk, M., Wang, N., Xiao, H.: Jina
+     embeddings 2: 8192-token general-purpose text embeddings for long documents
+     (2024), https://arxiv.org/abs/2310.19923
+
+ 7. Hinton, G.E., Srivastava, N., Krizhevsky, A., Sutskever, I., Salakhutdinov, R.R.:
+     Improving neural networks by preventing co-adaptation of feature detectors. arXiv
+     preprint arXiv:1207.0580 (2012)
+The Missing Link  15
+
+ 8. Kingma, D.P., Ba, J.: Adam: A method for stochastic optimization. arXiv preprint
+     arXiv:1412.6980 (2014)
+
+ 9. Kipf, T.N., Welling, M.: Semi-supervised classification with graph convolutional
+     networks. arXiv preprint arXiv:1609.02907 (2016)
+
+10. Kipf, T.N., Welling, M.: Variational graph auto-encoders (2016), https://arxiv.
+
+     org/abs/1611.07308
+11. Milz, T., Granitzer, M., Mitrovi, J.: Analysis of a german legal citation network.
+
+     In: Proceedings of the 13th International Joint Conference on Knowledge Discovery,
+     Knowledge Engineering and Knowledge Management (IC3K 2021) - Volume 1:
+     KDIR. pp. 147­154. INSTICC, SciTePress (2021)
+12. Ostendorff, M., Blume, T., Ostendorff, S.: Towards an open platform for legal infor-
+     mation. In: Proceedings of the ACM/IEEE Joint Conference on Digital Libraries
+     in 2020. p. 385­388. JCDL '20, ACM (Aug 2020), http://dx.doi.org/10.1145/
+
+     3383583.3398616
+13. Palmer Olsen, H., Garneau, N., Panagis, Y., Lindholm, J., Søgaard, A.: Re-framing
+
+     case law citation prediction from a paragraph perspective. In: Legal Knowledge and
+     Information Systems, pp. 323­328. IOS Press (2023)
+14. Palmirani, M., Brighi, R., Massini, M.: Automated extraction of normative refer-
+     ences in legal texts. In: Proceedings of the 9th international conference on Artificial
+     intelligence and law. pp. 105­106 (2003)
+15. Reimers, N., Gurevych, I.: Sentence-bert: Sentence embeddings using siamese bert-
+     networks. In: Proceedings of the 2019 Conference on Empirical Methods in Natural
+     Language Processing. Association for Computational Linguistics (11 2019)
+16. Reimers, N., Gurevych, I.: Making monolingual sentence embeddings multilingual
+     using knowledge distillation. In: Proceedings of the 2020 Conference on Empirical
+     Methods in Natural Language Processing. Association for Computational Linguis-
+     tics (11 2020), https://arxiv.org/abs/2004.09813
+17. Schlichtkrull, M., Kipf, T.N., Bloem, P., Van Den Berg, R., Titov, I., Welling,
+     M.: Modeling relational data with graph convolutional networks. In: The semantic
+     web: 15th international conference, ESWC 2018, Heraklion, Crete, Greece, June
+     3­7, 2018, proceedings 15. pp. 593­607. Springer (2018)
+18. Shulayeva, O., Siddharthan, A., Wyner, A.: Recognizing cited facts and principles
+     in legal judgements. Artificial Intelligence and Law 25(1), 107­126 (2017)
+19. Velickovi, P., Cucurull, G., Casanova, A., Romero, A., Lio, P., Bengio, Y.: Graph
+     attention networks. arXiv preprint arXiv:1710.10903 (2017)
+20. Wang, X., Ji, H., Shi, C., Wang, B., Ye, Y., Cui, P., Yu, P.S.: Heterogeneous graph
+     attention network. In: The world wide web conference. pp. 2022­2032 (2019)
+21. Wang, X., Vinel, A.: Benchmarking graph neural networks on link prediction
+     (2021), https://arxiv.org/abs/2102.12557
+22. Yang, Y., Lichtenwalter, R.N., Chawla, N.V.: Evaluating link prediction methods.
+     Knowledge and Information Systems 45, 751­782 (2015)
+23. Yu, Y., Wang, X.: Link prediction in directed network and its application in mi-
+     croblog. Mathematical Problems in Engineering 2014(1), 509282 (2014)
+24. Zhang, K., Yu, W., Dai, S., Xu, J.: Citalaw: Enhancing llm with citations in legal
+     domain (2025), https://arxiv.org/abs/2412.14556
+

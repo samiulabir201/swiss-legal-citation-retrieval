@@ -1,0 +1,111 @@
+stage,qid,gold_total,survived,dropped,recall
+Stage 1a — pool intake (v7.5),val_001,42,39,3,0.9285714285714286
+Stage 1a — pool intake (v7.5),val_002,38,30,8,0.7894736842105263
+Stage 1a — pool intake (v7.5),val_003,47,36,11,0.7659574468085106
+Stage 1a — pool intake (v7.5),val_004,10,10,0,1.0
+Stage 1a — pool intake (v7.5),val_005,11,11,0,1.0
+Stage 1a — pool intake (v7.5),val_006,18,17,1,0.9444444444444444
+Stage 1a — pool intake (v7.5),val_007,19,17,2,0.8947368421052632
+Stage 1a — pool intake (v7.5),val_008,30,25,5,0.8333333333333334
+Stage 1a — pool intake (v7.5),val_009,14,13,1,0.9285714285714286
+Stage 1a — pool intake (v7.5),val_010,25,22,3,0.88
+Stage 1b — BM25 top-500,val_001,42,9,33,0.21428571428571427
+Stage 1b — BM25 top-500,val_002,38,0,38,0.0
+Stage 1b — BM25 top-500,val_003,47,0,47,0.0
+Stage 1b — BM25 top-500,val_004,10,6,4,0.6
+Stage 1b — BM25 top-500,val_005,11,1,10,0.09090909090909091
+Stage 1b — BM25 top-500,val_006,18,3,15,0.16666666666666666
+Stage 1b — BM25 top-500,val_007,19,3,16,0.15789473684210525
+Stage 1b — BM25 top-500,val_008,30,2,28,0.06666666666666667
+Stage 1b — BM25 top-500,val_009,14,0,14,0.0
+Stage 1b — BM25 top-500,val_010,25,0,25,0.0
+Stage 1b — BM25 top-500,val_001,42,9,33,0.21428571428571427
+Stage 1b — BM25 top-500,val_002,38,0,38,0.0
+Stage 1b — BM25 top-500,val_003,47,0,47,0.0
+Stage 1b — BM25 top-500,val_004,10,6,4,0.6
+Stage 1b — BM25 top-500,val_005,11,1,10,0.09090909090909091
+Stage 1b — BM25 top-500,val_006,18,3,15,0.16666666666666666
+Stage 1b — BM25 top-500,val_007,19,3,16,0.15789473684210525
+Stage 1b — BM25 top-500,val_008,30,2,28,0.06666666666666667
+Stage 1b — BM25 top-500,val_009,14,0,14,0.0
+Stage 1b — BM25 top-500,val_010,25,0,25,0.0
+Stage 1b — v7.5 rank top-3000,val_001,42,9,33,0.21428571428571427
+Stage 1b — v7.5 rank top-3000,val_002,38,0,38,0.0
+Stage 1b — v7.5 rank top-3000,val_003,47,0,47,0.0
+Stage 1b — v7.5 rank top-3000,val_004,10,6,4,0.6
+Stage 1b — v7.5 rank top-3000,val_005,11,1,10,0.09090909090909091
+Stage 1b — v7.5 rank top-3000,val_006,18,3,15,0.16666666666666666
+Stage 1b — v7.5 rank top-3000,val_007,19,3,16,0.15789473684210525
+Stage 1b — v7.5 rank top-3000,val_008,30,2,28,0.06666666666666667
+Stage 1b — v7.5 rank top-3000,val_009,14,0,14,0.0
+Stage 1b — v7.5 rank top-3000,val_010,25,0,25,0.0
+Stage 1a — full pool (v7.5),val_001,42,39,3,0.9285714285714286
+Stage 1a — full pool (v7.5),val_002,38,30,8,0.7894736842105263
+Stage 1a — full pool (v7.5),val_003,47,36,11,0.7659574468085106
+Stage 1a — full pool (v7.5),val_004,10,10,0,1.0
+Stage 1a — full pool (v7.5),val_005,11,11,0,1.0
+Stage 1a — full pool (v7.5),val_006,18,17,1,0.9444444444444444
+Stage 1a — full pool (v7.5),val_007,19,17,2,0.8947368421052632
+Stage 1a — full pool (v7.5),val_008,30,25,5,0.8333333333333334
+Stage 1a — full pool (v7.5),val_009,14,13,1,0.9285714285714286
+Stage 1a — full pool (v7.5),val_010,25,22,3,0.88
+Stage 1b — v7.5 rank top-3000,val_001,42,23,19,0.5476190476190477
+Stage 1b — v7.5 rank top-3000,val_002,38,22,16,0.5789473684210527
+Stage 1b — v7.5 rank top-3000,val_003,47,18,29,0.3829787234042553
+Stage 1b — v7.5 rank top-3000,val_004,10,9,1,0.9
+Stage 1b — v7.5 rank top-3000,val_005,11,9,2,0.8181818181818182
+Stage 1b — v7.5 rank top-3000,val_006,18,13,5,0.7222222222222222
+Stage 1b — v7.5 rank top-3000,val_007,19,13,6,0.6842105263157895
+Stage 1b — v7.5 rank top-3000,val_008,30,19,11,0.6333333333333333
+Stage 1b — v7.5 rank top-3000,val_009,14,10,4,0.7142857142857143
+Stage 1b — v7.5 rank top-3000,val_010,25,15,10,0.6
+Stage 3 — auto-YES zone alone,val_001,42,13,29,0.30952380952380953
+Stage 3 — auto-YES zone alone,val_002,38,18,20,0.47368421052631576
+Stage 3 — auto-YES zone alone,val_003,47,10,37,0.2127659574468085
+Stage 3 — auto-YES zone alone,val_004,10,7,3,0.7
+Stage 3 — auto-YES zone alone,val_005,11,7,4,0.6363636363636364
+Stage 3 — auto-YES zone alone,val_006,18,10,8,0.5555555555555556
+Stage 3 — auto-YES zone alone,val_007,19,11,8,0.5789473684210527
+Stage 3 — auto-YES zone alone,val_008,30,14,16,0.4666666666666667
+Stage 3 — auto-YES zone alone,val_009,14,10,4,0.7142857142857143
+Stage 3 — auto-YES zone alone,val_010,25,11,14,0.44
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_001,42,18,24,0.42857142857142855
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_002,38,22,16,0.5789473684210527
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_003,47,12,35,0.2553191489361702
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_004,10,9,1,0.9
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_005,11,9,2,0.8181818181818182
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_006,18,13,5,0.7222222222222222
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_007,19,13,6,0.6842105263157895
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_008,30,17,13,0.5666666666666667
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_009,14,10,4,0.7142857142857143
+Stage 3 — auto-YES + borderline (max possible after Stage 4),val_010,25,15,10,0.6
+Stage 5 — adaptive K,val_001,42,1,41,0.023809523809523808
+Stage 5 — adaptive K,val_002,38,1,37,0.02631578947368421
+Stage 5 — adaptive K,val_003,47,1,46,0.02127659574468085
+Stage 5 — adaptive K,val_004,10,0,10,0.0
+Stage 5 — adaptive K,val_005,11,2,9,0.18181818181818182
+Stage 5 — adaptive K,val_006,18,1,17,0.05555555555555555
+Stage 5 — adaptive K,val_007,19,0,19,0.0
+Stage 5 — adaptive K,val_008,30,1,29,0.03333333333333333
+Stage 5 — adaptive K,val_009,14,1,13,0.07142857142857142
+Stage 5 — adaptive K,val_010,25,0,25,0.0
+Stage 5 — adaptive × 1.3,val_001,42,1,41,0.023809523809523808
+Stage 5 — adaptive × 1.3,val_002,38,3,35,0.07894736842105263
+Stage 5 — adaptive × 1.3,val_003,47,1,46,0.02127659574468085
+Stage 5 — adaptive × 1.3,val_004,10,0,10,0.0
+Stage 5 — adaptive × 1.3,val_005,11,2,9,0.18181818181818182
+Stage 5 — adaptive × 1.3,val_006,18,2,16,0.1111111111111111
+Stage 5 — adaptive × 1.3,val_007,19,0,19,0.0
+Stage 5 — adaptive × 1.3,val_008,30,1,29,0.03333333333333333
+Stage 5 — adaptive × 1.3,val_009,14,1,13,0.07142857142857142
+Stage 5 — adaptive × 1.3,val_010,25,0,25,0.0
+Stage 5 — fixed K=5,val_001,42,0,42,0.0
+Stage 5 — fixed K=5,val_002,38,1,37,0.02631578947368421
+Stage 5 — fixed K=5,val_003,47,0,47,0.0
+Stage 5 — fixed K=5,val_004,10,0,10,0.0
+Stage 5 — fixed K=5,val_005,11,2,9,0.18181818181818182
+Stage 5 — fixed K=5,val_006,18,1,17,0.05555555555555555
+Stage 5 — fixed K=5,val_007,19,0,19,0.0
+Stage 5 — fixed K=5,val_008,30,1,29,0.03333333333333333
+Stage 5 — fixed K=5,val_009,14,1,13,0.07142857142857142
+Stage 5 — fixed K=5,val_010,25,0,25,0.0

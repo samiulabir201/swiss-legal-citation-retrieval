@@ -1,0 +1,900 @@
+                                        Dynamic Ranked List Truncation for Reranking Pipelines via
+                                                       LLM-generated Reference-Documents
+
+arXiv:2604.09492v1 [cs.IR] 10 Apr 2026                      Nilanjan Sinhababu                                                 Soumedhik Bharati
+
+                                                   Centre for Computational and Data Sciences                    Department of Computer Science and Engineering
+                                                                      IIT Kharagpur                                              Sister Nivedita University
+                                                                            India                                                            India
+
+                                                              Debasis Ganguly                                                     Pabitra Mitra
+
+                                                             School of Computing Science                         Department of Computer Science and Engineering
+                                                                 University of Glasgow                                                 IIT Kharagpur
+                                                                     United Kingdom                                                          India
+
+                                        Abstract                                                                  Typically, in a pointwise or pairwise setup, the first-stage retrieve
+                                                                                                               candidate list is pruned before reranking [19]. This method of prun-
+                                        Large Language Models (LLM) have been widely used in rerank-           ing before reranking in a typical "retrieve then rerank" setup is
+                                        ing. Computational overhead and large context lengths remain a         known as ranked list truncation (RLT) and has been widely adopted
+                                        challenging issue for LLM rerankers. Efficient reranking usually       in reranking pipelines [13, 16]. However, recent literature shows
+                                        involves selecting a subset of the ranked list from the first stage,   that a fixed cut-off or score-based heuristic method is often subopti-
+                                        known as ranked list truncation (RLT). The truncated list is pro-      mal because they ignore query-specific relevance distributions and
+                                        cessed further by a reranker. For LLM rerankers, the ranked list       reranking gains [1]. Most existing approaches view truncation as a
+                                        is often partitioned and processed sequentially in batches to re-      selection over the retrieved list, without exploiting richer semantic
+                                        duce the context length. Both these steps involve hyperparameters      structure [10]. Additionally, there are instances where reranking
+                                        and topic-agnostic heuristics. Recently, LLMs have been shown          a larger ranked list without truncation is beneficial to facilitate
+                                        to be effective for relevance judgment. Equivalently, we propose       performance gains, particularly for listwise LLM rerankers [25, 33].
+                                        that LLMs can be used to generate reference documents that can         However, the improvement in retrieval performance comes at the
+                                        act as a pivot between relevant and non-relevant documents in a        expense of added reranking time, which harms the overall respon-
+                                        ranked list. We propose methods to use these generated reference       siveness of retrieval pipelines, particularly in real-time applica-
+                                        documents for RLT as well as for efficient listwise reranking. While   tions [23].
+                                        reranking, we process the ranked list in either parallel batches
+                                        of non-overlapping windows or overlapping windows with adap-              Recent studies indicate that LLMs demonstrate strong capabil-
+                                        tive strides, improving the existing fixed stride setup. The gener-    ities in understanding semantics and query-document relation-
+                                        ated reference documents are also shown to improve existing effi-      ships [7, 36]. In particular, LLMs have been successfully utilised
+                                        cient listwise reranking frameworks. Experiments on TREC Deep          for zero-shot, few-shot, and instruction-tuned relevance judgment,
+                                        Learning benchmarks show that our approach outperforms existing        surpassing even human annotators in terms of consistency and com-
+                                        RLT-based approaches. In-domain and out-of-domain benchmarks           pleteness [7]. However, while research has extensively explored the
+                                        demonstrate that our proposed methods accelerate LLM-based list-       capability of LLMs for relevance judgment, their potential to gener-
+                                        wise reranking by up to 66% compared to existing approaches.           ate semantically controlled reference-documents within retrieval
+                                        This work not only establishes a practical paradigm for efficient      pipelines remains largely unexplored [30].
+                                        LLM-based reranking but also provides insight into the capabil-
+                                        ity of LLMs to generate semantically controlled documents using           Our work investigates the complementary role of LLMs in multi-
+                                        relevance signals.                                                     stage retrieval, utilizing them to generate a moderately relevant
+                                                                                                               reference-document for a given query and then leveraging this
+                                        Keywords                                                               document as a semantic pivot to distinguish between highly rel-
+                                                                                                               evant and non-relevant documents in a ranked list. The idea of
+                                        Pivot Document Generation, Ranked list truncation, Reranking,          leveraging a semantic pivot enables designing a new RLT approach
+                                        Large language models                                                  for efficient reranking in pointwise and pairwise setups that is both
+                                                                                                               adaptive and model-agnostic, thereby improving efficiency without
+                                        1 Introduction                                                         requiring explicit model training or parameter tuning. In listwise
+                                                                                                               reranking, for which LLMs are now commonly used, the ranked
+                                        Retrieval and reranking pipelines are increasingly being adopted       list is often partitioned into overlapping windows and processed
+                                        in search systems. Managing the efficiency-effectiveness trade-off     sequentially in batches to reduce the context length, known as
+                                        for multi-stage retrieval pipelines poses a significant challenge due  the sliding window [21, 31]. Using the generated pivot, we propose
+                                        to the use of effective but computationally expensive reranking        methods that can process the ranked list in either parallel batches of
+                                        models [12, 15, 40]. Reranking strategies vary significantly across    non-overlapping windows or overlapping windows with adaptive
+                                        models and can be broadly categorized into pointwise, pairwise,
+                                        and listwise setups [22, 26, 31­33].
+                                                                       Sinhababu et al.
+
+strides, improving the existing fixed stride setup. We further inves-  mechanism to model the dependencies between document scores
+tigate the application of this semantic pivot in existing methods      and the optimal truncation point. More recently, Meng et al. [16] in-
+that require partitioning to facilitate efficient listwise reranking.  vestigated RLT specifically for reranking pipelines, demonstrating
+Our Contributions. The primary contributions of this work are          that fixed-depth reranking is often suboptimal and that dynamic
+summarized as follows:                                                 truncation can significantly improve the efficiency of LLM-based
+(1) LLM-generated semantic reference document: We leverage             rerankers.
+
+    the generation capability of LLMs to generate a semantically          LLM-based reranking. The recent developments in LLM ca-
+    controlled pivot-document that acts as a pivot distinguishing      pabilities and scale, especially large context windows, have led
+    relevant from non-relevant documents within a ranked list.         to the emergence of zero-shot listwise reranking with generative
+(2) Adaptive truncation via pivot placement: We propose PSI-           ranking models [9, 14, 33, 34]. Listwise objectives better capture
+    Rank to utilize the generated pivot for RLT in pointwise and       inter-document dependencies than pointwise or pairwise methods
+    pairwise setups, wherein the retriever itself determines the       or traditional cross-encoders [33]. Distilled LLMs, trained via per-
+    pivot's position in the ranked list. This approach requires only   mutation distillation on teacher rankings from zero-shot prompts,
+    a single model inference call for scoring the pivot, thereby       outperform much larger supervised cross-encoders like monoT5 [24,
+    improving reranking efficiency without exhaustive scoring.         25, 33]
+(3) Parallel listwise reranking through document propaga-
+    tion: In listwise reranking, we incorporate the semantic pivot to     Despite these gains, inference efficiency remains the main chal-
+    enable document propagation across non-overlapping windows         lenge while deploying listwise LLM rankers at scale. Recent ap-
+    (SNOW), facilitating parallel batch processing and substantially   proaches, such as FIRST and its variants, limit generation to a
+    reducing inference latency.                                        single identifier token, thereby improving retrieval efficiency [2, 9].
+(4) Adaptive stride mechanism for sliding windows: We ex-              Li et al. [11] use documents from the ranked list as references for
+    tend the conventional sliding window strategy by introducing       efficient zeroshot LLM reranking. Parry et al. [21] proposed Top-
+    an adaptive stride mechanism (VS-Sliding). The pivot dynami-       Down Partitioning (TDPart), which replaces window traversal with
+    cally estimates relevance density across reranking windows to      a pivot-guided selection that can be reranked in parallel.
+    balance contextual completeness and computational efficiency.
+(5) Enhanced anchor for TD-Part framework: We adapt the                   LLMs for Judgment and Generation. The capabilities of LLMs
+    TD-Part algorithm for efficient listwise reranking and demon-      extend beyond ranking to relevance judgment and data generation.
+    strate that substituting the conventional top-document anchor      Thomas et al. [36] and Faggioli et al. [7] have benchmarked LLMs
+    with our LLM-generated pivot yields improved relevance con-        extensively as automated relevance judges. Upadhyay et al. pro-
+    sistency and ranking stability (GPTD-Part).                        pose UMBRELA for relevance judgments with zeroshot and fewshot
+                                                                       prompting. Meng et al. [17] employ reranking frameworks for im-
+   Our experiments across in-domain and out-of-domain bench-           proved relevance assessment. These frameworks demonstrate the
+marks demonstrate that our truncation mechanism outperforms ex-        LLM's intrinsic understanding of query-document relevance rela-
+isting RLT-based approaches, while requiring no task-specific train-   tionships [37].
+ing or sensitive hyperparameter tuning. Furthermore, our method
+accelerates LLM-based list-wise reranking by up to 66% relative to        Consequently, LLMs have been successfully employed to gen-
+strong baselines, while maintaining, and in many cases improving,      erate synthetic training data to enable high performance dense
+retrieval effectiveness. We highlight not only the practical signifi-  retrieval with minimal examples [5, 30]. Approaches like HyDE [10]
+cance of using LLM-generated documents to improve RLT but also         and Query2Doc [39] generate hypothetical documents to improve
+offer insight into their robustness, model dependence, and applica-    retrieval via zeroshot expansion. Ruiyang et al. [28] use finetuned
+tion in multi-stage retrieval pipelines. The repository containing     LLMs to generate global scores for the documents in the ranked
+environment details and implementations of our proposed methods        list, improving listwise reranking efficiency.
+is shared for research and development1.
+                                                                       3 Reference-Document Generation and its
+2 Related Work                                                             Utility
+
+   Ranked List Truncation. Traditionally, RLT has been formu-          In this section, we propose that an LLM can generate a moderately
+lated as a cascade ranking problem. These methods determine the        relevant answer (reference-document) to a query. This reference-
+optimal cut-off depth for a ranked list before reranking to balance    document, based on its ranking position, can serve as a pivot in a
+effectiveness against efficiency. Lien et al. [13] explored efficient  ranked list to separate relevant from non-relevant documents.
+top- processing by dynamically pruning candidates unlikely to
+affect the final evaluation metric.                                       Motivation. Prior work has shown that LLMs have been suc-
+                                                                       cessfully utilized to generate relevance judgments for query docu-
+   For neural retrieval, RLT has evolved from heuristic score-based    ment pairs [6, 27, 37]. LLMs serve as effective judges for relevance
+thresholding to learned models. Bahri et al. [1] introduced Choppy,    in IR collections, often demonstrating high correlation with human
+a transformer-based model that predicts query-specific cut-offs by     annotators [6, 27]. This implies that LLMs can understand graded
+analyzing the score distribution of the top retrieved documents. Sim-  relevance between query-document pairs when provided with a
+ilarly, Wu et al. [40] proposed AttnCut, which utilizes an attention   relevance scale similar to that of human assessors [37]. However,
+                                                                       the focus of existing strategies remains solely on LLMs as judges,
+1                                                                      rather than generating documents with a specified relevance label.
+
+ https://github.com/nilanjansb/DynamicRLT
+Dynamic Ranked List Truncation for Reranking Pipelines via LLM-generated Reference-Documents
+
+                       System Prompt                                     Query (): Do goldfish grow?
+You are an expert information retrieval judge. Your task                 Example Document Ranked Above Pivot (+):
+is to generate a single document that matches a specific                 Genetics are the predetermined factor in how big your fish will grow.
+relevance grade for the given query.                                     Goldfish sold as tank suitable will grow to about 10 inches while those
+                                                                         sold as pond suitable will reach a maximum of about 18 inches.
+                         User Prompt                                     Analysis: Directly answers the query with specific metrics.
+Given the query: "{Q}"                                                   Generated Pivot ( |  = 2):
+Generate a document that would be scored exactly:                        Setting up a tank for coldwater fish requires attention to
+"{ }"                                                                    filtration and temperature. Unlike tropical fish, species
+                                                                         such as the goldfish do not require a heater, but they do
+Relevance grade score definitions:                                       produce a significant amount of waste. This means you will
+0: Irrelevant; the document or passage provides no                       need a robust filter to keep ammonia levels down. It is
+useful information for the query.                                        also important to consider the size of your tank carefully.
+1: Minimally relevant; offers some information related                   While often sold as small juveniles, these fish will increase in size
+to the query, but is limited or not highly useful.                       as they mature, eventually outgrowing small bowls or cramped
+2: Marginally relevant; partially addresses the query.                   environments.
+3: Highly relevant; provides a perfect or ideal response                 Analysis: Contains the relevant fact but is diluted by
+to the query, often comprehensive and precise.                           tangential context (tank maintenance).
+                                                                         Example Document Ranked Below Pivot ( -):
+Figure 1: Prompt P (, ) used for pivot generation. We adopt              Goldfish food contains less protein and more carbohydrates than other
+the relevance scale used by human NIST assessors [4] and                 fish food... Your goldfish need to eat proper goldfish food that meets
+LLM-based judge UMBRELA [37].                                            their specific needs.
+                                                                         Analysis: Discusses the correct entity (Goldfish) but addresses a com-
+   Crucially, we experiment on the capability of LLMs to generate        pletely different intent (Diet vs. Growth).
+documents of a particular relevance label. We acknowledge that the
+capability of LLMs in document generation controlled with varying     Figure 2: Comparison of document relevance levels for an ex-
+levels of relevance can be useful. In particular, we are focused on   ample query. The High Relevance document provides a direct
+generating documents with moderate relevance, as these can serve      answer. The Low Relevance document discusses the entity
+as a controlling pivot between highly relevant and less relevant      but misses the intent. The Generated Pivot sits semantically
+documents.                                                            in between: it acknowledges the growth aspect (marked in
+                                                                      green) but buries it within tangential information (marked
+   Reference-Document Generation. The core innovation of              in red), making it an ideal boundary for truncation.
+our approach lies in generating a pivot  that encodes query-
+                                                                      generated for a query in DL-19 is shown in Figure 2, which exhibits
+dependent semantics and adapts truncation dynamically for each        lower fine-grained topical relevance compared to a highly relevant
+                                                                      document.
+query . This property requires generating a document that is
+                                                                         Furthermore, we verify the generated documents' labels using
+broadly scoped, i.e., relevant to a more generalized version of the   an LLM-based relevance estimator UMBRELA2, which can generate
+                                                                      a relevance label for a given query and document pair [37]. Let
+original information need. This avoids a very fine-grained topical    RUMBRELA (, )  {0, 1, 2, 3} denote the relevance grade assigned
+document. Since  is generated independently of the first-stage        to the query-document pair (, ). Consequently, we test if 
+                                                                      indeed is a document with  = 2 for  using I RUMBRELA (, ) =
+retriever or downstream reranker, it can also serve as a universal    2.
+
+reference point across retrieval frameworks. The generation task      3.1 Generative Pointwise Reranking
+employs a structured, instruction-tuned prompt P (, ) that ex-
+                                                                      We propose Ranked List Partitioning using Single Inference (PSI-
+plicitly conditions the LLM on both the query semantics and target    Rank), which uses the same retriever to score the pivot document,
+                                                                      that retrieves the ranked list as shown in Figure 3. This requires
+relevance level, as shown in Figure 1. Formally, we prompt an LLM     only a single additional inference (scoring the pivot), resulting in
+( ) to generate a document  such that:                                negligible inference cost for positioning the pivot within the ranked
+                                                                      list. Documents that are scored higher than the pivot are considered
+     =   (P (,   =  2)),                                              more promising candidates and, therefore, only those documents
+
+                                                                      2
+
+where  denotes a relevance grade instruction specifying the pivot's    https://github.com/castorini/umbrela
+semantic position at the transition between relevant (  2) and non-
+relevant ( < 2) documents according to standard TREC relevance
+
+scales.
+
+   This formulation leverages the LLM's zero-shot judgment capa-
+
+bilities [36] while constraining output to a single, representative
+
+document of controlled length (typically 200-512 tokens) guided by
+collection specific average document length | | reported in Table 1.
+This ensures that the length of  is comparable to the lengths of
+documents in the collection. An example reference document 
+                                                                                                                                        Sinhababu et al.
+
+are reranked. We obtain the final reranked list by appending the       Since this method lets the model focus on smaller windows itera-
+                                                                       tively, it enables reranking without exceeding model context limits.
+remaining documents to the reranked list.                              However, the drawback of this strategy is the need for  / serial
+   Formally, we consider  () = {1, . . . ,  }, where  is the           inferences, where  is the number of documents to be reranked and
+                                                                        is the stride.
+initial ranker that retrieves top- documents in a multi-stage re-
+trieval pipeline. Following which, a reranker  reranks the top-           Reranking using Non-Overlapping Window. Our proposed
+candidates from the initial ranked list  (), producing a reordered
+sub-list  (,  ()), where   . PSI-Rank employs two com-                 solution is to consider multiple single windows that contain non-
+plementary truncation strategies, depending on the availability of
+
+calibration data (i.e., topics from a similar collection).
+
+   Dynamic Cutoff (Per-Query Hard Boundary). Our method                overlapping sets of documents, i.e., implementing a sliding window
+PSI-Rank controls the semantic anchoring of  to establish              with a stride equal to the window size ( = ). We name our
+                                                                       reranking method as Shared Non-Overlapping Window (SNOW).
+precise, query-adaptive truncation without requiring any para-
+                                                                       Under this strategy, rankings are generated independently for each
+metric supervision compulsory in existing dynamic RLT meth-
+ods [1]. We score  using  (, ) such that the current ranked            localized window. However, the absence of overlapping documents
+list now becomes {1, 2, . . . , , . . . , -1,  }. We partition the
+ranked list into + = {   () |  (,  ) >  (, )} and                      between windows restricts the possibility of repositioning relevant
+ - = {   () |  (,  ) <  (, )}. Then we rerank +
+using  =  (, +), where  = |+| defines the dynamic rerank-              documents from one window to another, thereby limiting the over-
+
+ing depth. The final ranked list is constructed by concatenating the   all effectiveness. Therefore, to make this approach functional, it is
+reranked list with the remaining ranked list: R =    -.
+                                                                       essential to avoid this restriction and allow for the propagation of
+
+                                                                       documents across adjacent windows.
+                                                                          SNOW employs the same pivot document  generated by PSI-
+
+                                                                       Rank as a shared semantic reference point across all non-overlapping
+
+Average Cutoff (Query Set Statistics). We calculate cutoff             windows. Unlike traditional sliding window approaches that rely
+                                                                       on overlapping documents for propagation, SNOW injects  into
+
+from a calibration query set by calculating the mean pivot score       each window independently. This design exploits the pivot's query-
+
+¯ =   1     C  (, ), where C denotes the calibration queries.          specific relevance boundary, thereby enabling document propaga-
+     |C|
+
+In contrast to the dynamic mechanism, which can be influenced          tion without sequential dependencies. Documents are promoted
+                                                                       or demoted based on their ranking relative to  within their re-
+by query-specific bias, our method PSI-Rank relies on a global
+instance ¯ that remains fixed across all test queries   C. This        spective windows as shown in Figure 3. Critically, this requires no
+
+mitigates per-query outliers in pivot scoring, yielding consistent     additional pivot generation or retrieval scoring beyond the single
+
+reranking depths across diverse queries. This provides statistical     inference already performed in PSI-Rank, making it computation-
+
+stability at the cost of query adaptivity. The ranked list is then     ally efficient while maintaining semantic consistency across all
+partitioned using ¯ into + = {   () |  (,  ) > ¯ } and
+ - = {   () |  (,  ) < ¯ }, followed by reranking  =                   parallel reranking operations.
+ (, +), where  = |+|. We yield the final list as R =    -.
+                                                                          Formally, the ranked list from the first stage ranker is parti-
+   This dual-mechanism design ensures PSI-Rank remains retriever-
+                                                                       tioned into  = / non-overlapping windows. Considering
+
+                                                                        = [1, . . . , ] windows, each batch is  = { (  -1)+1, . . . ,   }.
+
+agnostic, requiring only a single-inference pivot generation per       For  each  window,       is     appended  to  form          =               {  },  fol-
+
+                                                                                                                                 
+
+query, and eliminates the need for learned thresholds, embedding       lowed by listwise reranking using  (, )  + > {} >  -,
+                                                                                                                                                          
+
+models, or query-specific hyperparameter tuning, unlike prior RLT      where +          = {         |   (,  )    >    (, )} and  -                 = {    
+
+                                                                                                                                                 
+
+approaches [16, 40].                                                    |  (,  ) <  (, )} denotes the subset of documents ranked
+
+                                                                       higher than the pivot, leveraging pivot promotion to reveal query-
+
+3.2 Generative Listwise Reranking                                      adaptive local relevance boundaries. Global high-priority (+ =
+
+LLM-based reranking is typically performed using pointwise, pair-      +  · · ·  + ) and low-priority ( - =  -  · · ·   -) lists are
+wise, or listwise strategies, depending on the model and type of       1                                               1                
+task [26, 31, 32]. Among these reranking strategies, the listwise
+approach is generally preferred due to the fewer inferences and        concatenated to preserve cross-window ordering via shared pivot
+contextual comparisons required [31, 33].                              semantics, before a final single-window pass R =  (, (+  -))
+
+   Background. Listwise ranking is implemented using either a          captures global promotions within context limits.
+single window or a sliding window approach. However, existing lit-
+erature suggests that a single window approach can rerank approx-         Stride Adaptation in Sliding Window. Here, we present an-
+imately 20 documents from the first stage, limiting its applicability  other application of the generated pivot in a sliding window setup.
+when more documents need to be reranked [21, 31]. In contrast,         We observe that the standard sliding window technique uses a fixed
+the sliding window can rerank a larger number of documents by          stride value over the entire ranked list. However, in a reranking
+overlapping windows that slide across the entire document span.        setup, the density of actual relevant documents at the end of the
+The use of overlaps ensures that potentially relevant documents are    list is relatively lower compared to the initial portion. This is be-
+propagated across adjacent windows, allowing documents initially       cause reranking is performed on a list generated by a first-stage
+positioned at lower ranks to be promoted toward the top positions.     ranker. With this, we introduce Variable Stride-Sliding Window
+                                                                       (VS-Sliding) reranking, a framework that enhances the existing
+                                                                       sliding window mechanism by allowing for an adaptable stride as
+                                                                       shown in Figure 3.
+Dynamic Ranked List Truncation for Reranking Pipelines via LLM-generated Reference-Documents
+
+                                                                                            Pointwise & Pairwise                                      Listwise
+
+                                                                         Ranked List Partitioning using Single Inference  Shared Non Overlapping Window - SNOW
+                                                                         PSI-Rank
+                                                                                                                                                      D1 D1
+                                                         D*
+                                                                                                RLT
+                                                                         D1                                                             D1            D2 D2
+
+                                  Pivot Generator LLM    D1              D2                 D1 D1    D1                   D1            D2            D*        D1     D1
+                                                                                                                          D2                          D3 D3     D2     D2
+                                                         D2              D3                 D2 D2    D3          D1                     D3 + D*                        D4
+                                                                                                                                                                       D3
+                                                         D3              D4                 D3 D3    D2          D3       D3                          D4 D4     D4     D5
+                                                                                                                                                                       D6
+                        Q                                D4              D5                 D*                   D2                                                    D7
+                                                                                                                                                                       D8
+                                                                                            D4 D4                D4       D4  D4                      D*        D3     D9
+
+                                       Index             D5              D6                 D5 D5                D5       D5  D5                      D5 D5     D5     D1
+                                                                                                                                                                       D2 D1
+                                                         D6              D7                 D6 D6                D6       D6 D6 + D*                  D6 D6     D6     D4 D2
+
+                                                         D7              D8                 D7 D7                D7       D7                                    D7            D4
+                                                                                                                                                                       D3 D3
+                                     Ranker              D8              D9                                               D8                          D*        D8     D5 D5
+                                                                                                                                                                       D6 D6
+                                                         D9              D*                 D8 D8                D8       D9  D7                      D7 D7     D9     D7 D7
+                                                                                                                                                                       D8 D8
+                                                                                            D9 D9                D9           D8                      D8 D8            D9 D9
+
+                                                                                                                              D9 + D*                 D9 D9
+
+            Variable Stride Sliding Window - VS-Sliding                                              Generated Pivot TD-Part - GPTD-Part
+
+            D1                                                       D1            D1       D1                            D1 D1
+            D2                                                                                                            D2 D2
+            D3                                         D2       D2 D2              D2       D2 D1 D1 D1                   D*
+            D4                                         D3                                   D4 D2 D2 D2
+            D5                                                  D4 D4 + D*         D4                                     D3 D3
+            D6                                  D4 D4 + D*                                       D4 D3 D3 + D*                   D4
+            D7 D7                        D4                     D*                 D*                                            D5           D4 D4
+            D8 D8                        D5     D*                                          D3 D3 D4                                          D*
+                                                                D3 D3                       D5 D5 D5                           D6 + D*
+            D9 D9 + D*                 D6 + D*  D5 D5                                       D6 D6 D6                                          D5 D5
+                                                D6 D6                                       D7 D7 D7                                          D6 D6             D*
+                                  D*                                                        D8 D8 D8
+                                                                                            D9 D9 D9                                                 D7         D7 D7
+                                  D7 D7                                                                                                              D8         D8 D8
+                                  D8 D8                                                                                                                         D9 D9
+                                  D9 D9                                                                                                            D9 + D*
+
+                                                                Do goldfish grow?       > > grow to about 10
+                                                                   Query (Q)
+                                                                                   inches ...reach a maximum of
+                                                                                       about 18 inches grow...
+                Initial                            Partition                                                          Setting up a tank... size of    Goldfish food ...fish food ...eat
+                Final                                                                                                your tank ...fish will increase       proper goldfish food...
+
+                     Ranked List                                                                                       in size as they mature...
+
+                                  Ranking  Stride  in Pivot                            Documents Ranked > Pivot           D* Generated Pivot          Documents Ranked < Pivot
+                                  Window           Position
+
+Figure 3: This diagram shows the generation of a reference-document pivot () for the Query () and a retrieved ranked list
+of documents from a first-stage retriever (e.g., BM25 and SPLADE [8, 29]). The utility of this pivot across pointwise, pairwise
+(PSI-Rank) and listwise (SNOW, VS-Sliding, and GPTD-Part) configurations for improving ranking performance and efficiency
+is illustrated. For pointwise and pairwise methods, we use the pivot for adaptive RLT, requiring only a single inference to
+calculate the pivot score using the base-retrieval method (PSI-Rank). All documents with a score above the pivot (green coloured)
+are selected for reranking. For listwise setups, we rerank the entire ranked list without truncation. We propose three optimized
+reranking methods that use the pivot to make informed decisions during the ranking. SNOW uses a parallel non-overlapping
+window with the pivot enabling document movement across windows. VS-Sliding utilizes the pivot to promote variable stride.
+It takes long strides at the bottom and gradually takes smaller strides when ranking top positions, where the density of relevant
+documents is higher. Finally, we show GPTD-Part, an adaptation of TD-Part (an efficient listwise reranking framework), and
+show that our generated pivot further improves its performance.
+
+   Given the initial ranked list  (), VS-Sliding processes list from                               Generative Top-Down Partitioning. Top-Down Partitioning
+the end using adaptive stride  initialized as 1 = max. Here, max                                (TDPart) [21] improves reranking efficiency by recursively par-
+                                                                                                titioning the search space against a pivot element selected from
+is the maximum stride, which is by default equal to the window
+                                                                                                the top- window. However, TDPart relies on an internal pivot
+size  (which is a hyper-parameter in standard sliding window                                       (), making it sensitive to the initial retrieval noise; a
+                                                                                                non-relevant pivot can compromise the integrity of all subsequent
+based approaches), i.e.,  = . Starting at position 1 = ,                                        partitions. To address this dependency, we introduce Generated
+                                                                                                Pivot Top-Down Partitioning (GPTD-Part), which replaces the
+each window  = { -+1, . . . ,  } undergoes PSI-Rank                                             unstable internal pivot with our proposed semantically controlled
+                                                                                                anchor .
+with listwise reranker  (,                       {})             +   >   {  }      >    -
+                                                                                                   Unlike TDPart, GPTD-Part injects  as an external reference
+                                                                                          
+                                                                                                independent of the initial ranking quality. We first determine the
+where +         =  {              |   (,  )     >   (, )}. The next position                    pivot's effective rank  = rank ( |  ()) using the first-
+                                                                                                stage retriever  . This position  initializes the cutoff boundary.
+                                                                                                Subsequently, the listwise reranker  processes the initial win-
+                                                                                                dow top = {1, . . . , , } and deeper partitions, anchoring all
+advances as +1 =  - +1 where +1 = max(1, min(max, -
+
+| + |) ) ,  continuing  until             .     This  density-adaptive   mechanism
+
+    
+
+accelerates through sparse tail regions (low |+|) by skipping non-
+
+                                                                             
+
+relevant documents, while decelerating in relevant-dense regions
+
+(high |+|).
+
+              
+comparisons to . Formally, for any candidate within  encoun-                                                                                                Sinhababu et al.
+tered during traversal, we derive the high-relevance partition +
+as + = {   |  (,  ) >  (, )}. This ensures that doc-                    Table 1: Statistics of the datasets used in our experiments.
+ument promotion is governed by a query-specific, semantically           The | | and | | denote the average number of query and
+grounded threshold rather than arbitrary retrieval artifacts. GPTD-     document terms, respectively.
+Part is resilient against retrieval noise while retaining the parallel
+efficiency of top-down traversal. We have outlined the GPTD-Part        Collection #Docs Topics #Queries | | | |
+method in Figure 3.
+                                                                        MS                DL-19  43 5.40
+4 Evaluation                                                            MARCO  8.8M                                56.11
+
+In this section, we provide empirical evidence and experimental                           DL-20  54 6.04
+details to demonstrate the utility of the generated pivot in RLT
+and LLM-based listwise rerankers. The effectiveness of our pro-         BEIR   171K  COVID        50 10.60 160.77
+posed approach depends on several critical assumptions, which we               5.2K  SciFact     300 12.37 213.63
+systematically investigate through three research questions.                   383K  Touché       49 6.55 292.37
+                                                                               4.6M  DBPedia     400 5.39 49.68
+4.1 Research Questions
+                                                                        4.2 Datasets
+The fundamental hypothesis of our approach is that LLM-generated
+pivots can serve as an adaptive threshold between relevant and          We evaluate our approach on the MS MARCO passage collec-
+non-relevant documents. Unlike fixed thresholds that remain con-        tion [18] comprising over 8.8 million documents collated from the
+stant across queries, our pivots should theoretically adjust based      Bing search engine and then segmented into relatively short pas-
+on query complexity, domain characteristics, and the distributional     sages. For IR evaluation, we use the TREC deep learning track topics
+properties of retrieved candidates. This question examines whether      of 2019 and 2020, respectively denoted as DL-19 [4] and DL-20 [3].
+our generated pivots genuinely exhibit threshold-like behavior, cre-    To investigate RQ2-RQ4, we employ five out-of-domain test col-
+ating meaningful boundaries in the ranking space, or merely act as      lections from the BEIR benchmark [35]. Table 1 summarizes the
+arbitrary reference points. Understanding this property is essential    statistical characteristics of all datasets used in our experiments.
+for our adaptive RLT, making our first research question:
+RQ1: Does the generated pivot function as a dynamic threshold for       4.3 Evaluation Measures
+RLT in pointwise and pairwise reranking setups?
+                                                                        To assess the performance of the proposed approach against the
+   Even if pivots function as dynamic thresholds, their utility de-     baselines, three key metrics that capture both the effectiveness and
+pends on whether they translate into measurable ranking improve-        efficiency of the ranking pipelines are employed.
+ments. Listwise reranking with LLMs faces challenges due to sig-
+nificantly higher inference overhead compared to other reranking        · Mean Average Precision (MAP): We report the mean aver-
+methods. We investigate whether pivot-guided comparisons help              age precision (MAP) at cut-off 100 (MAP@100) with the binary
+LLMs make more accurate relative judgments by providing stable             relevance threshold set to 2 for DL-19 and DL-2020 topics only.
+reference points throughout the ranking process. This question
+directly addresses the practical value of our generated reference-      · Normalized Discounted Cumulative Gain (nDCG): We use
+document and therefore makes our second research question:                 nDCG as the standard measure because it accounts for a docu-
+RQ2: Does the generated pivot effectively improve LLM listwise             ment's relevance and its position in the ranked list. We report this
+reranking performance and efficiency?                                      metric for both in-domain and out-of-domain evaluation [35].
+
+   The quality of generated pivots likely depends on the gener-         · Inferences Per-Query (IPQ): Since the initial ranked list is
+ating LLM's understanding of relevance, domain knowledge, and              truncated before reranking in pointwise and pairwise setups, we
+text generation capabilities. If ranking performance varies substan-       report IPQ by dividing the total inferences by the number of
+tially based on which model generates the pivot, this suggests that        queries in the test set 1. A method with a lower IPQ is considered
+pivot generation itself is a critical bottleneck that requires careful     better when overall performance is not significantly reduced.
+model selection. Conversely, if diverse LLMs produce functionally
+equivalent pivots, it indicates that RLT is robust to variations in     · Speed-Up (SU): To quantify efficiency gains in listwise reranking
+pivot quality. This question addresses whether investing in stronger       setups, we report the proportional gains in run-time relative to
+models specifically for pivot generation is necessary or whether           the sliding window baseline. SU values greater than 1 indicate
+lightweight models are sufficient, making our third research ques-         an improvement in efficiency. We include the time required to
+tion:                                                                      generate the pivot in the execution time for methods that use it.
+RQ3: Does the ranking effectiveness significantly change with pivots
+generated by different LLMs?                                            4.4 Models
+
+                                                                        4.4.1 Phase-one. We retrieve the top-100 documents in a `retrieve
+                                                                        then rerank' pipeline. For testing our RLT method (PSI-Rank), we
+                                                                        use only BM25 as the first stage, as it is the most commonly
+                                                                        used first-stage ranker in RLT setups [40]. For LLM-based list-wise
+                                                                        reranking setups, we use both BM25 and SPLADE. We include
+                                                                        SPLADE to study LLM rerankers' dependence on first-stage re-
+                                                                        trieval. Although it is a very strong model, its performance is sig-
+                                                                        nificantly improved when used in conjunction with LLM rerankers.
+Dynamic Ranked List Truncation for Reranking Pipelines via LLM-generated Reference-Documents
+
+4.4.2 Pivot Generation. We experiment with three different-sized                       0.10 DL-2019    DL-2020  COVID
+LLMs to generate the pivot document. We use a small model with 3B
+parameters Llama-3.2-3B-Instruct3, a moderate-sized 8B param-              #Documents  0.05
+eters model Llama-3.1-8B-Instruct4, and a much larger model
+ 200B parameters GPT-4o5. However, we present the main results                         0.00 0 C25utof5f 0Dep7t5h 100 0 C25utof5f 0Dep7t5h 100 0 C25utof5f 0Dep7t5h 100
+using only the moderate-sized model for comparison.
+                                                                                       0.10   SciFact  Touché   DBPedia
+4.4.3 RLT Baselines. To establish the effectiveness of our approach,
+we compare against a set of RLT baseline methods:                          #Documents  0.05
+· Fixed- truncates all queries at a pre-determined depth (e.g.,
+                                                                                       0.00 0 C25utof5f 0Dep7t5h 100 0 C25utof5f 0Dep7t5h 100 0 C25utof5f 0Dep7t5h 100
+    = 100 for BM25, mono-T5 and  = 50 for duo-T5).
+· Greedy- [12]: This is a data-driven variant that selects a single        Figure 4: RLT cutoff distributions across in-domain and out-
+                                                                           of-domain test sets show our proposed method PSI-Rank
+   global cut-off depth  that maximizes the efficiency-effectiveness       generally truncates less than 30 out of 100 documents per
+   trade-off. We use  = 2 as per the literature [16] to favor efficiency-  query. The average cutoff across test topics is marked in a
+   focused retrieval scenarios.                                            red dotted line. For example, in SciFact, our method never
+· BiCut [12]: This method uses Bi-LSTM to process the ranked               required more than approximately 25% of the documents to
+   list. It makes a binary decision at each rank position. We set          achieve equivalent performance to a fixed-100 cutoff.
+    = 0.6, for prioritizing higher efficiency [16].
+· Distribution-based Models: We include three supervised mod-              · BM25 ( )  mono-T5 ( )  duo-T5: This three-stage pipeline
+   els that predict the optimal cut-off position directly from a dis-         performs RLT twice, first on BM25 top-100 documents and then
+   tribution of candidates. Choppy [1] employs a Transformer                  on mono-T5 truncated list before finally reranking with duo-T5.
+   encoder to capture global list context. AttnCut [40] utilizes a hy-
+   brid Bi-LSTM and Transformer architecture. MtCut [38] extends           · Sliding: We use a sliding window of size  and stride  for
+   AttnCut via multi-task learning. Similar to Greedy-, these mod-            listwise reranking over the candidate set, progressively refining
+   els are optimized using the EET metric with  = 2 for efficiency            the ranking to a target depth . For our experiments, we use
+   focused truncation policy [16].                                            standard hyperparameter values of  = 20 and  = 10 [9, 31].
+
+4.4.4 Reranking Models.                                                    · TD-Part: Employs a top-down partitioning strategy that selects
+· mono-T5: A widely adopted point-wise neural reranker that                   a pivot within an initial top window and recursively partitions
+                                                                              the ranking to depth  for efficient listwise reranking [21]. We
+   independently scores each document with respect to the query               set  = 20, consistent with the standard settings [21].
+
+   using a sequence-to-sequence formulation [20].                          4.5 Findings
+· duo-T5: A pair-wise reranker that directly compares pairs of
+                                                                           In this section, we provide experimental results to answer our
+   documents for a given query to determine relative relevance.            research questions.
+
+   By modeling document interactions explicitly, it often achieves         4.5.1 Generated pivot functions as a dynamic threshold for RLT in
+                                                                           pointwise and pairwise reranking configurations. LLM-generated
+   higher ranking accuracy than point-wise approaches [22].                pivots can be used to dynamically adjust reranking depth without
+· Rank-Zephyr: A list-wise LLM-based reranker designed to                  requiring model training or hyperparameter tuning, as shown in
+                                                                           Figure 4. Results from Table 2 show that PSI-Rank in both point-
+   jointly assess and reorder a set of candidate documents in a sin-       wise (BM25mono-T5) and pairwise (BM25mono-T5duo-T5)
+                                                                           pipelines consistently achieves competitive or superior performance
+   gle inference. It captures global ranking context and has demon-        while requiring substantially reduced reranker inferences, answer-
+                                                                           ing our first research question (RQ1).
+   strated strong effectiveness in modern retrieval benchmarks [25].
+· Rank-Vicuna: A list-wise reranker built on the Vicuna instruction-          Under BM25mono-T5, in-domain analysis from Table 2 demon-
+                                                                           strates PSI-Rank as the overall best-performing model with an
+   tuned LLM, utilizing conversational reasoning to perform holistic       exceptional MAP and nDCG score (.337 and .685 in DL-19), with
+                                                                           an impressive 55.8 IPQ. For DL-20, PSI-Rank outperforms the
+   ranking over document lists. It provides competitive performance        Fixed- mono-T5 (100) along with all other RLT methods, while
+                                                                           requiring only  55% of the total inferences. However, PSI-Rank
+   while remaining adaptable across ranking setups [24].                   with BM25 as the pivot scorer results in an early cutoff, truncating
+· Rank-GPT: A list-wise reranking framework that utilizes large            many relevant documents, achieving the lowest IPQ of 36.9, but
+
+   instruction-following language models to generate relevance-
+
+   aware rankings over candidate lists. In our experiments, we use
+   GPT-4o-mini for its balance between efficiency and effective-
+   ness [31, 33].
+
+4.4.5 Reranking Methods.
+· BM25 ( )  mono-T5: This pipeline performs RLT on top-100
+
+   BM25 retrieved documents and then reranks with mono-T5.
+· BM25 (100)  mono-T5 ( )  duo-T5: This three-stage
+
+   pipeline performs RLT on top-100 mono-T5 reranked documents
+
+   on top-100 BM25 retrieval and finally reranks with duo-T5.
+
+3 https://huggingface.co/meta- llama/Llama- 3.2- 3B- Instruct
+4 https://huggingface.co/meta- llama/Llama- 3.1- 8B- Instruct
+5 https://platform.openai.com/docs/models/gpt- 4o
+                                                                                                     Sinhababu et al.
+
+Table 2: Evaluation of our dynamic RLT (PSI-Rank) on in- and out-of-domain tests. We report MAP and nDCG@10 (in-domain)
+and nDCG@10 (out-of-domain). Efficiency is measured by Inferences Per-Query (IPQ). Best scores are bold, second-best are
+underlined. Symbols  and  indicate significance (paired t-test,  = 0.05) versus PSI-Rank and PSI-Rank, respectively.
+
+                                      DL-19                           DL-20  COVID  SciFact  Touché  DBPedia
+
+Type Retriever                        MAP nDCG IPQ MAP nDCG IPQ nDCG IPQ nDCG IPQ nDCG IPQ nDCG IPQ
+
+      BM25 (100)                      .232 .479 97.8 .275 .494 98.7 .576 100.0 .672 99.7 .252 100.0 .275 99.8
+
+Fixed-k +mono-T5 (100)                .358 .701 97.8 .374 .660 98.7 .631 100.0 .720 99.7 .319 100.0 .407 99.8
+
+      +mono-T5 (100) + duo-T5 (50) .360 .703 49.0 .385 .666 49.6 .631 50.0 .579 50.0 .272 50.0 .404 49.9
+
+BM25 ( )  mono-T5                     .323 .655 67.0 .371 .652 43.0 .623 43.0 .711 42.9 .315 43.0 .402 42.9
+              Greedy- ( = 2)          .311 .642 78.0 .354 .640 64.8 .612 65.0 .698 64.8 .309 65.0 .395 64.8
+              BiCut ( = 0.6)
+                                      .321 .665 70.0 .368 .656 55.0 .627 55.0 .715 54.8 .317 55.0 .404 54.9
+Baselines Choppy ( = 2)               .318 .660 47.0 .364 .650 36.0 .621 36.0 .709 35.9 .314 36.0 .401 35.9
+              AttnCut ( = 2)          .308 .655 44.2 .358 .645 35.2 .617 36.0 .704 35.9 .312 36.0 .398 35.9
+              MtCut ( = 2)
+
+              PSI-Rank                .315 .634 36.9 .327 .630 38.9 .635 43.6 .716 13.0 .295 50.5 .358 34.7
+     Ours                             .337 .685 55.8 .354 .670 53.5 .631 100.0 .720 20.0 .312 94.0 .403 60.9
+
+              PSI-Rank                .342 .698 43.0 .380 .662 40.7 .629 44.0 .575 43.3 .270 42.9 .400 43.8
+                                      .315 .675 45.0 .375 .655 50.0 .625 46.0 .570 46.7 .268 44.9 .398 46.3
+BM25 (100)  mono-T5 ( )  duo-T5       .333 .700 45.0 .382 .664 43.0 .630 45.0 .578 45.0 .271 43.9 .403 45.0
+              Greedy- ( = 2)          .330 .695 41.9 .378 .660 39.8 .628 42.0 .575 41.7 .269 40.8 .401 42.5
+              BiCut ( = 0.6)          .328 .690 40.7 .374 .655 38.9 .625 42.0 .572 41.7 .267 40.8 .399 42.5
+
+Baselines Choppy ( = 2)
+              AttnCut ( = 2)
+              MtCut ( = 2)
+
+              PSI-Rank                .354 .699 28.0 .314 .685 11.6 .611 17.3 .651 11.5 .308 13.1 .419 11.1
+     Ours                             .362 .708 19.7 .361 .678 20.0 .617 20.0 .628 20.0 .300 20.0 .419 20.0
+
+              PSI-Rank                .348 .692 39.1 .372 .655 36.1 .620 36.0 .568 39.3 .265 35.7 .395 35.5
+                                      .312 .668 43.0 .368 .648 44.4 .618 39.0 .562 43.0 .262 38.8 .392 38.8
+BM25 ( )  mono-T5 ( )  duo-T5         .335 .695 41.9 .378 .658 38.9 .625 38.0 .572 40.7 .268 37.8 .399 37.0
+              Greedy- ( = 2,  = 2)    .332 .690 40.7 .375 .652 37.0 .622 35.0 .569 37.3 .266 34.7 .396 34.8
+              BiCut ( = 0.6,  = 0.6)  .325 .685 39.5 .370 .650 35.2 .618 35.0 .565 37.3 .264 34.7 .394 34.8
+
+Baselines Choppy ( = 2,  = 2)
+              AttnCut ( = 2,  = 2)
+              MtCut ( = 2,  = 2)
+
+Ours  PSI-Rank ,                      .360 .706 55.1 .280 .648 8.5 .624 14.3 .669 7.6 .303 10.5 .416 7.9
+      PSI-Rank ,                      .362 .711 19.5 .314 .685 11.6 .616 12.8 .653 11.2 .309 12.3 .419 11.1
+      PSI-Rank,                       .359 .701 7.0 .340 .685 13.6 .621 16.2 .646 12.8 .300 15.3 .423 13.5
+      PSI-Rank,                       .362 .708 19.7 .361 .678 20.0 .617 20.0 .628 20.0 .300 20.0 .419 20.0
+
+significantly degrades performance. In this setup, out-of-domain      IPQ of 7 with negligible performance drop (PSI-Rank, on
+analysis deviated only for Choppy, which showed an insignificant      DL-19). We observe a similar balance between performance and ef-
+improvement over PSI-Rank on Touche and DBPedia.                      ficiency in out-of-domain settings, where with 7.6 IPQ, our method
+                                                                      PSI-Rank, attains the highest nDCG of 66.9 in the pairwise
+   In the full three-stage pipeline with mono-T5 as the pivot scorer  pipeline.
+model and duo-T5 as the reranker, PSI-Rank and PSI-Rank
+both demonstrate balanced effectiveness­efficiency trade-offs. The       Collectively, these observations support our hypothesis that gen-
+pairwise ranker duo-T5 did not show significant performance im-       erated reference-document functions as a semantic pivot rather
+provement across any test sets. However, our RLT methods pro-         than arbitrary anchors, enabling adaptive ranked list truncation
+mote performance by pruning irrelevant documents, improving           in both pointwise and pairwise reranking setups. Empirically, we
+pairwise reranking performance and stability across all test col-     observe substantial variance in reranking depth across queries with-
+lections. Specifically, PSI-Rank effectively minimizes inference      out degradation in performance metrics, which would be expected
+ (35 - 66%) in-domain and  (53 - 65%) in out-of-domain collec-        if the pivot behaved randomly.
+tions while still matching or surpassing majority baselines (except
+MAP in DL-20 and nDCG on COVID, where Choppy attains the              4.5.2 The generated pivot effectively improves listwise ranking per-
+best scores).                                                         formance and efficiency. Results from Table 3 confirm that our pro-
+                                                                      posed pivot-guided methods (SNOW, VS-Sliding, GPTD-Part) con-
+   A major advantage of our PSI-Rank approach is its low inference    sistently enhance LLM listwise reranking effectiveness over base-
+cost and initial-ranker dependence, making it particularly useful     lines, generalizing across in-domain and out-of-domain BEIR sub-
+for cascaded RLT across multiple stages. Here, the pivot is scored    sets. Furthermore, Table 4 shows the generalizability of our meth-
+by both BM25 and mono-T5, resulting in an optimally truncated         ods across multiple LLMs (RankZephyr, RankVicuna, RankGPT)
+ranked list for duo-T5 reranking. We observe that baseline models     answering our second research question (RQ2).
+in this setting did not improve over their single-level truncation,
+due to their ranker independent truncation process. In contrast,
+our approaches exhibit the highest efficiency, reaching the lowest
+Dynamic Ranked List Truncation for Reranking Pipelines via LLM-generated Reference-Documents
+
+Table 3: Listwise LLM based reranking performance comparison on various in and out-of-domain datasets using the generated
+pivot for partitioning. The best and the second-best scores for each metric and method are bold and underlined. The symbol 
+indicates the statistical significance of a method (paired t-test with  = 0.05) compared with the Sliding Window baseline.
+
+                                                         DL-19                 DL-20  COVID      SciFact    Touché  DBPedia
+
+             Type                Pipeline
+
+                                                  MAP nDCG SU MAP nDCG SU nDCG SU nDCG SU nDCG SU nDCG SU
+
+                           BM25                   .232 .479 ­ .275 .494 ­ .576                   ­ .672     ­ .252 ­ .275 ­
+             Baselines + Sliding                                                                 1.00 .657
+                                                  .342 .712 1.00 .392 .705 1.00 .579             1.55 .649  1.00 .255 1.00 .410 1.00
+                           + TDPart               .279 .641 1.46 .345 .659 1.48 .598                        1.55 .209 1.46 .383 1.65
+
+                                 + SNOW           .338 .673 2.73 .385 .690 2.77 .690 2.80 .730 2.85 .250 2.65 .350 2.95
+
+             Ours                + VS-Sliding .347 .698 1.67 .411 .692 1.73 .673 1.76 .747 1.82 .266 1.63 .402 1.93
+
+                                 + GPTD-Part .318 .665 1.46 .381 .671 1.48 .610 1.55 .660 1.55 .220 1.46 .395 1.65
+
+                           SPLADE                 .485 .730     ­ .505 .721           ­ .531     ­ .690     ­ .278 ­ .426 ­
+             Baselines + Sliding                                1.00 .585 .799        1.00 .536  1.00 .677  1.00 .274 1.00 .472 1.00
+                                                  .545 .770     1.46 .540 .773        1.48 .562  1.55 .684  1.55 .246 1.46 .445 1.65
+                           + TDPart               .505 .716
+
+                                 + SNOW           .489 .767 2.73 .544 .810 2.77 .630 2.80 .715 2.85 .275 2.65 .480 2.95
+
+             Ours                + VS-Sliding .461 .747 1.45 .555 .766 1.78 .641 1.81 .764 1.80 .301 1.66 .461 1.98
+
+                                 + GPTD-Part .525 .752 1.46 .560 .785 1.48 .580 1.55 .695 1.55 .255 1.46 .460 1.65
+
+Table 4: Performance comparison of listwise reranking meth-                           efficiency and performance gain, irrespective of the first stage.
+ods across different LLM re-rankers. Best and second-best                             While GPTD-Part substantially improves over the TD-Part base-
+scores are bold and underlined. The symbol  denotes statis-                           line by incorporating a generated pivot, showing the effectiveness
+tical significance similar to Table 3.                                                of our pivot across different strategies. However, SNOW and VS-
+                                                                                      Sliding demonstrate better overall effectiveness than GPTD-Part,
+                                            BM25                       SPLADE         particularly in out-of-domain collections. Since, top-down approach
+                                                                                      generally relies heavily on the initial retriever, it shows degraded
+                                 DL-19            DL-20         DL-19          DL-20  performance under BM25. Overall, our observation indicates that
+                                                                                      SNOW and VS-Sliding are efficient yet effective listwise reranking
+Pipeline     Method MAP nDCG MAP nDCG MAP nDCG MAP nDCG                               strategies, achieving state-of-the-art performance with the highest
+                                                                                      reported LLM-based listwise reranking efficiency.
+First stage  -                   .232 .479 .275 .494 .485 .730 .505 .721
+                                                                                         Observation from Table 4 demonstrates that MAP and nDCG
+             Sliding             .342 .712   .392 .705   .545 .770     .585 .799      scores for the proposed methods (SNOW, VS-Sliding, GPTD-Part)
+             SNOW                .338 .673               .489 .767     .544 .810      show low variation across different LLM rerankers. We observe
+                                             .385 .690   .461 .747     .555 .766      MAP and nDCG standard deviations of (0.115, 0.076 on SNOW),
++ RankZephyr VS-Sliding .347 .698                        .525 .752                    (0.078, 0.047 on VS-Sliding), and (0.108, 0.062 on GPTD-Part) over
+                     GPTD-Part .318 .665     .411 .692                 .560 .785      under BM25/SPLADE on DL-19/DL-20. RankZephyr shows the best
+                                             .381 .671                                overall performance, but SNOW/VS-Sliding maintains effectiveness
+                                                                                      against weaker models like RankVicuna ( < 0.03 in MAP and
+             Sliding             .285 .586 .315 .577 .500 .721         .530 .705      nDCG). VS-Sliding exhibits the lowest variation (nDCG  = 0.047),
+                                                                       .535 .704      benefiting from variable strides that adapt to relevance density. This
+             SNOW                .295 .595 .320 .590 .505 .725         .486 .708      robustness stems from pivot-guided partitioning, as validated in
+                                                                       .525 .700      prior experiments reported in Tables 2 and 3.
++ RankVicuna                     .319  .653  .376 .644   .451   .743
+                     VS-Sliding                                                       4.5.3 Ranking effectiveness is robust across pivots generated by dif-
+                                                                                      ferent LLMs. We demonstrate using Figure 5 that ranking effective-
+             GPTD-Part .305 .615 .330 .605 .502 .722                                  ness exhibits minimal variation across pivots generated by three
+                                                                                      different-sized models, answering RQ3 about the need for larger
+             Sliding             .345 .715   .385 .693   .540 .769     .560 .765      models in  generation. Considering the smallest model in our
+             SNOW                .310 .645   .350 .640   .560 .795     .570 .780      experiment, our proposed methods, SNOW and VS-Sliding, consis-
+                                                         .490 .793     .542 .769      tently improve nDCG@10 across benchmarks. The larger model
++ RankGPT    VS-Sliding .346 .708            .405 .677   .545 .775     .565 .770      GPT-4o also shows similar improvements, indicating that our pivot-
+             GPTD-Part .320 .660             .360 .655                                generation method is stable across both the small and the larger
+                                                                                      models. Although we observe the maximum improvements with
+   Our parallel reranking framework, SNOW, achieves the best                          the larger model, the cross-model differences remain negligible.
+efficiency (a maximum gain of  = 2.95 on DBPedia) and demon-                          Furthermore, the moderately sized model, Llama-3.1-8B-Instruct,
+strates consistent performance across test collections. Under BM25                    provides a stable balance between the larger and the smaller models,
+as a first-stage retriever, SNOW performs best on COVID (nDCG of                      making it an ideal choice in reranking setups. Overall, our results
+.690) and second best on SciFact (nDCG of .730). However, SNOW
+degrades performance on other collections compared to the VS-
+Sliding method. VS-Sliding accelerates through sparse tail regions
+while adaptively slowing in dense relevant regions, achieving  2×
+(maximum  = 1.98) stride efficiency over fixed-stride sliding
+windows by leveraging pivot-defined relevance density. VS-Sliding,
+while the second-most efficient (  1.8), outperforms or main-
+tains performance relative to all other methods (the highest MAP
+of .347 and .411 in DL-19 and DL-20, respectively).
+
+   With SPLADE first-stage, SNOW attains near-SOTA nDCG (.767
+in DL-19, .810 in DL-20), highlighting pivot stability in the dense
+retrieval contexts. We observe that SNOW and VS-Sliding gener-
+ally outperform baselines, except for DL-19, where Sliding shows
+only marginal improvement. VS-Sliding exhibits a balance between
+Method:              SNOW  VS-Sliding  GPTD-Part  Retriever:  BM25     SPLADE                                                                                              Sinhababu et al.
+ 0.85
+                     DL-2019                                 DL-2020                    [5] Zhuyun Dai, Vincent Y. Zhao, Ji Ma, Yi Luan, Jianmo Ni, Jing Lu, Anton Bakalov,
+                                                                                              Kelvin Guu, Keith B. Hall, and Ming-Wei Chang. 2022. Promptagator: Few-shot
+         0.80                                                                                 Dense Retrieval From 8 Examples. arXiv:2209.11755 [cs.CL] https://arxiv.org/
+                                                                                              abs/2209.11755
+nDCG@10  0.75
+                                                                                        [6] Guglielmo Faggioli, Laura Dietz, Charles L. A. Clarke, Gianluca Demartini,
+         0.70                                                                                 Matthias Hagen, Claudia Hauff, Noriko Kando, Evangelos Kanoulas, Martin
+                                                                                              Potthast, Benno Stein, and Henning Wachsmuth. 2023. Perspectives on Large
+         0.65              Llama-8B        GPT-4O Llama-3B   Llama-8B  GPT-4O                 Language Models for Relevance Judgment. In Proceedings of the 2023 ACM SI-
+           Llama-3B                                                                           GIR International Conference on Theory of Information Retrieval (Taipei, Taiwan)
+                                     Pivot Generator Models                                  (ICTIR '23). Association for Computing Machinery, New York, NY, USA, 39­50.
+                                                                                              doi:10.1145/3578337.3605136
+Figure 5: This graph demonstrates stable reference-document
+generation across different models, leading to stable perfor-                           [7] Guglielmo Faggioli, Laura Dietz, Charles L. A. Clarke, Gianluca Demartini,
+mance of our listwise methods. Results in this graph are                                      Matthias Hagen, Claudia Hauff, Julia Kiseleva, Gabriella Pasi, Martin Potthast,
+averaged over four runs with different random seeds. We test                                  and Maarten de Rijke. 2023. Perspectives on Large Language Models for Rele-
+by varying model hyperparameters - temperature and top-                                       vance Judgment. In ICTIR '23: Proceedings of the 2023 ACM SIGIR International
+p reporting minimal variance (nDCG  0.0066 and 0.0041                                         Conference on Theory of Information Retrieval. ACM, Taipei, Taiwan, 39­50.
+under BM25 and SPLADE). Pivots generated by Llama-8B
+are the most stable across experiments, resulting in higher                             [8] Thibault Formal, Benjamin Piwowarski, and Stéphane Clinchant. 2021. SPLADE:
+reranking performance.                                                                        Sparse Lexical and Expansion Model for First Stage Ranking. In Proceedings
+                                                                                              of the 44th International ACM SIGIR Conference on Research and Development
+demonstrate that our pivot generation method is adaptable across                              in Information Retrieval (Virtual Event, Canada) (SIGIR '21). Association for
+different architectures, finetuning, and model sizes.                                         Computing Machinery, New York, NY, USA, 2288­2292. doi:10.1145/3404835.
+                                                                                              3463098
+5 Conclusion
+                                                                                        [9] Revanth Gangi Reddy, JaeHyeok Doo, Yifei Xu, Md Arafat Sultan, Deevya Swain,
+Our empirical analysis confirms that LLM-generated pivot docu-                                Avirup Sil, and Heng Ji. 2024. FIRST: Faster Improved Listwise Reranking with Sin-
+ments function as effective semantic thresholds for adaptive ranked                           gle Token Decoding. In Proceedings of the 2024 Conference on Empirical Methods
+list truncation (RLT) in both pointwise and pairwise reranking                                in Natural Language Processing, Yaser Al-Onaizan, Mohit Bansal, and Yun-Nung
+pipelines, achieving competitive MAP and nDCG@10 scores with                                  Chen (Eds.). Association for Computational Linguistics, Miami, Florida, USA,
+35-66% inference reductions across in-domain and out-of-domain                                8642­8652. doi:10.18653/v1/2024.emnlp-main.491
+collections. Our proposed pivot-guided listwise reranking meth-
+ods (SNOW, VS-Sliding, and GPTD-Part) consistently outperform                          [10] Luyu Gao, Xueguang Ma, Jimmy Lin, and Jamie Callan. 2022. Precise Zero-Shot
+baselines across test collections while showing stability across mul-                         Dense Retrieval without Relevance Labels. https://arxiv.org/abs/2212.10496.
+tiple LLMs (RankZephyr, RankVicuna, RankGPT). Our methods
+in listwise setups achieved the significant efficiency gain while                      [11] Jieran Li, Xiuyuan Hu, Yang Zhao, Shengyao Zhuang, and Hao Zhang. 2025.
+conserving or improving performance. Pivot generation proves                                  Leveraging Reference Documents for Zero-Shot Ranking via Large Language
+robust across different models, exhibiting very low variance. These                           Models. arXiv:2506.11452 [cs.IR] https://arxiv.org/abs/2506.11452
+findings establish LLM-generated pivots as stable anchors that en-
+hance multi-stage reranking efficiency and stability without model                     [12] Yen-Chieh Lien, Daniel Cohen, and W. Bruce Croft. 2019. An Assumption-Free
+training, solely by leveraging LLMs' generative capabilities.                                 Approach to the Dynamic Truncation of Ranked Lists. In Proceedings of the 2019
+                                                                                              ACM SIGIR International Conference on Theory of Information Retrieval (Santa
+References                                                                                    Clara, CA, USA) (ICTIR '19). Association for Computing Machinery, New York,
+                                                                                              NY, USA, 79­82. doi:10.1145/3341981.3344234
+ [1] Dara Bahri, Yi Tay, Che Zheng, Donald Metzler, and Andrew Tomkins. 2020.
+       Choppy: Cut Transformer for Ranked List Truncation. In Proceedings of the       [13] Yen-Chieh Lien, Daniel Cohen, and W. Bruce Croft. 2019. An Assumption-Free
+       43rd International ACM SIGIR Conference on Research and Development in Infor-          Approach to the Dynamic Truncation of Ranked Lists. In Proceedings of the 2019
+       mation Retrieval (Virtual Event, China) (SIGIR '20). Association for Computing         ACM SIGIR International Conference on Theory of Information Retrieval (Santa
+       Machinery, New York, NY, USA, 1513­1516. doi:10.1145/3397271.3401188                   Clara, CA, USA) (ICTIR '19). Association for Computing Machinery, New York,
+                                                                                              NY, USA, 79­82. doi:10.1145/3341981.3344234
+ [2] Zijian Chen, Ronak Pradeep, and Jimmy Lin. 2025. Accelerating Listwise Rerank-
+       ing: Reproducing and Enhancing FIRST. In Proceedings of the 48th International  [14] Wenhan Liu, Xinyu Ma, Yutao Zhu, Ziliang Zhao, Shuaiqiang Wang, Dawei Yin,
+       ACM SIGIR Conference on Research and Development in Information Retrieval              and Zhicheng Dou. 2024. Sliding Windows Are Not the End: Exploring Full
+       (Padua, Italy) (SIGIR '25). Association for Computing Machinery, New York, NY,         Ranking with Long-Context Large Language Models. arXiv:2412.14574 [cs.IR]
+       USA, 3165­3172. doi:10.1145/3726302.3730287                                            https://arxiv.org/abs/2412.14574
+
+ [3] Nick Craswell, Bhaskar Mitra, Emine Yilmaz, and Daniel Campos. 2021. Overview     [15] Xueguang Ma, Xinyu Zhang, Ronak Pradeep, and Jimmy Lin. 2023. Fine-Tuning
+       of the TREC 2020 deep learning track. arXiv:2102.07662 [cs.IR]                         LLaMA for Multi-Stage Text Retrieval. In SIGIR '23: Proceedings of the 46th
+                                                                                              International ACM SIGIR Conference on Research and Development in Information
+ [4] Nick Craswell, Bhaskar Mitra, Emine Yilmaz, Daniel Campos, and Ellen M.                  Retrieval. ACM, Taipei, Taiwan, 2659­2669. https://arxiv.org/abs/2310.08319
+       Voorhees. 2020. Overview of the TREC 2019 deep learning track.
+       arXiv:2003.07820 [cs.IR] https://arxiv.org/abs/2003.07820                       [16] Chuan Meng, Negar Arabzadeh, Arian Askari, Mohammad Aliannejadi, and
+                                                                                              Maarten de Rijke. 2024. Ranked List Truncation for Large Language Model-
+                                                                                              based Re-Ranking. In Proceedings of the 47th International ACM SIGIR Conference
+                                                                                              on Research and Development in Information Retrieval (Washington DC, USA)
+                                                                                             (SIGIR '24). Association for Computing Machinery, New York, NY, USA, 141­151.
+                                                                                              doi:10.1145/3626772.3657864
+
+                                                                                       [17] Chuan Meng, Jiqun Liu, Mohammad Aliannejadi, Fengran Mo, Jeff Dalton, and
+                                                                                              Maarten de Rijke. 2026. Re-Rankers as Relevance Judges. arXiv:2601.04455 [cs.IR]
+                                                                                              https://arxiv.org/abs/2601.04455
+
+                                                                                       [18] Tri Nguyen, Mir Rosenberg, Xia Song, Jianfeng Gao, Saurabh Tiwary, Rangan
+                                                                                              Majumder, and Li Deng. 2017. MS MARCO: A Human-Generated MAchine
+                                                                                              Reading COmprehension Dataset. https://openreview.net/forum?id=Hk1iOLcle
+
+                                                                                       [19] Rodrigo Nogueira and Kyunghyun Cho. 2019. Passage Re-ranking with BERT.
+                                                                                              https://arxiv.org/abs/1901.04085.
+
+                                                                                       [20] Rodrigo Nogueira, Zhiying Jiang, Ronak Pradeep, and Jimmy Lin. 2020. Docu-
+                                                                                              ment Ranking with a Pretrained Sequence-to-Sequence Model. In Findings of the
+                                                                                              Association for Computational Linguistics: EMNLP 2020, Trevor Cohn, Yulan He,
+                                                                                              and Yang Liu (Eds.). Association for Computational Linguistics, Online, 708­718.
+                                                                                              doi:10.18653/v1/2020.findings- emnlp.63
+
+                                                                                       [21] Andrew Parry, Sean MacAvaney, and Debasis Ganguly. 2024. Top-Down
+                                                                                              Partitioning for Efficient List-Wise Ranking. arXiv:2405.14589 [cs.IR] https:
+                                                                                              //arxiv.org/abs/2405.14589
+
+                                                                                       [22] Ronak Pradeep, Rodrigo Nogueira, and Jimmy Lin. 2021. The Expando-Mono-
+                                                                                              Duo Design Pattern for Text Ranking with Pretrained Sequence-to-Sequence
+                                                                                              Models. arXiv:2101.05667 [cs.IR] https://arxiv.org/abs/2101.05667
+
+                                                                                       [23] Ronak Pradeep, Rodrigo Nogueira, and Jimmy Lin. 2021. The Expresso Library
+                                                                                              for Ranking at Scale. In SIGIR '21: Proceedings of the 44th International ACM SIGIR
+Dynamic Ranked List Truncation for Reranking Pipelines via LLM-generated Reference-Documents
+
+       Conference on Research and Development in Information Retrieval. ACM, Montréal,          Bali (Eds.). Association for Computational Linguistics, Singapore, 9414­9423.
+       QC, Canada, 2447­2450.                                                                   doi:10.18653/v1/2023.emnlp- main.585
+[24] Ronak Pradeep, Sahel Sharifymoghaddam, and Jimmy Lin. 2023. RankVicuna:             [40] Chen Wu, Ruqing Zhang, Jiafeng Guo, Yixing Fan, Yanyan Lan, and Xueqi
+       Zero-Shot Listwise Document Reranking with Open-Source Large Language                    Cheng. 2021. Learning to Truncate Ranked Lists for Information Retrieval.
+       Models. arXiv:2309.15088 [cs.IR] https://arxiv.org/abs/2309.15088                        arXiv:2102.12793 [cs.IR] https://arxiv.org/abs/2102.12793
+[25] Ronak Pradeep, Sahel Sharifymoghaddam, and Jimmy Lin. 2023.
+       RankZephyr: Effective and Robust Zero-Shot Listwise Reranking is a
+       Breeze! arXiv:2312.02724 [cs.IR] https://arxiv.org/abs/2312.02724
+[26] Zhen Qin, Rolf Jagerman, Kai Hui, Honglei Zhuang, Junru Wu, Le Yan, Jiaming
+       Shen, Tianqi Liu, Jialu Liu, Donald Metzler, Xuanhui Wang, and Michael Ben-
+       dersky. 2024. Large Language Models are Effective Text Rankers with Pair-
+       wise Ranking Prompting. In Findings of the Association for Computational Lin-
+       guistics: NAACL 2024, Kevin Duh, Helena Gomez, and Steven Bethard (Eds.).
+       Association for Computational Linguistics, Mexico City, Mexico, 1504­1518.
+       doi:10.18653/v1/2024.findings- naacl.97
+[27] Hossein A. Rahmani, Clemencia Siro, Mohammad Aliannejadi, Nick Craswell,
+       Charles L. A. Clarke, Guglielmo Faggioli, Bhaskar Mitra, Paul Thomas, and Emine
+       Yilmaz. 2024. LLM4Eval: Large Language Model for Evaluation in IR. In Proceed-
+       ings of the 47th International ACM SIGIR Conference on Research and Development
+       in Information Retrieval (Washington DC, USA) (SIGIR '24). Association for Com-
+       puting Machinery, New York, NY, USA, 3040­3043. doi:10.1145/3626772.3657992
+[28] Ruiyang Ren, Yuhao Wang, Kun Zhou, Wayne Xin Zhao, Wenjie Wang, Jing
+       Liu, Ji-Rong Wen, and Tat-Seng Chua. 2025. Self-Calibrated Listwise Reranking
+       with Large Language Models. In Proceedings of the ACM on Web Conference 2025
+       (Sydney NSW, Australia) (WWW '25). Association for Computing Machinery,
+       New York, NY, USA, 3692­3701. doi:10.1145/3696410.3714658
+[29] Stephen E Robertson, Steve Walker, Susan Jones, Micheline M Hancock-Beaulieu,
+       and Mike Gatford. 1995. Okapi at TREC-3. In Overview of the Third Text REtrieval
+       Conference (TREC-3). NIST Special Publication 500-225, Gaithersburg, MD, 109­
+       126.
+[30] Haiyang Shen, Hang Yan, Zhongshi Xing, Mugeng Liu, Yue Li, Zhiyang Chen,
+       Yuxiang Wang, Jiuzheng Wang, and Yun Ma. 2025. RAGSynth: Synthetic Data
+       for Robust and Faithful RAG Component Optimization. arXiv:2505.10989 [cs.AI]
+       https://arxiv.org/abs/2505.10989
+[31] Nilanjan Sinhababu, Andrew Parry, Debasis Ganguly, and Pabitra Mitra. 2025.
+       Modeling Ranking Properties with In-Context Learning. arXiv:2505.17736 [cs.IR]
+       https://arxiv.org/abs/2505.17736
+[32] Nilanjan Sinhababu, Andrew Parry, Debasis Ganguly, Debasis Samanta, and
+       Pabitra Mitra. 2024. Few-shot Prompting for Pairwise Ranking: An Effective
+       Non-Parametric Retrieval Model. In Findings of the Association for Computational
+       Linguistics: EMNLP 2024, Yaser Al-Onaizan, Mohit Bansal, and Yun-Nung Chen
+       (Eds.). Association for Computational Linguistics, Miami, Florida, USA, 12363­
+       12377. doi:10.18653/v1/2024.findings-emnlp.720
+[33] Weiwei Sun, Lingyong Yan, Xinyu Ma, Shuaiqiang Wang, Pengjie Ren, Zhumin
+       Chen, Dawei Yin, and Zhaochun Ren. 2023. Is ChatGPT Good at Search? Inves-
+       tigating Large Language Models as Re-Ranking Agents. In Proceedings of the
+       2023 Conference on Empirical Methods in Natural Language Processing, Houda
+       Bouamor, Juan Pino, and Kalika Bali (Eds.). Association for Computational Lin-
+       guistics, Singapore, 14918­14937. doi:10.18653/v1/2023.emnlp-main.923
+[34] Raphael Tang, Crystina Zhang, Xueguang Ma, Jimmy Lin, and Ferhan Ture.
+       2024. Found in the Middle: Permutation Self-Consistency Improves Listwise
+       Ranking in Large Language Models. In Proceedings of the 2024 Conference of the
+       North American Chapter of the Association for Computational Linguistics: Human
+       Language Technologies (Volume 1: Long Papers), Kevin Duh, Helena Gomez, and
+       Steven Bethard (Eds.). Association for Computational Linguistics, Mexico City,
+       Mexico, 2327­2340. doi:10.18653/v1/2024.naacl-long.129
+[35] Nandan Thakur, Nils Reimers, Andreas Rücklé, Abhishek Srivastava, and Iryna
+       Gurevych. 2021. BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of
+       Information Retrieval Models. arXiv:2104.08663 [cs.IR] https://arxiv.org/abs/
+       2104.08663
+[36] Paul Thomas, Seth Spielman, Nick Craswell, and Bhaskar Mitra. 2024. Large
+       Language Models can Accurately Predict Searcher Preferences. In Proceedings
+       of the 47th International ACM SIGIR Conference on Research and Development
+       in Information Retrieval (Washington DC, USA) (SIGIR '24). Association for
+       Computing Machinery, New York, NY, USA, 1930­1940. doi:10.1145/3626772.
+       3657707
+[37] Shivani Upadhyay, Ronak Pradeep, Nandan Thakur, Nick Craswell, and Jimmy
+       Lin. 2024. UMBRELA: UMbrela is the (Open-Source Reproduction of the) Bing
+       RELevance Assessor. arXiv:2406.06519 [cs.IR] https://arxiv.org/abs/2406.06519
+[38] Dong Wang, Jianxin Li, Tianchen Zhu, Haoyi Zhou, Qishan Zhu, Yuxin Wen,
+       and Hongming Piao. 2022. MtCut: A Multi-Task Framework for Ranked List
+       Truncation. In Proceedings of the Fifteenth ACM International Conference on Web
+       Search and Data Mining (Virtual Event, AZ, USA) (WSDM '22). Association for
+       Computing Machinery, New York, NY, USA, 1054­1062. doi:10.1145/3488560.
+       3498466
+[39] Liang Wang, Nan Yang, and Furu Wei. 2023. Query2doc: Query Expansion
+       with Large Language Models. In Proceedings of the 2023 Conference on Empirical
+       Methods in Natural Language Processing, Houda Bouamor, Juan Pino, and Kalika
+
