@@ -25,31 +25,80 @@ A naïve baseline (e.g. BM25 on the English query → German corpus) scores roug
 
 ## Headline results
 
-Every row below states **what was measured · on which split · with which method · in which notebook**, plus any caveats that materially affect interpretation.
+Each result below is a self-contained card stating **what was measured · on which split · with which method · in which notebook**, plus any caveat that materially affects interpretation. Results are grouped into three sections: retrieval-pool recall (A), end-to-end Macro F1 (B), and enrichment / infrastructure (C).
 
 ### A — Retrieval-pool recall (does the candidate pool *contain* the gold?)
 
-| What is measured | Value | Eval split | Method | Caveat | Source notebook |
-| --- | --- | --- | --- | --- | --- |
-| Macro recall of gold citations in the top-50 000 candidate pool | **R@50K = 0.893** | `val.csv`, n = 10 | 15-channel anchor / BM25 / dense / graph funnel + weighted RRF + 7-channel round-robin guarantee | Per-query recall ranges 0.766 (val_003) — 1.000 (val_004, val_005); val_003 R_max = 0.766 is a structural ceiling | [`notebooks/02_v75_multiquery_canonical_pool/pool_v75_multiquery_recall_0.89_at_k50k_CANONICAL.ipynb`](notebooks/02_v75_multiquery_canonical_pool/) |
-| Dense-only recall ceiling (R@1000) | **0.289** | `val.csv`, n = 10 | Qwen3-Embedding-8B brute-force cosine over the full 2.65 M-doc corpus | Establishes that dense retrieval alone *cannot* solve this task; motivates the multi-channel design | [`notebooks/05_embedding_and_retrieval_base/`](notebooks/05_embedding_and_retrieval_base/) |
+#### A1. Macro recall of gold citations in the top-50 000 candidate pool
 
-### B — End-to-end Macro F1 (the headline number, with full attribution)
+- **Value:** R@50K = **0.893** (macro)
+- **Eval split:** `val.csv`, n = 10
+- **Method:** 15-channel anchor / BM25 / dense / graph funnel + weighted Reciprocal Rank Fusion + 7-channel round-robin guarantee (130 slots × 7 channels = 910 reserved slots before RRF fills the tail of `topk_final = 50 000`).
+- **Caveat:** Per-query recall ranges from **0.766 (val_003)** to **1.000 (val_004, val_005)**. The 0.766 floor on val_003 is a structural ceiling — gold citations not in the union of all 15 channels cannot be reached by any downstream reranker or judge.
+- **Source notebook:** [`pool_v75_multiquery_recall_0.89_at_k50k_CANONICAL.ipynb`](notebooks/02_v75_multiquery_canonical_pool/)
 
-| What is measured | Value | Eval split | Method | Caveat | Source notebook |
-| --- | --- | --- | --- | --- | --- |
-| Macro F1 of the law-only hybrid pipeline (the "v12 hybrid" baseline) | **0.777** (P = 0.845, R = 0.748, avg K = 13) | `val.csv`, n = 10 | BM25 top-100 → Qwen3-Reranker-8B (re-fused as `0.7·BM25 + 0.3·rerank`) → zone-split with `HIGH = 0.55, LOW = 0.25` → Qwen3-8B judge on the borderline zone only | **Law-only — no court considerations.** **Val-overfit:** the same pipeline scores Macro F1 = **0.296 on train**, a +0.481 delta the notebook itself flags as `warning`. Only the `thresh_only` and `bm25_K3` variants generalise. | [`notebooks/06_law_only_bm25_rerank_judge_baseline/law_only_hybrid_v12_val_macroF1_0.777_overfit_warning.ipynb`](notebooks/06_law_only_bm25_rerank_judge_baseline/law_only_hybrid_v12_val_macroF1_0.777_overfit_warning.ipynb) |
-| End-to-end Macro F1 using the full 2.65 M corpus + v7.5 multi-query pool + LLM judge | < 0.10 | `val.csv`, n = 10 | The "endgame" pipeline — multi-channel pool from row A above + Qwen3-Reranker-8B + Qwen3-8B judge | **The judge's default-YES-on-parse-failure and `<think>` token-budget bug compounded to ≈ 87 % rubber-stamp YES verdicts.** Recall, not precision, is the binding bottleneck — see [`research/endgame_handoff_2026-05-09.md`](research/endgame_handoff_2026-05-09.md) §4 for the full diagnosis | [`notebooks/04_pre_v75_pipeline_iterations/`](notebooks/04_pre_v75_pipeline_iterations/) |
+#### A2. Dense-only recall ceiling (R@1000)
+
+- **Value:** R@1000 = **0.289** (macro)
+- **Eval split:** `val.csv`, n = 10
+- **Method:** Qwen3-Embedding-8B brute-force cosine similarity over the full 2 652 248-document corpus. No fusion, no rerank, no judge.
+- **Caveat:** Establishes that single-channel dense retrieval *cannot* solve this task — a 4096-dim embedding cannot encode the kind of inter-citation relationship that an expert annotator uses. This is the empirical evidence that motivates the multi-channel design in A1.
+- **Source notebook:** [`notebooks/05_embedding_and_retrieval_base/`](notebooks/05_embedding_and_retrieval_base/)
+
+### B — End-to-end Macro F1 (the headline numbers, with full attribution)
+
+#### B1. Law-only hybrid pipeline (the "v12 hybrid" baseline)
+
+- **Value:** Macro F1 = **0.777** on val (P = 0.845, R = 0.748, avg K = 13)
+- **Eval split:** `val.csv`, n = 10 — **law-only**, court considerations excluded
+- **Method:** BM25 top-100 → Qwen3-Reranker-8B → fused score `0.7·BM25 + 0.3·rerank` → zone-split (`HIGH = 0.55`, `LOW = 0.25`) → Qwen3-8B judge on the borderline zone only.
+- **Caveat — this is val-overfit, not a clean result:** the same pipeline scores Macro F1 = **0.296 on `train.csv`**, a delta of +0.481 between val and train. The notebook itself flags this in cell 7 as `warning`. Only the `thresh_only` and `bm25_K3` variants generalise across splits.
+- **Source notebook:** [`law_only_hybrid_v12_val_macroF1_0.777_overfit_warning.ipynb`](notebooks/06_law_only_bm25_rerank_judge_baseline/law_only_hybrid_v12_val_macroF1_0.777_overfit_warning.ipynb)
+
+#### B2. End-to-end pipeline on the full 2.65 M-doc corpus (the "endgame" run)
+
+- **Value:** Macro F1 < **0.10** on val
+- **Eval split:** `val.csv`, n = 10 — full DE + FR + IT corpus including court considerations
+- **Method:** The multi-query candidate pool from A1 → Qwen3-Reranker-8B → Qwen3-8B judge.
+- **Caveat — failure-mode diagnosis, not a model-quality result:** The judge had two compounding bugs — default-YES on parse failure, and `<think>` chain-of-thought consuming most of the token budget before reaching `VERDICT:`. The combined effect was ≈ 87 % rubber-stamp YES verdicts. Recall, not precision, is the binding bottleneck downstream. Full diagnosis in [`research/endgame_handoff_2026-05-09.md`](research/endgame_handoff_2026-05-09.md) §4.
+- **Source notebook:** [`notebooks/04_pre_v75_pipeline_iterations/`](notebooks/04_pre_v75_pipeline_iterations/)
 
 ### C — Enrichment & infrastructure (the building blocks)
 
-| What is measured | Value | Sample / dataset | Method | Source code |
-| --- | --- | --- | --- | --- |
-| Law-article LLM-enrichment coverage | **173 033 / 175 933 = 98.3 %** | All law articles in `laws_de.csv` | Qwen3-8B-AWQ with an English-aligned descriptor schema (`english_summary`, `concepts_en`, `legal_question`, `applicability_conditions`, `provision_role_llm`, `specificity_score`) | [`scripts/enrichment/`](scripts/enrichment/) + [`notebooks/07_law_de_enrichment/`](notebooks/07_law_de_enrichment/) |
-| Court-paragraph LLM-enrichment coverage | 363 258 / 2 476 315 ≈ 14.7 % | Court considerations in `court_considerations.csv` | Same model, 15-role taxonomy + 7-element doctrinal template | [`notebooks/08_court_llm_descriptor_extraction/`](notebooks/08_court_llm_descriptor_extraction/) |
-| Citation-graph gold-as-node coverage | **92.9 % → 96.0 %** (+3.1 pp) | All gold-citation entities in train + val | Regex patches for ATF / DTF / `c.` / `consid.` / space-tolerant docket forms | [`scripts/citation_extraction/extract_citation_graph.py`](scripts/citation_extraction/extract_citation_graph.py) |
-| Granularity-resolver gold recovery | **71.5 % → 98.1 %** (+26.6 pp) | `train.csv` gold | Bare `Art. N LAW` ↔ paragraph-children fanout against `laws_de.csv` | [`scripts/data_prep/granularity_resolver.py`](scripts/data_prep/granularity_resolver.py) |
-| Dense-vector query latency | ≈ 50 ms / query | 2.65 M × 4096 fp16 = 21 GB matrix in VRAM | Brute-force `E @ q` on NVIDIA RTX PRO 6000 Blackwell (95.6 GB VRAM) | [`scripts/retrieval_and_rerank/encode_queries_qwen3_8b.py`](scripts/retrieval_and_rerank/encode_queries_qwen3_8b.py) |
+#### C1. Law-article LLM-enrichment coverage
+
+- **Value:** **173 033 / 175 933 articles enriched (98.3 %)**
+- **Dataset:** All law articles in `laws_de.csv`
+- **Method:** Qwen3-8B-AWQ generating an English-aligned descriptor schema per article: `english_summary`, `concepts_en`, `legal_question`, `applicability_conditions`, `provision_role_llm`, `specificity_score`.
+- **Source code:** [`scripts/enrichment/`](scripts/enrichment/) + [`notebooks/07_law_de_enrichment/`](notebooks/07_law_de_enrichment/)
+
+#### C2. Court-paragraph LLM-enrichment coverage
+
+- **Value:** 363 258 / 2 476 315 paragraphs enriched (**≈ 14.7 %**, partial coverage)
+- **Dataset:** Court considerations in `court_considerations.csv`
+- **Method:** Same Qwen3-8B-AWQ model; per-paragraph schema includes a 15-role taxonomy + 7-element doctrinal template (rule-statement, application, lower-court summary, party-position, etc.).
+- **Source notebook:** [`notebooks/08_court_llm_descriptor_extraction/`](notebooks/08_court_llm_descriptor_extraction/)
+
+#### C3. Citation-graph gold-node coverage
+
+- **Value:** **92.9 % → 96.0 %** (+3.1 pp)
+- **Dataset:** All gold-citation entities across `train.csv` + `val.csv`
+- **Method:** Patched the citation-extraction regex with ATF / DTF / `c.` / `consid.` / space-tolerant docket forms. The remaining 4 % gap is corpus-side (codes not present in `laws_de.csv`, e.g. LugÜ, FIDLEG, FINIG, FinfraG), not regex-side.
+- **Source code:** [`scripts/citation_extraction/extract_citation_graph.py`](scripts/citation_extraction/extract_citation_graph.py)
+
+#### C4. Granularity-resolver gold recovery
+
+- **Value:** **71.5 % → 98.1 %** gold-in-corpus on train (+26.6 pp); val unchanged at 100 %
+- **Dataset:** `train.csv` gold-citation set
+- **Method:** Bare `Art. N LAW` ↔ paragraph-children (`Abs.`) fanout, validated against `laws_de.csv`. Critical because train gold cites bare articles whereas the corpus stores Absatz-granular rows.
+- **Source code:** [`scripts/data_prep/granularity_resolver.py`](scripts/data_prep/granularity_resolver.py)
+
+#### C5. Dense-vector query latency
+
+- **Value:** **≈ 50 ms per query**
+- **Hardware:** NVIDIA RTX PRO 6000 Blackwell, 95.6 GB VRAM
+- **Method:** Full-GPU brute-force `E @ q` against the 2 652 248 × 4096 fp16 corpus matrix (21 GB), all resident in VRAM. No FAISS, no IVF — Blackwell makes the naive matmul fast enough that ANN structures aren't needed.
+- **Source code:** [`scripts/retrieval_and_rerank/encode_queries_qwen3_8b.py`](scripts/retrieval_and_rerank/encode_queries_qwen3_8b.py)
 
 ---
 
