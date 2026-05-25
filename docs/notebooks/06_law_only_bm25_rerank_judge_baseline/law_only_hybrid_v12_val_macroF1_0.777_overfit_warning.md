@@ -1,6 +1,8 @@
-# reference_F1_0.777_Untitled75
+# law_only_hybrid_v12_val_macroF1_0.777_overfit_warning
 
-**Path:** `e:\swiss_citation_extraction\notebooks\06_high_scoring_reference\reference_F1_0.777_Untitled75.ipynb`
+**Path:** `e:\swiss_citation_extraction\notebooks\06_law_only_bm25_rerank_judge_baseline\law_only_hybrid_v12_val_macroF1_0.777_overfit_warning.ipynb`
+
+**Summary (one line):** Law-only (`laws_de.csv`, 171 654 articles) hybrid pipeline — BM25 top-100 → Qwen3-Reranker-8B → fused score `0.7·BM25 + 0.3·rerank` → zone-split (`HIGH = 0.55`, `LOW = 0.25`) → Qwen3-8B LLM judge on the borderline zone. **Macro F1 = 0.777 on `val.csv` (n = 10)** but **0.296 on `train.csv`** — the notebook's own cell-7 output flags this as `warning`: val-set overfit, only the `thresh_only` and `bm25_K3` variants generalise.
 
 ## Configuration
 

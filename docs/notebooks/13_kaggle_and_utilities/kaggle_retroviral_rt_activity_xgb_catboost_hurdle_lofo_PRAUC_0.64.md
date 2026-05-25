@@ -1,6 +1,8 @@
-# reference_F1_0.7716_scored
+# kaggle_retroviral_rt_activity_xgb_catboost_hurdle_lofo_PRAUC_0.64
 
-**Path:** `e:\swiss_citation_extraction\notebooks\06_high_scoring_reference\reference_F1_0.7716_scored.ipynb`
+**Path:** `e:\swiss_citation_extraction\notebooks\13_kaggle_and_utilities\kaggle_retroviral_rt_activity_xgb_catboost_hurdle_lofo_PRAUC_0.64.ipynb`
+
+**Summary (one line):** Kaggle `retroviral-challenge-predict` pipeline — predicts reverse-transcriptase activity (`active`, binary) and prime-editing efficiency (`pe_efficiency_pct`, continuous) for 57 train / 57 test enzymes, using structural / biochemical features + ESM-2 protein embeddings (PCA-reduced 1280 → 5) + an XGBoost / CatBoost hurdle ensemble (classifier-probability × non-negative regressor-efficiency). Leave-One-Family-Out CV scored with `CLS = harmonic_mean(PR-AUC, weighted_Spearman)`. **OOF: PR-AUC = 0.6432, W-Spearman = 0.5405, CLS = 0.5874.** Despite the legacy filename `F1_0.7716`, this notebook contains no Swiss legal citation logic — it is unrelated Kaggle work kept here for completeness.
 
 ## Configuration
 
